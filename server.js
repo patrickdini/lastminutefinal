@@ -6,7 +6,7 @@ const activitiesRoutes = require("./routes/activities");
 const pkg = require("./package.json");
 
 const app = express();
-const PORT = process.env.PORT || 5000; // listen on 5000 (matches your GUI)
+const PORT = process.env.PORT || 5000; // Infomaniak GUI listens on 5000
 
 // --- Middleware ---
 app.use(cors());
@@ -36,17 +36,15 @@ app.use(
     }),
 );
 
-// Preload index.html and inject a version string from package.json
+// Preload index.html and inject a *fresh* version each restart (busts caches)
 let htmlWithVersion;
+const ASSET_VERSION = Date.now().toString();
 try {
     const rawIndex = fs.readFileSync(
         path.join(__dirname, "public", "index.html"),
         "utf8",
     );
-    htmlWithVersion = rawIndex.replace(
-        /__ASSET_VERSION__/g,
-        pkg.version || Date.now(),
-    );
+    htmlWithVersion = rawIndex.replace(/__ASSET_VERSION__/g, ASSET_VERSION);
 } catch (err) {
     console.error("Failed to preload index.html:", err.message);
     htmlWithVersion = "<!doctype html><html><body><h1>App</h1></body></html>";
@@ -64,12 +62,28 @@ app.get("/", (req, res) => {
 app.get("/version", (req, res) => {
     res.json({
         version: pkg.version || "0.0.0",
+        assetVersion: ASSET_VERSION,
         dir: __dirname,
         time: new Date().toISOString(),
     });
 });
 
 app.get("/health", (req, res) => res.send("OK"));
+
+// (Optional) debug: list registered routes at startup
+function logRoutes() {
+    const routes = [];
+    (app._router?.stack || []).forEach((layer) => {
+        if (layer.route) {
+            const methods = Object.keys(layer.route.methods)
+                .map((m) => m.toUpperCase())
+                .join(",");
+            routes.push(`${methods} ${layer.route.path}`);
+        }
+    });
+    console.log("Registered routes:", routes);
+}
+logRoutes();
 
 // 404
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
