@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activities Dashboard</title>
+    <title>Villa Tokay - Room Availability Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1><i class="fas fa-chart-line"></i> Room Availability Dashboard</h1>
-            <p class="subtitle">Real-time monitoring of room availability from RoomAvailabilityStore table</p>
+            <h1><i class="fas fa-home"></i> Villa Tokay</h1>
+            <p class="subtitle">Your room availability at a glance. Live data from our exclusive villa collection on Gili Air.</p>
         </header>
 
         <div class="controls">
             <button id="refreshBtn" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Refresh Data
+                <i class="fas fa-sync-alt"></i> Update Availability
             </button>
             <button id="healthBtn" class="btn btn-secondary">
-                <i class="fas fa-heartbeat"></i> Check Health
+                <i class="fas fa-wifi"></i> Connection Status
             </button>
         </div>
 
@@ -49,15 +49,15 @@
             </div>
 
             <div id="emptyState" class="empty-state" style="display: none;">
-                <i class="fas fa-inbox"></i>
-                <h3>No Room Availability Data Found</h3>
-                <p>The RoomAvailabilityStore table appears to be empty.</p>
+                <i class="fas fa-calendar-check"></i>
+                <h3>Availability Coming Soon</h3>
+                <p>Your villa availability data is being updated. Check back in a moment for the latest room status.</p>
             </div>
 
             <div id="activitiesContainer" class="activities-container" style="display: none;">
                 <div class="activities-header">
-                    <h2><i class="fas fa-list"></i> Room Availability Data</h2>
-                    <div id="activitiesCount" class="activities-count">0 records</div>
+                    <h2><i class="fas fa-calendar-alt"></i> Current Villa Availability</h2>
+                    <div id="activitiesCount" class="activities-count">0 villas</div>
                 </div>
                 
                 <div class="table-container">
@@ -76,7 +76,7 @@
         </div>
 
         <footer class="footer">
-            <p>&copy; 2025 Activities Dashboard | Connected to Infomaniak MySQL Database</p>
+            <p>&copy; 2025 Villa Tokay | Your private retreat on Gili Air</p>
         </footer>
     </div>
 

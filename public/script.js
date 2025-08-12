@@ -123,7 +123,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', 'Connected - No data');
+        this.updateStatus('success', 'Connected - Availability updating');
         this.updateLastUpdated();
     }
     
@@ -167,7 +167,7 @@ class ActivitiesDashboard {
         this.hideAllStates();
         
         // Update count
-        this.elements.activitiesCount.textContent = `${activities.length} records`;
+        this.elements.activitiesCount.textContent = `${activities.length} villas`;
         
         // Generate table headers dynamically from first record
         if (activities.length > 0) {
@@ -182,7 +182,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', `Connected - ${activities.length} records`);
+        this.updateStatus('success', `Live data - ${activities.length} villas available`);
         this.updateLastUpdated();
     }
     
@@ -305,11 +305,11 @@ class ActivitiesDashboard {
             const data = await response.json();
             
             if (data.success) {
-                this.updateStatus('success', 'Database healthy');
-                this.showNotification('Database connection is healthy!', 'success');
+                this.updateStatus('success', 'Connection excellent');
+                this.showNotification('Live connection to villa data confirmed', 'success');
             } else {
-                this.updateStatus('error', 'Database unhealthy');
-                this.showNotification(`Health check failed: ${data.message}`, 'error');
+                this.updateStatus('error', 'Connection issue');
+                this.showNotification(`Connection check failed: ${data.message}`, 'error');
             }
             
         } catch (error) {
