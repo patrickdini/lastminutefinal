@@ -6,7 +6,7 @@ const activitiesRoutes = require("./routes/activities");
 const pkg = require("./package.json");
 
 const app = express();
-const PORT = process.env.PORT || 5000; // match GUI Listening port
+const PORT = process.env.PORT || 5000; // <-- your desired port
 
 // --- Middleware ---
 app.use(cors());
@@ -25,7 +25,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve static files with explicit no-cache headers
+// Serve /public with explicit no-cache headers
 app.use(
     express.static(path.join(__dirname, "public"), {
         setHeaders: (res) =>
@@ -36,7 +36,7 @@ app.use(
     }),
 );
 
-// Preload index.html and inject a version string (uses package.json version)
+// Preload index.html and inject a version string from package.json
 let htmlWithVersion;
 try {
     const rawIndex = fs.readFileSync(
@@ -53,15 +53,14 @@ try {
 }
 
 // --- Routes ---
-// API routes
 app.use("/api", activitiesRoutes);
 
-// Root route - serve the main HTML (with injected version)
+// Root
 app.get("/", (req, res) => {
     res.type("html").send(htmlWithVersion);
 });
 
-// Health/version endpoints
+// Version & health
 app.get("/version", (req, res) => {
     res.json({
         version: pkg.version || "0.0.0",
@@ -71,12 +70,10 @@ app.get("/version", (req, res) => {
 });
 app.get("/health", (req, res) => res.send("OK"));
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ error: "Route not found" });
-});
+// 404
+app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
-// Global error handler
+// Error handler
 app.use((err, req, res, next) => {
     console.error("Error stack:", err.stack || err);
     res.status(500).json({
@@ -88,7 +85,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-// --- Start server ---
+// Start
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
@@ -96,10 +93,10 @@ app.listen(PORT, "0.0.0.0", () => {
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
-    console.log("SIGTERM received, shutting down gracefully");
+    console.log("SIGTERM received");
     process.exit(0);
 });
 process.on("SIGINT", () => {
-    console.log("SIGINT received, shutting down gracefully");
+    console.log("SIGINT received");
     process.exit(0);
 });
