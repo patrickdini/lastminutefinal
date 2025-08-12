@@ -10,12 +10,24 @@ router.get('/activities', async (req, res) => {
     try {
         console.log('Fetching activities from database...');
         
+        // Calculate date range: today to today + 60 days in Bali time (UTC+8)
+        const now = new Date();
+        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        const today = baliTime.toISOString().split('T')[0];
+        
+        const endDate = new Date(baliTime);
+        endDate.setDate(endDate.getDate() + 60);
+        const maxDate = endDate.toISOString().split('T')[0];
+        
+        console.log(`Querying availability from ${today} to ${maxDate} (Bali time)`);
+        
         // Get database connection
         const connection = await db.getConnection();
         
-        // Query the RoomAvailabilityStore table ordered by EntryDate
+        // Query the RoomAvailabilityStore table for next 60 days only
         const [rows] = await connection.execute(
-            'SELECT * FROM RoomAvailabilityStore ORDER BY EntryDate DESC, UserRoomDisplayName ASC LIMIT 100'
+            'SELECT * FROM RoomAvailabilityStore WHERE EntryDate >= ? AND EntryDate <= ? ORDER BY EntryDate ASC, UserRoomDisplayName ASC',
+            [today, maxDate]
         );
         
         // Release the connection back to the pool

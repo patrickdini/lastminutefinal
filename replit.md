@@ -29,7 +29,8 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 
 ### API Design
 - **RESTful Endpoints**: Simple API structure under `/api` prefix
-- **Activities Endpoint**: `/api/activities` for retrieving all activities
+- **Activities Endpoint**: `/api/activities` for retrieving availability data (filtered to next 60 days from current Bali date)
+- **Date Filtering**: Server-side filtering for efficiency - queries only today to today+60 days in Bali time
 - **Health Check**: Built-in health monitoring capabilities
 - **Response Format**: Consistent JSON responses with success/error states
 

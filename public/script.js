@@ -59,14 +59,13 @@ class ActivitiesDashboard {
     
     /**
      * Get current date in Bali time zone (UTC+8)
-     * Note: For demo purposes, using base date from available data (2026)
      */
     getBaliDate(offsetDays = 0) {
-        // Use the earliest date from the available data for demo
-        // In production, this would use the actual current date
-        const baseDate = new Date('2026-08-01T00:00:00.000Z');
-        baseDate.setDate(baseDate.getDate() + offsetDays);
-        return baseDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+        const now = new Date();
+        // Convert to Bali time (UTC+8)
+        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        baliTime.setDate(baliTime.getDate() + offsetDays);
+        return baliTime.toISOString().split('T')[0]; // Return YYYY-MM-DD format
     }
     
     /**
@@ -112,15 +111,6 @@ class ActivitiesDashboard {
                 break;
         }
         
-        console.log('Filter Debug:', {
-            filter: this.currentFilter,
-            startDate,
-            endDate,
-            today,
-            totalRecords: this.currentData.length,
-            sampleRecord: this.currentData[0]
-        });
-        
         // Filter data: only show records with AvailabilityCount >= 1 and within date range
         this.filteredData = this.currentData.filter(record => {
             // Convert database date (ISO string) to YYYY-MM-DD format for comparison
@@ -128,22 +118,8 @@ class ActivitiesDashboard {
             const hasAvailability = record.AvailabilityCount && parseInt(record.AvailabilityCount) >= 1;
             const inDateRange = recordDate >= startDate && recordDate <= endDate;
             
-            // Debug logging
-            if (hasAvailability) {
-                console.log('Available record:', {
-                    date: recordDate,
-                    startDate,
-                    endDate,
-                    availability: record.AvailabilityCount,
-                    inRange: inDateRange,
-                    villa: record.UserRoomDisplayName
-                });
-            }
-            
             return hasAvailability && inDateRange;
         });
-        
-        console.log('Filtered results:', this.filteredData.length);
         
         // Update display
         if (this.filteredData.length === 0) {
