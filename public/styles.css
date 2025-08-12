@@ -355,7 +355,7 @@ body {
 
 .activities-table td {
     padding: 12px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid rgba(170, 120, 49, 0.2);
     vertical-align: top;
 }
 
@@ -373,26 +373,31 @@ body {
     background: rgba(170, 120, 49, 0.15);
 }
 
-/* Cell types */
-.cell-id {
+/* Custom cell styling */
+.availability-available {
+    color: #4CAF50;
     font-weight: 600;
+}
+
+.availability-none {
+    color: #f44336;
+    font-weight: 600;
+}
+
+.rate {
     color: #AA7831;
+    font-weight: 600;
+    font-size: 1.1em;
 }
 
-.cell-timestamp {
-    color: #666;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-}
-
-.cell-number {
-    text-align: right;
-    font-weight: 500;
-}
-
-.cell-text {
-    max-width: 300px;
-    word-wrap: break-word;
+.villa-class {
+    padding: 4px 8px;
+    background: rgba(170, 120, 49, 0.2);
+    border-radius: 4px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #AA7831;
 }
 
 /* Footer */

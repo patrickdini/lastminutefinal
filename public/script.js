@@ -262,10 +262,10 @@ class ActivitiesDashboard {
         // Update count
         this.elements.activitiesCount.textContent = `${activities.length} villas`;
         
-        // Generate table headers dynamically from first record
+        // Generate table headers and data
         if (activities.length > 0) {
-            this.generateTableHeaders(activities[0]);
-            this.populateTableData(activities);
+            this.generateCustomTableHeaders();
+            this.populateCustomTableData(activities);
         }
         
         this.elements.activitiesContainer.style.display = 'block';
@@ -294,101 +294,101 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Generate table headers dynamically
+     * Generate custom table headers
      */
-    generateTableHeaders(sampleRecord) {
-        const headers = Object.keys(sampleRecord);
+    generateCustomTableHeaders() {
+        const headers = [
+            'Date',
+            'Villa/Room', 
+            'Availability',
+            'Rate',
+            'Bedrooms',
+            'Max Adults',
+            'Max Guests',
+            'Pool',
+            'Class'
+        ];
+        
         this.elements.tableHeaders.innerHTML = '';
         
         headers.forEach(header => {
             const th = document.createElement('th');
-            th.textContent = this.formatHeaderName(header);
+            th.textContent = header;
             this.elements.tableHeaders.appendChild(th);
         });
     }
     
     /**
-     * Format header names for display
+     * Populate table with custom data formatting
      */
-    formatHeaderName(header) {
-        return header
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase())
-            .trim();
-    }
-    
-    /**
-     * Populate table with data
-     */
-    populateTableData(activities) {
+    populateCustomTableData(activities) {
         this.elements.activitiesTableBody.innerHTML = '';
         
         activities.forEach(activity => {
             const row = document.createElement('tr');
             
-            Object.entries(activity).forEach(([key, value]) => {
-                const cell = document.createElement('td');
-                cell.innerHTML = this.formatCellValue(key, value);
-                cell.className = this.getCellClass(key, value);
-                row.appendChild(cell);
+            // Date (only date, not time)
+            const dateCell = document.createElement('td');
+            const date = new Date(activity.EntryDate);
+            dateCell.textContent = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             });
+            row.appendChild(dateCell);
+            
+            // Villa/Room
+            const roomCell = document.createElement('td');
+            roomCell.innerHTML = `<strong>${this.escapeHtml(activity.UserRoomDisplayName || '')}</strong>`;
+            row.appendChild(roomCell);
+            
+            // Availability
+            const availCell = document.createElement('td');
+            availCell.textContent = activity.AvailabilityCount || 0;
+            availCell.className = activity.AvailabilityCount > 0 ? 'availability-available' : 'availability-none';
+            row.appendChild(availCell);
+            
+            // Rate (convert to millions with 1 decimal place)
+            const rateCell = document.createElement('td');
+            const rate = parseFloat(activity.LowestRateAmount) || 0;
+            const rateInMillions = rate / 1000000;
+            rateCell.innerHTML = `<span class="rate">${rateInMillions.toFixed(1)}M</span>`;
+            row.appendChild(rateCell);
+            
+            // Bedrooms
+            const bedroomsCell = document.createElement('td');
+            bedroomsCell.textContent = activity.Bedrooms || 0;
+            row.appendChild(bedroomsCell);
+            
+            // Max Adults
+            const adultsCell = document.createElement('td');
+            adultsCell.textContent = activity.MaxAdultsPerUnit || 0;
+            row.appendChild(adultsCell);
+            
+            // Max Guests
+            const guestsCell = document.createElement('td');
+            guestsCell.textContent = activity.MaxGuestsPerUnit || 0;
+            row.appendChild(guestsCell);
+            
+            // Pool
+            const poolCell = document.createElement('td');
+            if (activity.Pool === true || activity.Pool === 'true' || activity.Pool === 1 || activity.Pool === '1') {
+                poolCell.innerHTML = '<i class="fas fa-check" style="color: #4CAF50;"></i>';
+            } else {
+                poolCell.innerHTML = '<i class="fas fa-times" style="color: #999;"></i>';
+            }
+            row.appendChild(poolCell);
+            
+            // Class
+            const classCell = document.createElement('td');
+            classCell.innerHTML = `<span class="villa-class">${this.escapeHtml(activity.UserDefinedClass || 'Standard')}</span>`;
+            row.appendChild(classCell);
             
             this.elements.activitiesTableBody.appendChild(row);
         });
     }
     
-    /**
-     * Format cell values for display
-     */
-    formatCellValue(key, value) {
-        if (value === null || value === undefined) {
-            return '<em style="color: #999;">null</em>';
-        }
-        
-        // Handle different data types
-        if (key.toLowerCase().includes('id')) {
-            return `<strong>${value}</strong>`;
-        }
-        
-        if (key.toLowerCase().includes('date') || key.toLowerCase().includes('time')) {
-            if (value instanceof Date || (typeof value === 'string' && !isNaN(Date.parse(value)))) {
-                return new Date(value).toLocaleString();
-            }
-        }
-        
-        if (typeof value === 'number') {
-            return value.toLocaleString();
-        }
-        
-        if (typeof value === 'boolean') {
-            return value ? '<i class="fas fa-check" style="color: #4CAF50;"></i>' : '<i class="fas fa-times" style="color: #f44336;"></i>';
-        }
-        
-        if (typeof value === 'string' && value.length > 100) {
-            return `<span title="${this.escapeHtml(value)}">${this.escapeHtml(value.substring(0, 100))}...</span>`;
-        }
-        
-        return this.escapeHtml(String(value));
-    }
-    
-    /**
-     * Get CSS class for cell based on content
-     */
-    getCellClass(key, value) {
-        if (key.toLowerCase().includes('id')) {
-            return 'cell-id';
-        }
-        
-        if (key.toLowerCase().includes('date') || key.toLowerCase().includes('time')) {
-            return 'cell-timestamp';
-        }
-        
-        if (typeof value === 'number') {
-            return 'cell-number';
-        }
-        
-        return 'cell-text';
-    }
+
     
     /**
      * Escape HTML to prevent XSS
