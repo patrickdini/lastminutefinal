@@ -9,6 +9,7 @@ This is a real-time villa availability monitoring dashboard built with Node.js a
 Preferred communication style: Simple, everyday language.
 Brand identity: Villa Tokay luxury villa brand with sophisticated color palette and elegant typography.
 Villa Tokay Brand Voice: "The Knowing Guide" - comfortable luxury, quietly confident, genuinely warm, thoughtfully evocative.
+Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all time references and operations. Users are located in Bali and this is the operational time zone for Villa Tokay.
 
 ## System Architecture
 
