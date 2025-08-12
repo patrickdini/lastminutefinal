@@ -372,11 +372,7 @@ class ActivitiesDashboard {
             
             // Pool
             const poolCell = document.createElement('td');
-            if (activity.Pool === true || activity.Pool === 'true' || activity.Pool === 1 || activity.Pool === '1') {
-                poolCell.innerHTML = '<i class="fas fa-check" style="color: #4CAF50;"></i>';
-            } else {
-                poolCell.innerHTML = '<i class="fas fa-times" style="color: #999;"></i>';
-            }
+            poolCell.textContent = activity.Pool || '';
             row.appendChild(poolCell);
             
             // Class
