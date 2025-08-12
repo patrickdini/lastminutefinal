@@ -110,14 +110,34 @@ class ActivitiesDashboard {
                 break;
         }
         
+        console.log('Filter Debug:', {
+            filter: this.currentFilter,
+            startDate,
+            endDate,
+            totalRecords: this.currentData.length,
+            sampleRecord: this.currentData[0]
+        });
+        
         // Filter data: only show records with AvailabilityCount >= 1 and within date range
         this.filteredData = this.currentData.filter(record => {
             const recordDate = record.EntryDate;
             const hasAvailability = record.AvailabilityCount && parseInt(record.AvailabilityCount) >= 1;
             const inDateRange = recordDate >= startDate && recordDate <= endDate;
             
+            // Debug logging
+            if (hasAvailability) {
+                console.log('Available record:', {
+                    date: recordDate,
+                    availability: record.AvailabilityCount,
+                    inRange: inDateRange,
+                    villa: record.UserRoomDisplayName
+                });
+            }
+            
             return hasAvailability && inDateRange;
         });
+        
+        console.log('Filtered results:', this.filteredData.length);
         
         // Update display
         if (this.filteredData.length === 0) {
