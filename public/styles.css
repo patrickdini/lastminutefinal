@@ -392,12 +392,23 @@ body {
 
 .villa-class {
     padding: 4px 8px;
-    background: rgba(170, 120, 49, 0.2);
     border-radius: 4px;
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #AA7831;
+    font-weight: 600;
+}
+
+.villa-class.premium {
+    background: linear-gradient(135deg, #AA7831, #D4A843);
+    color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(170, 120, 49, 0.3);
+}
+
+.villa-class.normal {
+    background: rgba(128, 128, 128, 0.2);
+    color: #999;
+    border: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 /* Footer */

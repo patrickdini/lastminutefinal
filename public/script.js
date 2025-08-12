@@ -370,14 +370,24 @@ class ActivitiesDashboard {
             guestsCell.textContent = activity.MaxGuestsPerUnit || 0;
             row.appendChild(guestsCell);
             
-            // Pool
+            // Pool (with icons for Private vs Shared)
             const poolCell = document.createElement('td');
-            poolCell.textContent = activity.Pool || '';
+            const poolValue = (activity.Pool || '').toString().toLowerCase();
+            if (poolValue.includes('private')) {
+                poolCell.innerHTML = '<i class="fas fa-lock" style="color: #AA7831; margin-right: 5px;"></i>Private';
+            } else if (poolValue.includes('shared')) {
+                poolCell.innerHTML = '<i class="fas fa-users" style="color: #4CAF50; margin-right: 5px;"></i>Shared';
+            } else {
+                poolCell.textContent = activity.Pool || '';
+            }
             row.appendChild(poolCell);
             
-            // Class
+            // Class (with enhanced styling)
             const classCell = document.createElement('td');
-            classCell.innerHTML = `<span class="villa-class">${this.escapeHtml(activity.UserDefinedClass || 'Standard')}</span>`;
+            const classValue = (activity.UserDefinedClass || 'Normal').toString().toLowerCase();
+            const classDisplay = activity.UserDefinedClass || 'Normal';
+            const classCSS = classValue.includes('premium') ? 'premium' : 'normal';
+            classCell.innerHTML = `<span class="villa-class ${classCSS}">${this.escapeHtml(classDisplay)}</span>`;
             row.appendChild(classCell);
             
             this.elements.activitiesTableBody.appendChild(row);
