@@ -6,7 +6,7 @@ const activitiesRoutes = require("./routes/activities");
 const pkg = require("./package.json");
 
 const app = express();
-const PORT = process.env.PORT || 5000; // <-- your desired port
+const PORT = process.env.PORT || 5000; // listen on 5000 (matches your GUI)
 
 // --- Middleware ---
 app.use(cors());
@@ -60,7 +60,7 @@ app.get("/", (req, res) => {
     res.type("html").send(htmlWithVersion);
 });
 
-// Version & health
+// Version & health (keep BEFORE 404 & error handlers)
 app.get("/version", (req, res) => {
     res.json({
         version: pkg.version || "0.0.0",
@@ -68,12 +68,13 @@ app.get("/version", (req, res) => {
         time: new Date().toISOString(),
     });
 });
+
 app.get("/health", (req, res) => res.send("OK"));
 
 // 404
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
-// Error handler
+// Error handler (must be last)
 app.use((err, req, res, next) => {
     console.error("Error stack:", err.stack || err);
     res.status(500).json({
