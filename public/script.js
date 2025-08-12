@@ -7,7 +7,9 @@ class ActivitiesDashboard {
     constructor() {
         this.apiBaseUrl = '/api';
         this.currentData = null;
+        this.filteredData = null;
         this.isLoading = false;
+        this.currentFilter = 'tomorrow'; // Default filter
         
         // DOM elements
         this.elements = {
@@ -24,7 +26,10 @@ class ActivitiesDashboard {
             activitiesContainer: document.getElementById('activitiesContainer'),
             activitiesCount: document.getElementById('activitiesCount'),
             tableHeaders: document.getElementById('tableHeaders'),
-            activitiesTableBody: document.getElementById('activitiesTableBody')
+            activitiesTableBody: document.getElementById('activitiesTableBody'),
+            filterTomorrow: document.getElementById('filterTomorrow'),
+            filter7Days: document.getElementById('filter7Days'),
+            filter14Days: document.getElementById('filter14Days')
         };
         
         this.initializeEventListeners();
@@ -39,12 +44,87 @@ class ActivitiesDashboard {
         this.elements.healthBtn.addEventListener('click', () => this.checkHealth());
         this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
         
+        // Filter button listeners
+        this.elements.filterTomorrow.addEventListener('click', () => this.setFilter('tomorrow'));
+        this.elements.filter7Days.addEventListener('click', () => this.setFilter('7days'));
+        this.elements.filter14Days.addEventListener('click', () => this.setFilter('14days'));
+        
         // Auto-refresh every 30 seconds
         setInterval(() => {
             if (!this.isLoading) {
                 this.loadActivities(true); // Silent refresh
             }
         }, 30000);
+    }
+    
+    /**
+     * Get current date in Bali time zone (UTC+8)
+     */
+    getBaliDate(offsetDays = 0) {
+        const now = new Date();
+        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // UTC+8
+        baliTime.setDate(baliTime.getDate() + offsetDays);
+        return baliTime.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+    }
+    
+    /**
+     * Set filter and update display
+     */
+    setFilter(filterType) {
+        this.currentFilter = filterType;
+        
+        // Update active button
+        document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+        const activeButton = document.querySelector(`[data-filter="${filterType}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+        
+        // Apply filter to current data
+        if (this.currentData) {
+            this.applyFilter();
+        }
+    }
+    
+    /**
+     * Apply current filter to the data
+     */
+    applyFilter() {
+        if (!this.currentData) return;
+        
+        let startDate, endDate;
+        const today = this.getBaliDate();
+        
+        switch (this.currentFilter) {
+            case 'tomorrow':
+                startDate = this.getBaliDate(1); // Tomorrow
+                endDate = startDate;
+                break;
+            case '7days':
+                startDate = this.getBaliDate(1); // Tomorrow
+                endDate = this.getBaliDate(7); // 7 days from today
+                break;
+            case '14days':
+                startDate = this.getBaliDate(1); // Tomorrow
+                endDate = this.getBaliDate(14); // 14 days from today
+                break;
+        }
+        
+        // Filter data: only show records with AvailabilityCount >= 1 and within date range
+        this.filteredData = this.currentData.filter(record => {
+            const recordDate = record.EntryDate;
+            const hasAvailability = record.AvailabilityCount && parseInt(record.AvailabilityCount) >= 1;
+            const inDateRange = recordDate >= startDate && recordDate <= endDate;
+            
+            return hasAvailability && inDateRange;
+        });
+        
+        // Update display
+        if (this.filteredData.length === 0) {
+            this.showEmpty();
+        } else {
+            this.showActivities(this.filteredData);
+        }
     }
     
     /**
@@ -123,7 +203,21 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', 'Connected - Availability updating');
+        // Create filter description for empty state
+        let filterDesc = '';
+        switch (this.currentFilter) {
+            case 'tomorrow':
+                filterDesc = 'tomorrow';
+                break;
+            case '7days':
+                filterDesc = 'next 7 days';
+                break;
+            case '14days':
+                filterDesc = 'next 14 days';
+                break;
+        }
+        
+        this.updateStatus('success', `No availability for ${filterDesc}`);
         this.updateLastUpdated();
     }
     
@@ -147,11 +241,8 @@ class ActivitiesDashboard {
             
             this.currentData = data.data;
             
-            if (this.currentData.length === 0) {
-                this.showEmpty();
-            } else {
-                this.showActivities(this.currentData);
-            }
+            // Apply current filter to the new data
+            this.applyFilter();
             
         } catch (error) {
             console.error('Error loading activities:', error);
@@ -182,7 +273,21 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', `Live data - ${activities.length} villas available`);
+        // Create filter description
+        let filterDesc = '';
+        switch (this.currentFilter) {
+            case 'tomorrow':
+                filterDesc = 'tomorrow';
+                break;
+            case '7days':
+                filterDesc = 'next 7 days';
+                break;
+            case '14days':
+                filterDesc = 'next 14 days';
+                break;
+        }
+        
+        this.updateStatus('success', `${activities.length} villas available for ${filterDesc}`);
         this.updateLastUpdated();
     }
     
