@@ -17,9 +17,7 @@ class ActivitiesDashboard {
             refreshBtn: document.getElementById('refreshBtn'),
             healthBtn: document.getElementById('healthBtn'),
             retryBtn: document.getElementById('retryBtn'),
-            statusIndicator: document.getElementById('statusIndicator'),
-            statusText: document.getElementById('statusText'),
-            lastUpdated: document.getElementById('lastUpdated'),
+
             loadingSpinner: document.getElementById('loadingSpinner'),
             errorMessage: document.getElementById('errorMessage'),
             errorText: document.getElementById('errorText'),
@@ -507,22 +505,7 @@ class ActivitiesDashboard {
     
 
     
-    /**
-     * Update status indicator
-     */
-    updateStatus(status, message) {
-        const statusDot = this.elements.statusIndicator.querySelector('.status-dot');
-        statusDot.className = `status-dot ${status}`;
-        this.elements.statusText.textContent = message;
-    }
-    
-    /**
-     * Update last updated timestamp
-     */
-    updateLastUpdated() {
-        const now = new Date();
-        this.elements.lastUpdated.textContent = `Last updated: ${now.toLocaleString()}`;
-    }
+
     
     /**
      * Show loading state
@@ -536,7 +519,6 @@ class ActivitiesDashboard {
         }
         
         this.elements.refreshBtn.disabled = true;
-        this.updateStatus('loading', 'Loading...');
         
         // Add spinning animation to refresh button
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
@@ -567,7 +549,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('error', 'Error occurred');
+
     }
     
     /**
@@ -583,8 +565,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', 'No availability for selected dates');
-        this.updateLastUpdated();
+
     }
     
     /**
@@ -774,8 +755,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        this.updateStatus('success', `${offers.length} offers available`);
-        this.updateLastUpdated();
+
     }
 
     /**
