@@ -115,26 +115,30 @@ class ActivitiesDashboard {
      * Get filter configuration for Mon/Tue/Wed/Sat/Sun
      */
     getWeekdayFilters(baliTime) {
-        const startOfWeek = new Date(baliTime);
-        const dayOfWeek = startOfWeek.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Get Monday of current week
-        startOfWeek.setDate(startOfWeek.getDate() + mondayOffset);
+        // Start from tomorrow in Bali time
+        const tomorrow = new Date(baliTime);
+        tomorrow.setDate(tomorrow.getDate() + 1);
         
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 6); // Sunday
+        // Calculate "This Week" from tomorrow onwards
+        const remainingThisWeek = new Date(tomorrow);
+        const dayOfWeek = tomorrow.getDay();
+        const daysUntilSunday = 7 - dayOfWeek; // Days from tomorrow until end of week (Sunday)
+        
+        const endOfWeek = new Date(tomorrow);
+        endOfWeek.setDate(tomorrow.getDate() + daysUntilSunday - 1); // End on Sunday
         
         const nextWeekStart = new Date(endOfWeek);
         nextWeekStart.setDate(nextWeekStart.getDate() + 1); // Next Monday
         
         const nextWeekEnd = new Date(nextWeekStart);
-        nextWeekEnd.setDate(nextWeekEnd.getDate() + 6); // Next Sunday
+        nextWeekEnd.setDate(nextWeekStart.getDate() + 6); // Next Sunday
         
         return {
             filter1: {
                 title: 'This Week',
-                subtitle: this.formatDateRange(startOfWeek, endOfWeek),
+                subtitle: this.formatDateRange(tomorrow, endOfWeek),
                 icon: 'fas fa-calendar-week',
-                dateRange: [startOfWeek, endOfWeek]
+                dateRange: [tomorrow, endOfWeek]
             },
             filter2: {
                 title: 'This Weekend',
@@ -161,9 +165,18 @@ class ActivitiesDashboard {
      * Get filter configuration for Thu/Fri
      */
     getThurFriFilters(baliTime) {
-        const nextSaturday = new Date(baliTime);
-        const daysUntilSaturday = (6 - baliTime.getDay() + 7) % 7;
-        nextSaturday.setDate(baliTime.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+        // Start from tomorrow
+        const tomorrow = new Date(baliTime);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        // Calculate upcoming weekend from tomorrow onwards
+        const nextSaturday = new Date(tomorrow);
+        const daysUntilSaturday = (6 - tomorrow.getDay() + 7) % 7;
+        if (daysUntilSaturday === 0) { // Tomorrow is Saturday
+            // Use tomorrow as Saturday
+        } else {
+            nextSaturday.setDate(tomorrow.getDate() + daysUntilSaturday);
+        }
         
         const nextSunday = new Date(nextSaturday);
         nextSunday.setDate(nextSaturday.getDate() + 1);
@@ -209,23 +222,27 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Get weekend date range based on current date
+     * Get weekend date range starting from tomorrow onwards
      */
     getWeekendRange(currentDate) {
-        const saturday = new Date(currentDate);
-        const sunday = new Date(currentDate);
+        // Start from tomorrow
+        const tomorrow = new Date(currentDate);
+        tomorrow.setDate(tomorrow.getDate() + 1);
         
-        const currentDay = currentDate.getDay();
-        const daysUntilSaturday = (6 - currentDay + 7) % 7;
+        const saturday = new Date(tomorrow);
+        const sunday = new Date(tomorrow);
         
-        if (daysUntilSaturday === 0) { // Today is Saturday
-            sunday.setDate(currentDate.getDate() + 1);
-            return [currentDate, sunday];
-        } else if (currentDay === 0) { // Today is Sunday
-            saturday.setDate(currentDate.getDate() - 1);
-            return [saturday, currentDate];
+        const tomorrowDay = tomorrow.getDay();
+        const daysUntilSaturday = (6 - tomorrowDay + 7) % 7;
+        
+        if (daysUntilSaturday === 0) { // Tomorrow is Saturday
+            sunday.setDate(tomorrow.getDate() + 1);
+            return [tomorrow, sunday];
+        } else if (tomorrowDay === 0) { // Tomorrow is Sunday
+            saturday.setDate(tomorrow.getDate() - 1);
+            return [saturday, tomorrow];
         } else { // Weekday - get upcoming weekend
-            saturday.setDate(currentDate.getDate() + daysUntilSaturday);
+            saturday.setDate(tomorrow.getDate() + daysUntilSaturday);
             sunday.setDate(saturday.getDate() + 1);
             return [saturday, sunday];
         }
