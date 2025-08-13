@@ -36,13 +36,15 @@ router.get('/activities', async (req, res) => {
                 lrd.view_type,
                 lrd.pool_type,
                 lrd.image_urls,
-                lrd.key_amenities
+                lrd.key_amenities,
+                lrd.class
             FROM RoomAvailabilityStore ras
             LEFT JOIN LMRoomDescription lrd ON (
                 CASE 
                     WHEN ras.UserRoomDisplayName = 'Pearl & Shell' THEN lrd.name = 'The Pearl Villa'
                     WHEN ras.UserRoomDisplayName = 'Leaf' THEN lrd.name = 'The Leaf Villa'
                     WHEN ras.UserRoomDisplayName = 'Shore' THEN lrd.name = 'The Shore Villa'
+                    WHEN ras.UserRoomDisplayName = 'Sunset Room' THEN lrd.name = 'The Sunset Room'
                     WHEN ras.UserRoomDisplayName = 'Sunset' THEN lrd.name = 'The Sunset Room'
                     WHEN ras.UserRoomDisplayName = 'Swell 2BR' THEN lrd.name = 'The Swell 2BR'
                     WHEN ras.UserRoomDisplayName = 'Swell 3BR' THEN lrd.name = 'The Swell 3BR'

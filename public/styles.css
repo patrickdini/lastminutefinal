@@ -811,8 +811,8 @@ body {
 
 .villa-class-badge {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    left: 15px;
     background: linear-gradient(135deg, #AA7831, #D4A843);
     color: white;
     padding: 8px 16px;
@@ -821,6 +821,9 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .villa-name {

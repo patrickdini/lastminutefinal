@@ -695,6 +695,7 @@ class ActivitiesDashboard {
                         bedrooms: checkInRecord.Bedrooms,
                         maxGuests: checkInRecord.MaxAdultsPerUnit,
                         villaClass: checkInRecord.UserDefinedClass,
+                        class: checkInRecord.class,
                         pool: checkInRecord.Pool,
                         totalRate: checkInRecord.LowestRateAmount * nights,
                         // Enhanced villa data from LMRoomDescription
@@ -845,12 +846,12 @@ class ActivitiesDashboard {
                         <div class="villa-image-container">
                             <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
                             ${imageUrls.length > 1 ? `<div class="image-count">+${imageUrls.length - 1}</div>` : ''}
+                            ${villaDetails.class ? `<div class="villa-class-badge">${villaDetails.class}</div>` : ''}
                         </div>
                     </div>
                 ` : ''}
                 
                 <div class="villa-card-header">
-                    ${villaClass ? `<div class="villa-class-badge">${villaClass}</div>` : ''}
                     <div class="villa-tagline">${tagline}</div>
                     <div class="villa-name-subtitle">${villaName}</div>
                     
@@ -863,11 +864,11 @@ class ActivitiesDashboard {
                     <div class="villa-description" data-expanded="false">
                         <div class="description-preview">
                             <p>${this.truncateText(description, 100)}</p>
-                            ${description.length > 100 ? `<button class="expand-btn" onclick="this.toggleDescription(this)">Show more</button>` : ''}
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="app.toggleDescription(this)">Show more</button>` : ''}
                         </div>
                         <div class="description-full">
                             <p>${description}</p>
-                            ${description.length > 100 ? `<button class="expand-btn" onclick="this.toggleDescription(this)">Show less</button>` : ''}
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="app.toggleDescription(this)">Show less</button>` : ''}
                         </div>
                     </div>
                     
