@@ -69,11 +69,27 @@
                 <!-- Custom date slider (hidden by default) -->
                 <div id="customDateSlider" class="custom-date-slider" style="display: none;">
                     <div class="slider-container">
-                        <label for="dateRange">Select Date:</label>
-                        <input type="range" id="dateRange" min="1" max="60" value="1" class="date-slider">
+                        <label>Select Date Range:</label>
+                        <div class="dual-slider-container">
+                            <div class="slider-track">
+                                <div id="sliderRange" class="slider-range"></div>
+                                <input type="range" id="startDateRange" min="1" max="60" value="1" class="date-slider start-slider">
+                                <input type="range" id="endDateRange" min="1" max="60" value="7" class="date-slider end-slider">
+                            </div>
+                        </div>
                         <div class="slider-display">
-                            <span id="selectedDate">Tomorrow</span>
-                            <span id="dayOfWeek">Wednesday</span>
+                            <div class="date-range-display">
+                                <div class="start-date">
+                                    <span class="date-label">From:</span>
+                                    <span id="selectedStartDate">Tomorrow</span>
+                                    <span id="startDayOfWeek">Wednesday</span>
+                                </div>
+                                <div class="end-date">
+                                    <span class="date-label">To:</span>
+                                    <span id="selectedEndDate">Next Tuesday</span>
+                                    <span id="endDayOfWeek">Tuesday</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

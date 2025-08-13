@@ -33,9 +33,13 @@ class ActivitiesDashboard {
             dateFilter3: document.getElementById('dateFilter3'),
             dateFilter4: document.getElementById('dateFilter4'),
             customDateSlider: document.getElementById('customDateSlider'),
-            dateRange: document.getElementById('dateRange'),
-            selectedDate: document.getElementById('selectedDate'),
-            dayOfWeek: document.getElementById('dayOfWeek')
+            startDateRange: document.getElementById('startDateRange'),
+            endDateRange: document.getElementById('endDateRange'),
+            sliderRange: document.getElementById('sliderRange'),
+            selectedStartDate: document.getElementById('selectedStartDate'),
+            startDayOfWeek: document.getElementById('startDayOfWeek'),
+            selectedEndDate: document.getElementById('selectedEndDate'),
+            endDayOfWeek: document.getElementById('endDayOfWeek')
         };
         
         this.initializeEventListeners();
@@ -57,8 +61,9 @@ class ActivitiesDashboard {
         this.elements.dateFilter3.addEventListener('click', () => this.handleDateFilterClick('filter3'));
         this.elements.dateFilter4.addEventListener('click', () => this.handleDateFilterClick('filter4'));
         
-        // Custom date slider listener
-        this.elements.dateRange.addEventListener('input', (e) => this.handleSliderChange(e.target.value));
+        // Custom date slider listeners
+        this.elements.startDateRange.addEventListener('input', () => this.handleDualSliderChange());
+        this.elements.endDateRange.addEventListener('input', () => this.handleDualSliderChange());
         
         // Auto-refresh every 30 seconds
         setInterval(() => {
@@ -344,41 +349,92 @@ class ActivitiesDashboard {
      * Setup date slider for custom date selection
      */
     setupDateSlider() {
-        this.updateSliderDisplay(1);
+        // Initialize with default values: start = 1 (tomorrow), end = 7 (week from tomorrow)
+        this.elements.startDateRange.value = 1;
+        this.elements.endDateRange.value = 7;
+        this.updateDualSliderDisplay();
+        this.updateSliderRange();
     }
 
     /**
-     * Handle slider change
+     * Handle dual slider change
      */
-    handleSliderChange(value) {
-        this.updateSliderDisplay(parseInt(value));
+    handleDualSliderChange() {
+        let startValue = parseInt(this.elements.startDateRange.value);
+        let endValue = parseInt(this.elements.endDateRange.value);
         
-        // Apply single date filter - create date string directly
-        const targetDate = new Date();
-        const baliTime = new Date(targetDate.getTime() + (8 * 60 * 60 * 1000));
-        baliTime.setDate(baliTime.getDate() + parseInt(value));
+        // Ensure end is always after start
+        if (endValue <= startValue) {
+            endValue = startValue + 1;
+            this.elements.endDateRange.value = endValue;
+        }
         
-        const dateStr = baliTime.toISOString().split('T')[0];
-        this.currentDateRange = [dateStr, dateStr];
-        this.applyDateFilter([dateStr, dateStr]);
+        this.updateDualSliderDisplay();
+        this.updateSliderRange();
+        
+        // Apply date range filter
+        const startDate = this.getDateFromOffset(startValue);
+        const endDate = this.getDateFromOffset(endValue);
+        
+        this.currentDateRange = [startDate, endDate];
+        this.applyDateFilter([startDate, endDate]);
     }
 
     /**
-     * Update slider display text
+     * Get date string from day offset
      */
-    updateSliderDisplay(dayOffset) {
+    getDateFromOffset(dayOffset) {
         const targetDate = new Date();
         const baliTime = new Date(targetDate.getTime() + (8 * 60 * 60 * 1000));
         baliTime.setDate(baliTime.getDate() + dayOffset);
+        return baliTime.toISOString().split('T')[0];
+    }
+
+    /**
+     * Update dual slider display text
+     */
+    updateDualSliderDisplay() {
+        const startOffset = parseInt(this.elements.startDateRange.value);
+        const endOffset = parseInt(this.elements.endDateRange.value);
         
-        const options = { month: 'short', day: 'numeric', year: 'numeric' };
-        const dateStr = baliTime.toLocaleDateString('en-US', options);
+        // Update start date display
+        const startDate = new Date();
+        const startBaliTime = new Date(startDate.getTime() + (8 * 60 * 60 * 1000));
+        startBaliTime.setDate(startBaliTime.getDate() + startOffset);
         
+        const startOptions = { month: 'short', day: 'numeric' };
+        const startDateStr = startBaliTime.toLocaleDateString('en-US', startOptions);
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const dayName = dayNames[baliTime.getDay()];
+        const startDayName = dayNames[startBaliTime.getDay()];
         
-        this.elements.selectedDate.textContent = dayOffset === 1 ? 'Tomorrow' : dateStr;
-        this.elements.dayOfWeek.textContent = dayName;
+        this.elements.selectedStartDate.textContent = startOffset === 1 ? 'Tomorrow' : startDateStr;
+        this.elements.startDayOfWeek.textContent = startDayName;
+        
+        // Update end date display
+        const endDate = new Date();
+        const endBaliTime = new Date(endDate.getTime() + (8 * 60 * 60 * 1000));
+        endBaliTime.setDate(endBaliTime.getDate() + endOffset);
+        
+        const endDateStr = endBaliTime.toLocaleDateString('en-US', startOptions);
+        const endDayName = dayNames[endBaliTime.getDay()];
+        
+        this.elements.selectedEndDate.textContent = endDateStr;
+        this.elements.endDayOfWeek.textContent = endDayName;
+    }
+
+    /**
+     * Update slider range visual indicator
+     */
+    updateSliderRange() {
+        const startValue = parseInt(this.elements.startDateRange.value);
+        const endValue = parseInt(this.elements.endDateRange.value);
+        const max = 60;
+        
+        const startPercent = ((startValue - 1) / (max - 1)) * 100;
+        const endPercent = ((endValue - 1) / (max - 1)) * 100;
+        
+        this.elements.sliderRange.style.left = startPercent + '%';
+        this.elements.sliderRange.style.width = (endPercent - startPercent) + '%';
     }
 
     /**
