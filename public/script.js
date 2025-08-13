@@ -720,7 +720,7 @@ class ActivitiesDashboard {
                     checkInDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkInDateObj.toISOString().split('T')[0];
                     
-                    const offerData = {
+                    offers.push({
                         villa: villaName,
                         checkIn: checkInDate,
                         nights: nights,
@@ -732,9 +732,7 @@ class ActivitiesDashboard {
                         villaClass: checkInRecord.UserDefinedClass,
                         pool: checkInRecord.Pool,
                         totalRate: checkInRecord.LowestRateAmount * nights
-                    };
-                    console.log('Generated offer:', offerData);
-                    offers.push(offerData);
+                    });
                 }
             });
         });
@@ -836,12 +834,14 @@ class ActivitiesDashboard {
             .sort() // Sort dates chronologically
             .map(checkInDate => {
                 const dateOffers = villaOffers[checkInDate];
-                const checkinDay = this.getDayOfWeek(new Date(checkInDate + 'T00:00:00'));
+                const dateObj = new Date(checkInDate.includes('T') ? checkInDate : checkInDate + 'T00:00:00');
+                const checkinDay = this.getDayOfWeek(dateObj);
+                const daysFromNow = this.calculateDaysFromNow(dateObj);
                 
                 return `
                     <div class="checkin-group">
                         <div class="checkin-date-header">
-                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}
+                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}${daysFromNow}
                         </div>
                         <div class="booking-options">
                             ${dateOffers.map(offer => `
@@ -916,7 +916,6 @@ class ActivitiesDashboard {
      * Format date for display (e.g., "Aug 21")
      */
     formatDateForDisplay(dateString) {
-        console.log('formatDateForDisplay input:', dateString);
         if (!dateString) return 'Invalid Date';
         
         // Handle various date formats
@@ -926,8 +925,6 @@ class ActivitiesDashboard {
         } else {
             date = new Date(dateString + 'T00:00:00');
         }
-        
-        console.log('formatDateForDisplay parsed date:', date);
         
         if (isNaN(date.getTime())) {
             return 'Invalid Date';
@@ -943,11 +940,41 @@ class ActivitiesDashboard {
      * Get day of week from date
      */
     getDayOfWeek(date) {
-        console.log('getDayOfWeek input date:', date);
         if (!date || isNaN(date.getTime())) {
             return 'Invalid';
         }
         return date.toLocaleDateString('en-US', { weekday: 'short' });
+    }
+
+    /**
+     * Calculate days from now with "In xx days" format
+     */
+    calculateDaysFromNow(targetDate) {
+        if (!targetDate || isNaN(targetDate.getTime())) {
+            return '';
+        }
+        
+        // Get current date in Bali timezone (UTC+8)
+        const now = new Date();
+        const baliNow = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        const today = new Date(baliNow.getFullYear(), baliNow.getMonth(), baliNow.getDate());
+        
+        // Get target date without time
+        const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+        
+        // Calculate difference in days
+        const diffTime = target.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+            return ' (Today)';
+        } else if (diffDays === 1) {
+            return ' (Tomorrow)';
+        } else if (diffDays > 1) {
+            return ` (In ${diffDays} days)`;
+        } else {
+            return ` (${Math.abs(diffDays)} days ago)`;
+        }
     }
     
     /**
