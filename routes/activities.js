@@ -35,10 +35,21 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Successfully retrieved ${rows.length} activities`);
         
+        // Transform room names: "Pearl & Shell" -> "Pearl"
+        const transformedRows = rows.map(row => {
+            if (row.UserRoomDisplayName === 'Pearl & Shell') {
+                return {
+                    ...row,
+                    UserRoomDisplayName: 'Pearl'
+                };
+            }
+            return row;
+        });
+        
         res.json({
             success: true,
-            count: rows.length,
-            data: rows
+            count: transformedRows.length,
+            data: transformedRows
         });
         
     } catch (error) {
