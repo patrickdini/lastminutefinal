@@ -121,76 +121,65 @@ body {
         margin-bottom: 25px;
     }
     
+    /* Keep guest inputs side by side horizontally as shown in screenshot */
     .guest-inputs {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .guest-input-group {
-        position: relative;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
     }
     
     .guest-input-group label {
         font-size: 0.85rem;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     
     .guest-select {
-        padding: 14px 16px;
-        font-size: 1.1rem;
-        border-radius: 10px;
-        background-position: right 14px center;
-        padding-right: 50px;
-        min-height: 48px;
-        display: flex;
-        align-items: center;
+        padding: 12px 14px;
+        font-size: 1rem;
+        border-radius: 8px;
+        background-position: right 12px center;
+        padding-right: 40px;
+        min-height: 46px;
     }
     
-    /* Arrow instruction for mobile */
-    .guest-input-group::after {
-        content: '↑';
-        position: absolute;
-        right: 55px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #AA7831;
-        font-size: 1.2rem;
-        font-weight: bold;
-        pointer-events: none;
-        z-index: 1;
-    }
-    
-    /* Date filter grid - 2x2 matrix for mobile */
+    /* Date filter grid - proper 2x2 matrix for mobile */
     .date-filter-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 1fr 1fr;
+        gap: 10px;
         margin-bottom: 15px;
     }
     
     .date-filter-box {
-        padding: 16px 12px;
-        min-height: 85px;
-        border-radius: 10px;
+        padding: 14px 10px;
+        min-height: 75px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .date-filter-box i {
-        font-size: 1.4rem;
-        margin-bottom: 4px;
+        font-size: 1.2rem;
+        margin-bottom: 3px;
     }
     
     .filter-title {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         font-weight: 600;
         margin-bottom: 2px;
+        text-align: center;
     }
     
     .filter-subtitle {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         opacity: 0.85;
+        text-align: center;
     }
     
     .filter-controls {
-        padding: 18px;
+        padding: 16px;
         margin-bottom: 15px;
     }
     
@@ -1154,35 +1143,35 @@ body {
         margin-bottom: 20px;
     }
     
+    .guest-inputs {
+        gap: 10px;
+    }
+    
     .date-filter-box {
-        padding: 12px 8px;
-        min-height: 75px;
+        padding: 10px 8px;
+        min-height: 65px;
     }
     
     .date-filter-box i {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
     
     .filter-title {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
     
     .filter-subtitle {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
     
     .filter-controls {
-        padding: 15px;
+        padding: 14px;
     }
     
     .guest-select {
-        font-size: 1rem;
-        min-height: 44px;
-        padding: 12px 14px;
-    }
-    
-    .guest-input-group::after {
-        right: 50px;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
+        min-height: 42px;
+        padding: 10px 12px;
+        padding-right: 35px;
     }
 }
