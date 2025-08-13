@@ -805,17 +805,17 @@ class ActivitiesDashboard {
                 groups[offer.villa] = {};
             }
             
-            if (!groups[offer.villa][offer.checkinDate]) {
-                groups[offer.villa][offer.checkinDate] = [];
+            if (!groups[offer.villa][offer.checkIn]) {
+                groups[offer.villa][offer.checkIn] = [];
             }
             
-            groups[offer.villa][offer.checkinDate].push(offer);
+            groups[offer.villa][offer.checkIn].push(offer);
         });
         
         // Sort offers within each check-in date by nights ascending
         Object.keys(groups).forEach(villa => {
-            Object.keys(groups[villa]).forEach(checkinDate => {
-                groups[villa][checkinDate].sort((a, b) => a.nights - b.nights);
+            Object.keys(groups[villa]).forEach(checkInDate => {
+                groups[villa][checkInDate].sort((a, b) => a.nights - b.nights);
             });
         });
         
@@ -826,20 +826,20 @@ class ActivitiesDashboard {
      * Generate individual villa card HTML
      */
     generateVillaCard(villaName, villaDetails, villaOffers) {
-        const villaClass = villaDetails.class || '';
+        const villaClass = villaDetails.villaClass || '';
         const villaDescription = this.getVillaDescription(villaName);
         
         // Generate check-in date groups
         const checkinGroups = Object.keys(villaOffers)
             .sort() // Sort dates chronologically
-            .map(checkinDate => {
-                const dateOffers = villaOffers[checkinDate];
-                const checkinDay = this.getDayOfWeek(new Date(checkinDate + 'T00:00:00'));
+            .map(checkInDate => {
+                const dateOffers = villaOffers[checkInDate];
+                const checkinDay = this.getDayOfWeek(new Date(checkInDate + 'T00:00:00'));
                 
                 return `
                     <div class="checkin-group">
                         <div class="checkin-date-header">
-                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkinDate)}
+                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}
                         </div>
                         <div class="booking-options">
                             ${dateOffers.map(offer => `
@@ -849,13 +849,13 @@ class ActivitiesDashboard {
                                             ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
                                         </div>
                                         <div class="booking-dates">
-                                            ${this.formatDateForDisplay(offer.checkinDate)} - ${this.formatDateForDisplay(offer.checkoutDate)}
+                                            ${this.formatDateForDisplay(offer.checkIn)} - ${this.formatDateForDisplay(offer.checkOut)}
                                         </div>
                                     </div>
                                     <div class="booking-price">
                                         <div class="rate">${this.formatRate(offer.rate)}</div>
                                     </div>
-                                    <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkinDate}', ${offer.nights})">
+                                    <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkIn}', ${offer.nights})">
                                         Book
                                     </button>
                                 </div>
