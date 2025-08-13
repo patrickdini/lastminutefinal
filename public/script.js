@@ -9,7 +9,8 @@ class ActivitiesDashboard {
         this.currentData = null;
         this.filteredData = null;
         this.isLoading = false;
-        this.currentFilter = 'tomorrow'; // Default filter
+        this.currentFilter = 'default'; // Default filter
+        this.currentDateRange = null;
         
         // DOM elements
         this.elements = {
@@ -27,12 +28,18 @@ class ActivitiesDashboard {
             activitiesCount: document.getElementById('activitiesCount'),
             tableHeaders: document.getElementById('tableHeaders'),
             activitiesTableBody: document.getElementById('activitiesTableBody'),
-            filterTomorrow: document.getElementById('filterTomorrow'),
-            filter7Days: document.getElementById('filter7Days'),
-            filter14Days: document.getElementById('filter14Days')
+            dateFilter1: document.getElementById('dateFilter1'),
+            dateFilter2: document.getElementById('dateFilter2'),
+            dateFilter3: document.getElementById('dateFilter3'),
+            dateFilter4: document.getElementById('dateFilter4'),
+            customDateSlider: document.getElementById('customDateSlider'),
+            dateRange: document.getElementById('dateRange'),
+            selectedDate: document.getElementById('selectedDate'),
+            dayOfWeek: document.getElementById('dayOfWeek')
         };
         
         this.initializeEventListeners();
+        this.setupDynamicDateFilters();
         this.loadActivities();
     }
     
@@ -44,10 +51,14 @@ class ActivitiesDashboard {
         this.elements.healthBtn.addEventListener('click', () => this.checkHealth());
         this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
         
-        // Filter button listeners
-        this.elements.filterTomorrow.addEventListener('click', () => this.setFilter('tomorrow'));
-        this.elements.filter7Days.addEventListener('click', () => this.setFilter('7days'));
-        this.elements.filter14Days.addEventListener('click', () => this.setFilter('14days'));
+        // Date filter listeners
+        this.elements.dateFilter1.addEventListener('click', () => this.handleDateFilterClick('filter1'));
+        this.elements.dateFilter2.addEventListener('click', () => this.handleDateFilterClick('filter2'));
+        this.elements.dateFilter3.addEventListener('click', () => this.handleDateFilterClick('filter3'));
+        this.elements.dateFilter4.addEventListener('click', () => this.handleDateFilterClick('filter4'));
+        
+        // Custom date slider listener
+        this.elements.dateRange.addEventListener('input', (e) => this.handleSliderChange(e.target.value));
         
         // Auto-refresh every 30 seconds
         setInterval(() => {
@@ -67,67 +78,333 @@ class ActivitiesDashboard {
         baliTime.setDate(baliTime.getDate() + offsetDays);
         return baliTime.toISOString().split('T')[0]; // Return YYYY-MM-DD format
     }
-    
+
     /**
-     * Set filter and update display
+     * Get current day of week in Bali time (0 = Sunday, 1 = Monday, etc.)
      */
-    setFilter(filterType) {
-        this.currentFilter = filterType;
+    getBaliDayOfWeek() {
+        const now = new Date();
+        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        return baliTime.getDay();
+    }
+
+    /**
+     * Setup dynamic date filters based on current day of week
+     */
+    setupDynamicDateFilters() {
+        const dayOfWeek = this.getBaliDayOfWeek(); // 0 = Sunday, 1 = Monday, etc.
+        const today = new Date();
+        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000));
         
-        // Update active button
-        document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
-        const activeButton = document.querySelector(`[data-filter="${filterType}"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
+        // Determine filter configuration based on day of week
+        let filters;
+        if ([1, 2, 3, 6, 0].includes(dayOfWeek)) { // Mon, Tue, Wed, Sat, Sun
+            filters = this.getWeekdayFilters(baliTime);
+        } else { // Thu, Fri
+            filters = this.getThurFriFilters(baliTime);
         }
         
-        // Apply filter to current data
-        if (this.currentData) {
-            this.applyFilter();
+        // Update filter boxes
+        this.updateFilterBoxes(filters);
+        
+        // Set default active filter
+        this.setActiveFilter('filter1');
+    }
+
+    /**
+     * Get filter configuration for Mon/Tue/Wed/Sat/Sun
+     */
+    getWeekdayFilters(baliTime) {
+        const startOfWeek = new Date(baliTime);
+        const dayOfWeek = startOfWeek.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Get Monday of current week
+        startOfWeek.setDate(startOfWeek.getDate() + mondayOffset);
+        
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 6); // Sunday
+        
+        const nextWeekStart = new Date(endOfWeek);
+        nextWeekStart.setDate(nextWeekStart.getDate() + 1); // Next Monday
+        
+        const nextWeekEnd = new Date(nextWeekStart);
+        nextWeekEnd.setDate(nextWeekEnd.getDate() + 6); // Next Sunday
+        
+        return {
+            filter1: {
+                title: 'This Week',
+                subtitle: this.formatDateRange(startOfWeek, endOfWeek),
+                icon: 'fas fa-calendar-week',
+                dateRange: [startOfWeek, endOfWeek]
+            },
+            filter2: {
+                title: 'This Weekend',
+                subtitle: this.getWeekendSubtitle(baliTime),
+                icon: 'fas fa-calendar-alt',
+                dateRange: this.getWeekendRange(baliTime)
+            },
+            filter3: {
+                title: 'Next Week',
+                subtitle: this.formatDateRange(nextWeekStart, nextWeekEnd),
+                icon: 'fas fa-calendar-plus',
+                dateRange: [nextWeekStart, nextWeekEnd]
+            },
+            filter4: {
+                title: 'Pick Your Date',
+                subtitle: 'Choose any date',
+                icon: 'fas fa-calendar-check',
+                dateRange: 'custom'
+            }
+        };
+    }
+
+    /**
+     * Get filter configuration for Thu/Fri
+     */
+    getThurFriFilters(baliTime) {
+        const nextSaturday = new Date(baliTime);
+        const daysUntilSaturday = (6 - baliTime.getDay() + 7) % 7;
+        nextSaturday.setDate(baliTime.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+        
+        const nextSunday = new Date(nextSaturday);
+        nextSunday.setDate(nextSaturday.getDate() + 1);
+        
+        const nextWeekStart = new Date(nextSunday);
+        nextWeekStart.setDate(nextSunday.getDate() + 1); // Monday after this weekend
+        
+        const nextWeekEnd = new Date(nextWeekStart);
+        nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+        
+        const nextWeekendSaturday = new Date(nextWeekEnd);
+        nextWeekendSaturday.setDate(nextWeekEnd.getDate() + 1);
+        
+        const nextWeekendSunday = new Date(nextWeekendSaturday);
+        nextWeekendSunday.setDate(nextWeekendSaturday.getDate() + 1);
+        
+        return {
+            filter1: {
+                title: 'This Weekend',
+                subtitle: this.formatDateRange(nextSaturday, nextSunday),
+                icon: 'fas fa-calendar-alt',
+                dateRange: [nextSaturday, nextSunday]
+            },
+            filter2: {
+                title: 'Next Week',
+                subtitle: this.formatDateRange(nextWeekStart, nextWeekEnd),
+                icon: 'fas fa-calendar-plus',
+                dateRange: [nextWeekStart, nextWeekEnd]
+            },
+            filter3: {
+                title: 'Next Weekend',
+                subtitle: this.formatDateRange(nextWeekendSaturday, nextWeekendSunday),
+                icon: 'fas fa-calendar-week',
+                dateRange: [nextWeekendSaturday, nextWeekendSunday]
+            },
+            filter4: {
+                title: 'Pick Your Date',
+                subtitle: 'Choose any date',
+                icon: 'fas fa-calendar-check',
+                dateRange: 'custom'
+            }
+        };
+    }
+
+    /**
+     * Get weekend date range based on current date
+     */
+    getWeekendRange(currentDate) {
+        const saturday = new Date(currentDate);
+        const sunday = new Date(currentDate);
+        
+        const currentDay = currentDate.getDay();
+        const daysUntilSaturday = (6 - currentDay + 7) % 7;
+        
+        if (daysUntilSaturday === 0) { // Today is Saturday
+            sunday.setDate(currentDate.getDate() + 1);
+            return [currentDate, sunday];
+        } else if (currentDay === 0) { // Today is Sunday
+            saturday.setDate(currentDate.getDate() - 1);
+            return [saturday, currentDate];
+        } else { // Weekday - get upcoming weekend
+            saturday.setDate(currentDate.getDate() + daysUntilSaturday);
+            sunday.setDate(saturday.getDate() + 1);
+            return [saturday, sunday];
         }
     }
-    
+
     /**
-     * Apply current filter to the data
+     * Get weekend subtitle text
      */
-    applyFilter() {
-        if (!this.currentData) return;
+    getWeekendSubtitle(currentDate) {
+        const [saturday, sunday] = this.getWeekendRange(currentDate);
+        return this.formatDateRange(saturday, sunday);
+    }
+
+    /**
+     * Format date range as "Aug 17-18" or "Aug 17 - Sep 1" for cross-month
+     */
+    formatDateRange(startDate, endDate) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
-        let startDate, endDate;
-        const today = this.getBaliDate();
+        const startMonth = months[startDate.getMonth()];
+        const endMonth = months[endDate.getMonth()];
+        const startDay = startDate.getDate();
+        const endDay = endDate.getDate();
         
-        switch (this.currentFilter) {
-            case 'tomorrow':
-                startDate = this.getBaliDate(1); // Tomorrow
-                endDate = startDate;
-                break;
-            case '7days':
-                startDate = this.getBaliDate(1); // Tomorrow
-                endDate = this.getBaliDate(7); // 7 days from today
-                break;
-            case '14days':
-                startDate = this.getBaliDate(1); // Tomorrow
-                endDate = this.getBaliDate(14); // 14 days from today
-                break;
+        if (startDate.getMonth() === endDate.getMonth()) {
+            return `${startMonth} ${startDay}-${endDay}`;
+        } else {
+            return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
         }
-        
-        // Filter data: only show records with AvailabilityCount >= 1 and within date range
-        this.filteredData = this.currentData.filter(record => {
-            // Convert database date (ISO string) to YYYY-MM-DD format for comparison
-            const recordDate = record.EntryDate ? record.EntryDate.split('T')[0] : '';
-            const hasAvailability = record.AvailabilityCount && parseInt(record.AvailabilityCount) >= 1;
-            const inDateRange = recordDate >= startDate && recordDate <= endDate;
+    }
+
+    /**
+     * Update filter box content
+     */
+    updateFilterBoxes(filters) {
+        Object.keys(filters).forEach(filterKey => {
+            const elementKey = `dateFilter${filterKey.slice(-1)}`; // Convert filter1 -> dateFilter1
+            const element = this.elements[elementKey];
+            const filter = filters[filterKey];
             
-            return hasAvailability && inDateRange;
+            if (element) {
+                element.querySelector('i').className = filter.icon;
+                element.querySelector('.filter-title').textContent = filter.title;
+                element.querySelector('.filter-subtitle').textContent = filter.subtitle;
+                
+                // Store date range as simple date strings instead of Date objects
+                if (filter.dateRange === 'custom') {
+                    element.dataset.dateRange = 'custom';
+                } else {
+                    const [start, end] = filter.dateRange;
+                    const startStr = start.toISOString().split('T')[0];
+                    const endStr = end.toISOString().split('T')[0];
+                    element.dataset.dateRange = JSON.stringify([startStr, endStr]);
+                }
+            }
+        });
+    }
+
+    /**
+     * Handle date filter click
+     */
+    handleDateFilterClick(filterId) {
+        this.setActiveFilter(filterId);
+        
+        if (filterId === 'filter4') {
+            // Show custom date slider
+            this.elements.customDateSlider.style.display = 'block';
+            this.setupDateSlider();
+        } else {
+            // Hide custom date slider
+            this.elements.customDateSlider.style.display = 'none';
+            
+            // Apply filter based on date range
+            const elementKey = `dateFilter${filterId.slice(-1)}`; // Convert filter1 -> dateFilter1
+            const element = this.elements[elementKey];
+            if (element && element.dataset.dateRange) {
+                const dateRange = JSON.parse(element.dataset.dateRange);
+                this.currentDateRange = dateRange;
+                this.applyDateFilter(dateRange);
+            }
+        }
+    }
+
+    /**
+     * Set active filter visually
+     */
+    setActiveFilter(filterId) {
+        // Remove active class from all filters
+        ['filter1', 'filter2', 'filter3', 'filter4'].forEach(id => {
+            this.elements[`dateFilter${id.slice(-1)}`].classList.remove('active');
         });
         
-        // Update display
-        if (this.filteredData.length === 0) {
-            this.showEmpty();
-        } else {
-            this.showActivities(this.filteredData);
-        }
+        // Add active class to selected filter
+        this.elements[`dateFilter${filterId.slice(-1)}`].classList.add('active');
     }
+
+    /**
+     * Setup date slider for custom date selection
+     */
+    setupDateSlider() {
+        this.updateSliderDisplay(1);
+    }
+
+    /**
+     * Handle slider change
+     */
+    handleSliderChange(value) {
+        this.updateSliderDisplay(parseInt(value));
+        
+        // Apply single date filter - create date string directly
+        const targetDate = new Date();
+        const baliTime = new Date(targetDate.getTime() + (8 * 60 * 60 * 1000));
+        baliTime.setDate(baliTime.getDate() + parseInt(value));
+        
+        const dateStr = baliTime.toISOString().split('T')[0];
+        this.currentDateRange = [dateStr, dateStr];
+        this.applyDateFilter([dateStr, dateStr]);
+    }
+
+    /**
+     * Update slider display text
+     */
+    updateSliderDisplay(dayOffset) {
+        const targetDate = new Date();
+        const baliTime = new Date(targetDate.getTime() + (8 * 60 * 60 * 1000));
+        baliTime.setDate(baliTime.getDate() + dayOffset);
+        
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        const dateStr = baliTime.toLocaleDateString('en-US', options);
+        
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = dayNames[baliTime.getDay()];
+        
+        this.elements.selectedDate.textContent = dayOffset === 1 ? 'Tomorrow' : dateStr;
+        this.elements.dayOfWeek.textContent = dayName;
+    }
+
+    /**
+     * Apply date filter to current data
+     */
+    applyDateFilter(dateRange) {
+        if (!this.currentData) return;
+        
+        // If dateRange is already string format [startStr, endStr], use directly
+        let startStr, endStr;
+        
+        if (Array.isArray(dateRange) && dateRange.length === 2) {
+            const [start, end] = dateRange;
+            
+            // If already strings in YYYY-MM-DD format, use directly
+            if (typeof start === 'string' && start.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                startStr = start;
+                endStr = end;
+            } else if (start instanceof Date && end instanceof Date) {
+                // Convert Date objects to strings
+                startStr = start.toISOString().split('T')[0];
+                endStr = end.toISOString().split('T')[0];
+            } else {
+                console.error('Invalid date format in dateRange:', dateRange);
+                this.displayActivities(this.currentData);
+                return;
+            }
+        } else {
+            console.error('Invalid dateRange format:', dateRange);
+            this.displayActivities(this.currentData);
+            return;
+        }
+        
+        // Filter the data
+        this.filteredData = this.currentData.filter(activity => {
+            const activityDate = activity.EntryDate.split('T')[0]; // Extract date part only
+            return activityDate >= startStr && activityDate <= endStr;
+        });
+        
+        this.displayActivities(this.filteredData);
+    }
+    
+
     
     /**
      * Update status indicator
@@ -205,21 +482,7 @@ class ActivitiesDashboard {
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        // Create filter description for empty state
-        let filterDesc = '';
-        switch (this.currentFilter) {
-            case 'tomorrow':
-                filterDesc = 'tomorrow';
-                break;
-            case '7days':
-                filterDesc = 'next 7 days';
-                break;
-            case '14days':
-                filterDesc = 'next 14 days';
-                break;
-        }
-        
-        this.updateStatus('success', `No availability for ${filterDesc}`);
+        this.updateStatus('success', 'No availability for selected dates');
         this.updateLastUpdated();
     }
     
@@ -243,8 +506,21 @@ class ActivitiesDashboard {
             
             this.currentData = data.data;
             
-            // Apply current filter to the new data
-            this.applyFilter();
+            // Apply the default filter (filter1) to the new data
+            if (this.elements.dateFilter1 && this.elements.dateFilter1.dataset.dateRange && this.elements.dateFilter1.dataset.dateRange !== 'custom') {
+                try {
+                    const defaultDateRange = JSON.parse(this.elements.dateFilter1.dataset.dateRange);
+                    this.currentDateRange = defaultDateRange;
+                    this.applyDateFilter(defaultDateRange);
+                } catch (error) {
+                    console.error('Error parsing default date range:', error);
+                    // Fallback: show all data
+                    this.displayActivities(this.currentData);
+                }
+            } else {
+                // Fallback: show all data
+                this.displayActivities(this.currentData);
+            }
             
         } catch (error) {
             console.error('Error loading activities:', error);
@@ -253,9 +529,9 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Show activities data
+     * Display activities data (new method name)
      */
-    showActivities(activities) {
+    displayActivities(activities) {
         this.isLoading = false;
         this.hideAllStates();
         
