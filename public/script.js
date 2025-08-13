@@ -720,7 +720,7 @@ class ActivitiesDashboard {
                     checkInDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkInDateObj.toISOString().split('T')[0];
                     
-                    offers.push({
+                    const offerData = {
                         villa: villaName,
                         checkIn: checkInDate,
                         nights: nights,
@@ -732,7 +732,9 @@ class ActivitiesDashboard {
                         villaClass: checkInRecord.UserDefinedClass,
                         pool: checkInRecord.Pool,
                         totalRate: checkInRecord.LowestRateAmount * nights
-                    });
+                    };
+                    console.log('Generated offer:', offerData);
+                    offers.push(offerData);
                 }
             });
         });
@@ -914,7 +916,23 @@ class ActivitiesDashboard {
      * Format date for display (e.g., "Aug 21")
      */
     formatDateForDisplay(dateString) {
-        const date = new Date(dateString + 'T00:00:00');
+        console.log('formatDateForDisplay input:', dateString);
+        if (!dateString) return 'Invalid Date';
+        
+        // Handle various date formats
+        let date;
+        if (dateString.includes('T')) {
+            date = new Date(dateString);
+        } else {
+            date = new Date(dateString + 'T00:00:00');
+        }
+        
+        console.log('formatDateForDisplay parsed date:', date);
+        
+        if (isNaN(date.getTime())) {
+            return 'Invalid Date';
+        }
+        
         return date.toLocaleDateString('en-US', { 
             month: 'short', 
             day: 'numeric' 
@@ -925,6 +943,10 @@ class ActivitiesDashboard {
      * Get day of week from date
      */
     getDayOfWeek(date) {
+        console.log('getDayOfWeek input date:', date);
+        if (!date || isNaN(date.getTime())) {
+            return 'Invalid';
+        }
         return date.toLocaleDateString('en-US', { weekday: 'short' });
     }
     
