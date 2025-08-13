@@ -123,7 +123,8 @@ body {
     
     /* Keep guest inputs side by side horizontally as shown in screenshot */
     .guest-inputs {
-        grid-template-columns: 1fr 1fr;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 12px;
     }
     
@@ -1144,6 +1145,8 @@ body {
     }
     
     .guest-inputs {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 10px;
     }
     
