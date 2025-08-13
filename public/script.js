@@ -869,6 +869,7 @@ class ActivitiesDashboard {
                         </div>
                         <div class="description-full">
                             <p>${description}</p>
+                            ${this.formatKeyAmenities(villaDetails.key_amenities)}
                             ${description.length > 100 ? `<button class="expand-btn" onclick="toggleDescription(this)">Show less</button>` : ''}
                         </div>
                     </div>
@@ -1236,6 +1237,41 @@ class ActivitiesDashboard {
         const isExpanded = descriptionContainer.getAttribute('data-expanded') === 'true';
         descriptionContainer.setAttribute('data-expanded', !isExpanded);
         button.textContent = isExpanded ? 'Show more' : 'Show less';
+    }
+
+    /**
+     * Format key amenities from database field
+     */
+    formatKeyAmenities(keyAmenitiesField) {
+        if (!keyAmenitiesField) return '';
+        
+        try {
+            let amenities = [];
+            
+            // Try parsing as JSON array first
+            if (keyAmenitiesField.startsWith('[')) {
+                amenities = JSON.parse(keyAmenitiesField);
+            } else {
+                // Otherwise, split by comma and clean up
+                amenities = keyAmenitiesField.split(',')
+                    .map(amenity => amenity.trim())
+                    .filter(amenity => amenity.length > 0);
+            }
+            
+            if (amenities.length === 0) return '';
+            
+            return `
+                <div class="key-amenities">
+                    <h4 class="amenities-title">Key Amenities:</h4>
+                    <ul class="amenities-list">
+                        ${amenities.map(amenity => `<li><i class="fas fa-check"></i> ${amenity}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        } catch (error) {
+            console.log('Error parsing key amenities:', error);
+            return '';
+        }
     }
 }
 

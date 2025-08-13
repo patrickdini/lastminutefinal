@@ -809,6 +809,52 @@ body {
     color: #D4A843;
 }
 
+/* Key Amenities */
+.key-amenities {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(224, 224, 224, 0.2);
+}
+
+.amenities-title {
+    color: #AA7831;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-family: 'Crimson Text', serif;
+}
+
+.amenities-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.amenities-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #E0E0E0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.amenities-list li i {
+    color: #AA7831;
+    width: 12px;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .amenities-list {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}
+
 .villa-class-badge {
     position: absolute;
     top: 15px;
