@@ -24,11 +24,37 @@ router.get('/activities', async (req, res) => {
         // Get database connection
         const connection = await db.getConnection();
         
-        // Query the RoomAvailabilityStore table for next 60 days only
-        const [rows] = await connection.execute(
-            'SELECT * FROM RoomAvailabilityStore WHERE EntryDate >= ? AND EntryDate <= ? ORDER BY EntryDate ASC, UserRoomDisplayName ASC',
-            [today, maxDate]
-        );
+        // Query RoomAvailabilityStore with villa descriptions from LMRoomDescription
+        const [rows] = await connection.execute(`
+            SELECT 
+                ras.*,
+                lrd.name as villa_display_name,
+                lrd.tagline,
+                lrd.description,
+                lrd.square_meters,
+                lrd.bathrooms,
+                lrd.view_type,
+                lrd.pool_type,
+                lrd.image_urls,
+                lrd.key_amenities
+            FROM RoomAvailabilityStore ras
+            LEFT JOIN LMRoomDescription lrd ON (
+                CASE 
+                    WHEN ras.UserRoomDisplayName = 'Pearl & Shell' THEN lrd.name = 'The Pearl Villa'
+                    WHEN ras.UserRoomDisplayName = 'Leaf' THEN lrd.name = 'The Leaf Villa'
+                    WHEN ras.UserRoomDisplayName = 'Shore' THEN lrd.name = 'The Shore Villa'
+                    WHEN ras.UserRoomDisplayName = 'Sunset' THEN lrd.name = 'The Sunset Room'
+                    WHEN ras.UserRoomDisplayName = 'Swell 2BR' THEN lrd.name = 'The Swell 2BR'
+                    WHEN ras.UserRoomDisplayName = 'Swell 3BR' THEN lrd.name = 'The Swell 3BR'
+                    WHEN ras.UserRoomDisplayName = 'Swell 4BR' THEN lrd.name = 'The Swell 4BR'
+                    WHEN ras.UserRoomDisplayName = 'Tide' THEN lrd.name = 'The Tide Villa'
+                    WHEN ras.UserRoomDisplayName = 'Wave' THEN lrd.name = 'The Wave Villa'
+                    ELSE ras.UserRoomDisplayName = lrd.name
+                END
+            )
+            WHERE ras.EntryDate >= ? AND ras.EntryDate <= ? 
+            ORDER BY ras.EntryDate ASC, ras.UserRoomDisplayName ASC
+        `, [today, maxDate]);
         
         // Release the connection back to the pool
         connection.release();

@@ -696,7 +696,16 @@ class ActivitiesDashboard {
                         maxGuests: checkInRecord.MaxAdultsPerUnit,
                         villaClass: checkInRecord.UserDefinedClass,
                         pool: checkInRecord.Pool,
-                        totalRate: checkInRecord.LowestRateAmount * nights
+                        totalRate: checkInRecord.LowestRateAmount * nights,
+                        // Enhanced villa data from LMRoomDescription
+                        tagline: checkInRecord.tagline,
+                        description: checkInRecord.description,
+                        square_meters: checkInRecord.square_meters,
+                        bathrooms: checkInRecord.bathrooms,
+                        view_type: checkInRecord.view_type,
+                        pool_type: checkInRecord.pool_type,
+                        image_urls: checkInRecord.image_urls,
+                        key_amenities: checkInRecord.key_amenities
                     });
                 }
             });
@@ -786,7 +795,10 @@ class ActivitiesDashboard {
      */
     generateVillaCard(villaName, villaDetails, villaOffers) {
         const villaClass = villaDetails.villaClass || '';
-        const villaDescription = this.getVillaDescription(villaName);
+        const tagline = villaDetails.tagline || villaName;
+        const description = villaDetails.description || this.getVillaDescription(villaName);
+        const imageUrls = this.parseImageUrls(villaDetails.image_urls);
+        const specifications = this.formatVillaSpecs(villaDetails);
         
         // Generate check-in date groups
         const checkinGroups = Object.keys(villaOffers)
@@ -828,11 +840,37 @@ class ActivitiesDashboard {
         
         return `
             <div class="villa-card">
+                ${imageUrls.length > 0 ? `
+                    <div class="villa-image-gallery">
+                        <div class="villa-image-container">
+                            <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
+                            ${imageUrls.length > 1 ? `<div class="image-count">+${imageUrls.length - 1}</div>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
                 <div class="villa-card-header">
                     ${villaClass ? `<div class="villa-class-badge">${villaClass}</div>` : ''}
-                    <div class="villa-name">${villaName}</div>
-                    <div class="villa-subtitle">${villaName} - ${villaClass} Retreat</div>
-                    <div class="villa-description">${villaDescription}</div>
+                    <div class="villa-tagline">${tagline}</div>
+                    <div class="villa-name-subtitle">${villaName}</div>
+                    
+                    ${specifications ? `
+                        <div class="villa-specifications">
+                            ${specifications}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="villa-description" data-expanded="false">
+                        <div class="description-preview">
+                            <p>${this.truncateText(description, 100)}</p>
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="this.toggleDescription(this)">Show more</button>` : ''}
+                        </div>
+                        <div class="description-full">
+                            <p>${description}</p>
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="this.toggleDescription(this)">Show less</button>` : ''}
+                        </div>
+                    </div>
+                    
                     <div class="villa-details">
                         <div class="villa-detail-item">
                             <i class="fas fa-users"></i>
@@ -1131,6 +1169,71 @@ class ActivitiesDashboard {
         }
         
         return error.message || 'An unexpected error occurred. Please try again.';
+    }
+
+    /**
+     * Parse image URLs from database field
+     */
+    parseImageUrls(imageUrlsField) {
+        if (!imageUrlsField) return [];
+        
+        try {
+            // Try parsing as JSON array first
+            if (imageUrlsField.startsWith('[')) {
+                return JSON.parse(imageUrlsField);
+            }
+            
+            // Otherwise, split by comma and clean up
+            return imageUrlsField.split(',')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+        } catch (error) {
+            console.log('Error parsing image URLs:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Format villa specifications
+     */
+    formatVillaSpecs(villaDetails) {
+        const specs = [];
+        
+        if (villaDetails.square_meters) {
+            specs.push(`<div class="spec-item"><i class="fas fa-expand-arrows-alt"></i> ${villaDetails.square_meters}m²</div>`);
+        }
+        
+        if (villaDetails.bathrooms) {
+            specs.push(`<div class="spec-item"><i class="fas fa-bath"></i> ${villaDetails.bathrooms} ${villaDetails.bathrooms === 1 ? 'Bath' : 'Baths'}</div>`);
+        }
+        
+        if (villaDetails.view_type) {
+            specs.push(`<div class="spec-item"><i class="fas fa-eye"></i> ${villaDetails.view_type}</div>`);
+        }
+        
+        if (villaDetails.pool_type) {
+            specs.push(`<div class="spec-item"><i class="fas fa-swimming-pool"></i> ${villaDetails.pool_type} Pool</div>`);
+        }
+        
+        return specs.length > 0 ? specs.join('') : null;
+    }
+
+    /**
+     * Truncate text for preview
+     */
+    truncateText(text, maxLength) {
+        if (!text || text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    }
+
+    /**
+     * Toggle description expansion
+     */
+    toggleDescription(button) {
+        const descriptionContainer = button.closest('.villa-description');
+        const isExpanded = descriptionContainer.getAttribute('data-expanded') === 'true';
+        descriptionContainer.setAttribute('data-expanded', !isExpanded);
+        button.textContent = isExpanded ? 'Show more' : 'Show less';
     }
 }
 
