@@ -596,16 +596,58 @@ class ActivitiesDashboard {
     generateOffersFromData(data) {
         const offers = [];
         
-        // Group data by villa
+        // Use existing filtered data if available from date filter, otherwise apply default filter
+        let workingData = data;
+        let dateRangeDesc = "all data";
+        
+        if (this.filteredData && this.filteredData.length > 0) {
+            workingData = this.filteredData;
+            dateRangeDesc = "filtered date range";
+        } else if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
+            // Apply the current date range filter
+            const [startDate, endDate] = this.currentDateRange;
+            const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
+            const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
+            
+            workingData = data.filter(record => {
+                const activityDate = record.EntryDate.split('T')[0];
+                return activityDate >= startStr && activityDate <= endStr;
+            });
+            dateRangeDesc = `${startStr} to ${endStr}`;
+        } else {
+            // Default to next 7 days from tomorrow
+            const today = new Date();
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+            const weekLater = new Date(tomorrow.getTime() + 7 * 24 * 60 * 60 * 1000);
+            
+            const startStr = tomorrow.toISOString().split('T')[0];
+            const endStr = weekLater.toISOString().split('T')[0];
+            
+            workingData = data.filter(record => {
+                const activityDate = record.EntryDate.split('T')[0];
+                return activityDate >= startStr && activityDate <= endStr;
+            });
+            dateRangeDesc = `${startStr} to ${endStr} (default)`;
+        }
+        
+        // Filter for available rooms only
+        const availableData = workingData.filter(record => record.AvailabilityCount > 0);
+        
+        console.log(`Generating offers from ${availableData.length} available records (${dateRangeDesc})`);
+        
+        if (availableData.length === 0) {
+            console.log('No available rooms found in the selected date range');
+            return [];
+        }
+        
+        // Group available data by villa
         const villaGroups = {};
-        data.forEach(record => {
-            if (record.AvailabilityCount > 0) { // Only available rooms
-                const villa = record.UserRoomDisplayName;
-                if (!villaGroups[villa]) {
-                    villaGroups[villa] = [];
-                }
-                villaGroups[villa].push(record);
+        availableData.forEach(record => {
+            const villa = record.UserRoomDisplayName;
+            if (!villaGroups[villa]) {
+                villaGroups[villa] = [];
             }
+            villaGroups[villa].push(record);
         });
 
         // For each villa, find continuous availability periods and generate offers
