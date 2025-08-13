@@ -39,8 +39,14 @@ class ActivitiesDashboard {
             selectedStartDate: document.getElementById('selectedStartDate'),
             startDayOfWeek: document.getElementById('startDayOfWeek'),
             selectedEndDate: document.getElementById('selectedEndDate'),
-            endDayOfWeek: document.getElementById('endDayOfWeek')
+            endDayOfWeek: document.getElementById('endDayOfWeek'),
+            adultsCount: document.getElementById('adultsCount'),
+            childrenCount: document.getElementById('childrenCount')
         };
+        
+        // Guest count properties
+        this.selectedAdults = 2; // Default to 2 adults
+        this.selectedChildren = 0; // Default to no children
         
         this.initializeEventListeners();
         this.setupDynamicDateFilters();
@@ -64,6 +70,10 @@ class ActivitiesDashboard {
         // Custom date slider listeners
         this.elements.startDateRange.addEventListener('input', () => this.handleDualSliderChange());
         this.elements.endDateRange.addEventListener('input', () => this.handleDualSliderChange());
+        
+        // Guest count listeners
+        this.elements.adultsCount.addEventListener('change', () => this.handleGuestCountChange());
+        this.elements.childrenCount.addEventListener('change', () => this.handleGuestCountChange());
         
         // Auto-refresh every 30 seconds
         setInterval(() => {
@@ -381,6 +391,25 @@ class ActivitiesDashboard {
     }
 
     /**
+     * Handle guest count change
+     */
+    handleGuestCountChange() {
+        this.selectedAdults = parseInt(this.elements.adultsCount.value);
+        this.selectedChildren = parseInt(this.elements.childrenCount.value);
+        
+        console.log(`Guest count changed: ${this.selectedAdults} adults, ${this.selectedChildren} children`);
+        
+        // Re-filter the current data with new guest requirements
+        if (this.currentData) {
+            if (this.filteredData && this.filteredData.length > 0) {
+                this.displayActivities(this.filteredData);
+            } else {
+                this.displayActivities(this.currentData);
+            }
+        }
+    }
+
+    /**
      * Get date string from day offset
      */
     getDateFromOffset(dayOffset) {
@@ -631,12 +660,22 @@ class ActivitiesDashboard {
         }
         
         // Filter for available rooms only
-        const availableData = workingData.filter(record => record.AvailabilityCount > 0);
+        let availableData = workingData.filter(record => record.AvailabilityCount > 0);
         
-        console.log(`Generating offers from ${availableData.length} available records (${dateRangeDesc})`);
+        // Apply guest capacity filtering
+        const totalGuests = this.selectedAdults + this.selectedChildren;
+        availableData = availableData.filter(record => {
+            const maxAdults = record.MaxAdultsPerUnit || 0;
+            const maxGuests = record.MaxGuestsPerUnit || 0;
+            
+            // Check both adult capacity and total guest capacity
+            return this.selectedAdults <= maxAdults && totalGuests <= maxGuests;
+        });
+        
+        console.log(`Generating offers from ${availableData.length} available records (${dateRangeDesc}) for ${this.selectedAdults} adults, ${this.selectedChildren} children`);
         
         if (availableData.length === 0) {
-            console.log('No available rooms found in the selected date range');
+            console.log('No available rooms found matching your guest requirements and date range');
             return [];
         }
         

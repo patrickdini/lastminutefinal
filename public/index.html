@@ -41,8 +41,34 @@
                 </button>
             </div>
 
+            <!-- Guest Selection -->
+            <div class="guest-selection">
+                <div class="filter-label">Who's coming along?</div>
+                <div class="guest-inputs">
+                    <div class="guest-input-group">
+                        <label for="adultsCount">Adults:</label>
+                        <select id="adultsCount" class="guest-select">
+                            <option value="1">1 Adult</option>
+                            <option value="2" selected>2 Adults</option>
+                            <option value="3">3 Adults</option>
+                            <option value="4">4 Adults</option>
+                        </select>
+                    </div>
+                    <div class="guest-input-group">
+                        <label for="childrenCount">Children:</label>
+                        <select id="childrenCount" class="guest-select">
+                            <option value="0" selected>No Children</option>
+                            <option value="1">1 Child</option>
+                            <option value="2">2 Children</option>
+                            <option value="3">3 Children</option>
+                            <option value="4">4 Children</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="filter-controls">
-                <div class="filter-label">Show Available Villas:</div>
+                <div class="filter-label">When do you need to escape?</div>
                 <div class="date-filter-grid">
                     <button id="dateFilter1" class="date-filter-box active" data-filter="">
                         <i class="fas fa-calendar-week"></i>
