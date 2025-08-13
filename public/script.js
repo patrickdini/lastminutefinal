@@ -26,8 +26,7 @@ class ActivitiesDashboard {
             emptyState: document.getElementById('emptyState'),
             offersContainer: document.getElementById('offersContainer'),
             offersCount: document.getElementById('offersCount'),
-            offersTableHeaders: document.getElementById('offersTableHeaders'),
-            offersTableBody: document.getElementById('offersTableBody'),
+            villaCards: document.getElementById('villaCards'),
             dateFilter1: document.getElementById('dateFilter1'),
             dateFilter2: document.getElementById('dateFilter2'),
             dateFilter3: document.getElementById('dateFilter3'),
@@ -763,10 +762,9 @@ class ActivitiesDashboard {
         // Update count
         this.elements.offersCount.textContent = `${offers.length} offers`;
         
-        // Generate table headers and data for offers
+        // Generate villa cards
         if (offers.length > 0) {
-            this.generateOffersTableHeaders();
-            this.populateOffersTableData(offers);
+            this.generateVillaCards(offers);
         }
         
         this.elements.offersContainer.style.display = 'block';
@@ -781,70 +779,153 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Generate offers table headers
+     * Generate villa cards from offers
      */
-    generateOffersTableHeaders() {
-        const headers = [
-            'Villa', 'Check-in', 'Nights', 'Check-out', 'Rate/Night', 
-            'Total Rate', 'Details', 'Class', 'Pool'
-        ];
+    generateVillaCards(offers) {
+        // Group offers by villa, then by check-in date
+        const villaGroups = this.groupOffersByVillaAndDate(offers);
         
-        this.elements.offersTableHeaders.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+        this.elements.villaCards.innerHTML = Object.keys(villaGroups)
+            .map(villaName => {
+                const villaOffers = villaGroups[villaName];
+                const firstOffer = Object.values(villaOffers)[0][0]; // Get first offer for villa details
+                
+                return this.generateVillaCard(villaName, firstOffer, villaOffers);
+            }).join('');
     }
 
     /**
-     * Populate offers table with data
+     * Group offers by villa name and check-in date
      */
-    populateOffersTableData(offers) {
-        const self = this; // Store reference to maintain context
-        this.elements.offersTableBody.innerHTML = offers.map(offer => {
-            const checkInDate = new Date(offer.checkIn);
-            const checkOutDate = new Date(offer.checkOut);
+    groupOffersByVillaAndDate(offers) {
+        const groups = {};
+        
+        offers.forEach(offer => {
+            if (!groups[offer.villa]) {
+                groups[offer.villa] = {};
+            }
             
-            const formattedCheckIn = checkInDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                weekday: 'short'
-            });
-
-            const formattedCheckOut = checkOutDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                weekday: 'short'
-            });
-
-            const nightsText = offer.nights === 1 ? '1 night' : `${offer.nights} nights`;
-
-            const ratePerNight = offer.rate ? 
-                `<span class="rate">${self.formatRate(offer.rate)}</span>` : 
-                '<span class="rate">-</span>';
-
-            const totalRate = offer.totalRate ? 
-                `<span class="rate">${self.formatRate(offer.totalRate)}</span>` : 
-                '<span class="rate">-</span>';
-
-            const details = `${offer.bedrooms || 0} bed • ${offer.maxGuests || 0} guests`;
+            if (!groups[offer.villa][offer.checkinDate]) {
+                groups[offer.villa][offer.checkinDate] = [];
+            }
             
-            const villaClass = offer.villaClass ? 
-                `<span class="villa-class ${offer.villaClass.toLowerCase()}">${offer.villaClass}</span>` : 
-                '<span class="villa-class normal">Normal</span>';
+            groups[offer.villa][offer.checkinDate].push(offer);
+        });
+        
+        // Sort offers within each check-in date by nights ascending
+        Object.keys(groups).forEach(villa => {
+            Object.keys(groups[villa]).forEach(checkinDate => {
+                groups[villa][checkinDate].sort((a, b) => a.nights - b.nights);
+            });
+        });
+        
+        return groups;
+    }
 
-            const pool = self.formatPoolInfo(offer.pool);
+    /**
+     * Generate individual villa card HTML
+     */
+    generateVillaCard(villaName, villaDetails, villaOffers) {
+        const villaClass = villaDetails.class || '';
+        const villaDescription = this.getVillaDescription(villaName);
+        
+        // Generate check-in date groups
+        const checkinGroups = Object.keys(villaOffers)
+            .sort() // Sort dates chronologically
+            .map(checkinDate => {
+                const dateOffers = villaOffers[checkinDate];
+                const checkinDay = this.getDayOfWeek(new Date(checkinDate + 'T00:00:00'));
+                
+                return `
+                    <div class="checkin-group">
+                        <div class="checkin-date-header">
+                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkinDate)}
+                        </div>
+                        <div class="booking-options">
+                            ${dateOffers.map(offer => `
+                                <div class="booking-option">
+                                    <div class="booking-info">
+                                        <div class="booking-duration">
+                                            ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
+                                        </div>
+                                        <div class="booking-dates">
+                                            ${this.formatDateForDisplay(offer.checkinDate)} - ${this.formatDateForDisplay(offer.checkoutDate)}
+                                        </div>
+                                    </div>
+                                    <div class="booking-price">
+                                        <div class="rate">${this.formatRate(offer.rate)}</div>
+                                    </div>
+                                    <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkinDate}', ${offer.nights})">
+                                        Book
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        
+        return `
+            <div class="villa-card">
+                <div class="villa-card-header">
+                    ${villaClass ? `<div class="villa-class-badge">${villaClass}</div>` : ''}
+                    <div class="villa-name">${villaName}</div>
+                    <div class="villa-subtitle">${villaName} - ${villaClass} Retreat</div>
+                    <div class="villa-description">${villaDescription}</div>
+                    <div class="villa-details">
+                        <div class="villa-detail-item">
+                            <i class="fas fa-users"></i>
+                            <span>${villaDetails.maxGuests} Guests</span>
+                        </div>
+                        <div class="villa-detail-item">
+                            <i class="fas fa-bed"></i>
+                            <span>${villaDetails.bedrooms} ${villaDetails.bedrooms === 1 ? 'Bedroom' : 'Bedrooms'}</span>
+                        </div>
+                        <div class="villa-detail-item">
+                            <i class="fas fa-${villaDetails.pool === 'Private' ? 'lock' : 'users'}"></i>
+                            <span>Pool: ${this.formatPoolInfo(villaDetails.pool)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="villa-booking-options">
+                    <div class="booking-section-title">Select Your Stay:</div>
+                    ${checkinGroups}
+                </div>
+            </div>
+        `;
+    }
 
-            return `
-                <tr>
-                    <td><strong>${offer.villa}</strong></td>
-                    <td>${formattedCheckIn}</td>
-                    <td>${nightsText}</td>
-                    <td>${formattedCheckOut}</td>
-                    <td>${ratePerNight}</td>
-                    <td>${totalRate}</td>
-                    <td>${details}</td>
-                    <td>${villaClass}</td>
-                    <td>${pool}</td>
-                </tr>
-            `;
-        }).join('');
+    /**
+     * Get villa description based on name
+     */
+    getVillaDescription(villaName) {
+        const descriptions = {
+            'Shore Villa': 'An exclusive sanctuary for the discerning traveler. Our two-bedroom Shore Villa offers unparalleled privacy and luxury.',
+            'Garden Villa': 'Immerse yourself in tropical tranquility. Our Garden Villa provides an intimate escape surrounded by lush landscapes.',
+            'Pool Villa': 'Experience ultimate luxury with your private pool. Our Pool Villa offers the perfect blend of comfort and exclusivity.',
+            'Ocean Villa': 'Wake up to breathtaking ocean views. Our Ocean Villa delivers an unforgettable beachfront experience.',
+            'Sunset Villa': 'Witness spectacular sunsets from your private terrace. Our Sunset Villa creates magical evening moments.'
+        };
+        
+        return descriptions[villaName] || 'A luxury villa experience crafted for your perfect getaway on Gili Air.';
+    }
+
+    /**
+     * Format date for display (e.g., "Aug 21")
+     */
+    formatDateForDisplay(dateString) {
+        const date = new Date(dateString + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    }
+
+    /**
+     * Get day of week from date
+     */
+    getDayOfWeek(date) {
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
     }
     
     /**
