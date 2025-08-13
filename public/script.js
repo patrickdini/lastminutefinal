@@ -24,10 +24,10 @@ class ActivitiesDashboard {
             errorMessage: document.getElementById('errorMessage'),
             errorText: document.getElementById('errorText'),
             emptyState: document.getElementById('emptyState'),
-            activitiesContainer: document.getElementById('activitiesContainer'),
-            activitiesCount: document.getElementById('activitiesCount'),
-            tableHeaders: document.getElementById('tableHeaders'),
-            activitiesTableBody: document.getElementById('activitiesTableBody'),
+            offersContainer: document.getElementById('offersContainer'),
+            offersCount: document.getElementById('offersCount'),
+            offersTableHeaders: document.getElementById('offersTableHeaders'),
+            offersTableBody: document.getElementById('offersTableBody'),
             dateFilter1: document.getElementById('dateFilter1'),
             dateFilter2: document.getElementById('dateFilter2'),
             dateFilter3: document.getElementById('dateFilter3'),
@@ -522,7 +522,7 @@ class ActivitiesDashboard {
         this.elements.loadingSpinner.style.display = 'none';
         this.elements.errorMessage.style.display = 'none';
         this.elements.emptyState.style.display = 'none';
-        this.elements.activitiesContainer.style.display = 'none';
+        this.elements.offersContainer.style.display = 'none';
     }
     
     /**
@@ -566,7 +566,9 @@ class ActivitiesDashboard {
         try {
             this.showLoading(silent);
             
+            console.log('Fetching from:', `${this.apiBaseUrl}/activities`);
             const response = await fetch(`${this.apiBaseUrl}/activities`);
+            console.log('Response status:', response.status, response.statusText);
             const data = await response.json();
             
             if (!response.ok) {
@@ -579,21 +581,8 @@ class ActivitiesDashboard {
             
             this.currentData = data.data;
             
-            // Apply the default filter (filter1) to the new data
-            if (this.elements.dateFilter1 && this.elements.dateFilter1.dataset.dateRange && this.elements.dateFilter1.dataset.dateRange !== 'custom') {
-                try {
-                    const defaultDateRange = JSON.parse(this.elements.dateFilter1.dataset.dateRange);
-                    this.currentDateRange = defaultDateRange;
-                    this.applyDateFilter(defaultDateRange);
-                } catch (error) {
-                    console.error('Error parsing default date range:', error);
-                    // Fallback: show all data
-                    this.displayActivities(this.currentData);
-                }
-            } else {
-                // Fallback: show all data
-                this.displayActivities(this.currentData);
-            }
+            // Show all data initially - filters will be applied when user clicks them
+            this.displayActivities(this.currentData);
             
         } catch (error) {
             console.error('Error loading activities:', error);
@@ -602,44 +591,178 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Display activities data (new method name)
+     * Generate all possible booking offers from available villa data
+     */
+    generateOffersFromData(data) {
+        const offers = [];
+        
+        // Group data by villa
+        const villaGroups = {};
+        data.forEach(record => {
+            if (record.AvailabilityCount > 0) { // Only available rooms
+                const villa = record.UserRoomDisplayName;
+                if (!villaGroups[villa]) {
+                    villaGroups[villa] = [];
+                }
+                villaGroups[villa].push(record);
+            }
+        });
+
+        // For each villa, find continuous availability periods and generate offers
+        Object.keys(villaGroups).forEach(villaName => {
+            const records = villaGroups[villaName].sort((a, b) => 
+                new Date(a.EntryDate).getTime() - new Date(b.EntryDate).getTime()
+            );
+
+            // Generate offers for each possible check-in date
+            records.forEach((checkInRecord, index) => {
+                const checkInDate = checkInRecord.EntryDate;
+                
+                // Count consecutive available days from this check-in date
+                let consecutiveDays = 1;
+                
+                for (let i = index; i < records.length - 1; i++) {
+                    const currentDate = new Date(records[i].EntryDate);
+                    const nextDate = new Date(records[i + 1].EntryDate);
+                    const diffDays = (nextDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24);
+                    
+                    if (diffDays === 1) {
+                        consecutiveDays++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Create offers for 1 to consecutiveDays nights
+                for (let nights = 1; nights <= consecutiveDays; nights++) {
+                    const checkInDateObj = new Date(checkInDate);
+                    checkInDateObj.setDate(checkInDateObj.getDate() + nights);
+                    const checkOutDateStr = checkInDateObj.toISOString().split('T')[0];
+                    
+                    offers.push({
+                        villa: villaName,
+                        checkIn: checkInDate,
+                        nights: nights,
+                        checkOut: checkOutDateStr,
+                        rate: checkInRecord.LowestRateAmount,
+                        ratePlan: checkInRecord.RatePlanName,
+                        bedrooms: checkInRecord.Bedrooms,
+                        maxGuests: checkInRecord.MaxAdultsPerUnit,
+                        villaClass: checkInRecord.UserDefinedClass,
+                        pool: checkInRecord.Pool,
+                        totalRate: checkInRecord.LowestRateAmount * nights
+                    });
+                }
+            });
+        });
+
+        // Sort offers by check-in date, then by villa name, then by nights
+        return offers.sort((a, b) => {
+            const dateCompare = new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime();
+            if (dateCompare !== 0) return dateCompare;
+            
+            const villaCompare = a.villa.localeCompare(b.villa);
+            if (villaCompare !== 0) return villaCompare;
+            
+            return a.nights - b.nights;
+        });
+    }
+
+    /**
+     * Display offers data
      */
     displayActivities(activities) {
         this.isLoading = false;
         this.hideAllStates();
         
-        // Update count
-        this.elements.activitiesCount.textContent = `${activities.length} villas`;
+        // Generate offers from activities data
+        const offers = this.generateOffersFromData(activities);
         
-        // Generate table headers and data
-        if (activities.length > 0) {
-            this.generateCustomTableHeaders();
-            this.populateCustomTableData(activities);
+        // Update count
+        this.elements.offersCount.textContent = `${offers.length} offers`;
+        
+        // Generate table headers and data for offers
+        if (offers.length > 0) {
+            this.generateOffersTableHeaders();
+            this.populateOffersTableData(offers);
         }
         
-        this.elements.activitiesContainer.style.display = 'block';
+        this.elements.offersContainer.style.display = 'block';
         this.elements.refreshBtn.disabled = false;
         
         // Remove spinning animation
         const refreshIcon = this.elements.refreshBtn.querySelector('i');
         refreshIcon.classList.remove('fa-spin');
         
-        // Create filter description
-        let filterDesc = '';
-        switch (this.currentFilter) {
-            case 'tomorrow':
-                filterDesc = 'tomorrow';
-                break;
-            case '7days':
-                filterDesc = 'next 7 days';
-                break;
-            case '14days':
-                filterDesc = 'next 14 days';
-                break;
-        }
-        
-        this.updateStatus('success', `${activities.length} villas available for ${filterDesc}`);
+        this.updateStatus('success', `${offers.length} offers available`);
         this.updateLastUpdated();
+    }
+
+    /**
+     * Generate offers table headers
+     */
+    generateOffersTableHeaders() {
+        const headers = [
+            'Villa', 'Check-in', 'Nights', 'Check-out', 'Rate/Night', 
+            'Total Rate', 'Details', 'Class', 'Pool'
+        ];
+        
+        this.elements.offersTableHeaders.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+    }
+
+    /**
+     * Populate offers table with data
+     */
+    populateOffersTableData(offers) {
+        const self = this; // Store reference to maintain context
+        this.elements.offersTableBody.innerHTML = offers.map(offer => {
+            const checkInDate = new Date(offer.checkIn);
+            const checkOutDate = new Date(offer.checkOut);
+            
+            const formattedCheckIn = checkInDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                weekday: 'short'
+            });
+
+            const formattedCheckOut = checkOutDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                weekday: 'short'
+            });
+
+            const nightsText = offer.nights === 1 ? '1 night' : `${offer.nights} nights`;
+
+            const ratePerNight = offer.rate ? 
+                `<span class="rate">${self.formatRate(offer.rate)}</span>` : 
+                '<span class="rate">-</span>';
+
+            const totalRate = offer.totalRate ? 
+                `<span class="rate">${self.formatRate(offer.totalRate)}</span>` : 
+                '<span class="rate">-</span>';
+
+            const details = `${offer.bedrooms || 0} bed • ${offer.maxGuests || 0} guests`;
+            
+            const villaClass = offer.villaClass ? 
+                `<span class="villa-class ${offer.villaClass.toLowerCase()}">${offer.villaClass}</span>` : 
+                '<span class="villa-class normal">Normal</span>';
+
+            const pool = self.formatPoolInfo(offer.pool);
+
+            return `
+                <tr>
+                    <td><strong>${offer.villa}</strong></td>
+                    <td>${formattedCheckIn}</td>
+                    <td>${nightsText}</td>
+                    <td>${formattedCheckOut}</td>
+                    <td>${ratePerNight}</td>
+                    <td>${totalRate}</td>
+                    <td>${details}</td>
+                    <td>${villaClass}</td>
+                    <td>${pool}</td>
+                </tr>
+            `;
+        }).join('');
     }
     
     /**
@@ -745,6 +868,31 @@ class ActivitiesDashboard {
     
 
     
+    /**
+     * Format rate from amount to millions with 1 decimal place
+     */
+    formatRate(amount) {
+        if (!amount) return '-';
+        const rate = parseFloat(amount) || 0;
+        const rateInMillions = rate / 1000000;
+        return `${rateInMillions.toFixed(1)}M`;
+    }
+
+    /**
+     * Format pool information with icons
+     */
+    formatPoolInfo(poolValue) {
+        if (!poolValue) return '';
+        const poolStr = poolValue.toString().toLowerCase();
+        if (poolStr.includes('private')) {
+            return '<i class="fas fa-lock" style="color: #AA7831; margin-right: 5px;"></i>Private';
+        } else if (poolStr.includes('shared')) {
+            return '<i class="fas fa-users" style="color: #4CAF50; margin-right: 5px;"></i>Shared';
+        } else {
+            return poolValue;
+        }
+    }
+
     /**
      * Escape HTML to prevent XSS
      */

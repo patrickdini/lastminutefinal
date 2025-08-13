@@ -2,7 +2,9 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const fs = require("fs");
+console.log("Loading activities routes...");
 const activitiesRoutes = require("./routes/activities");
+console.log("Activities routes loaded:", typeof activitiesRoutes);
 const pkg = require("./package.json");
 
 const app = express();
@@ -51,7 +53,9 @@ try {
 }
 
 // --- Routes ---
+console.log("Registering API routes...");
 app.use("/api", activitiesRoutes);
+console.log("API routes registered");
 
 // Root
 app.get("/", (req, res) => {
@@ -79,6 +83,16 @@ function logRoutes() {
                 .map((m) => m.toUpperCase())
                 .join(",");
             routes.push(`${methods} ${layer.route.path}`);
+        } else if (layer.name === 'router') {
+            // Check nested router routes
+            (layer.handle?.stack || []).forEach((subLayer) => {
+                if (subLayer.route) {
+                    const methods = Object.keys(subLayer.route.methods)
+                        .map((m) => m.toUpperCase())
+                        .join(",");
+                    routes.push(`${methods} /api${subLayer.route.path}`);
+                }
+            });
         }
     });
     console.log("Registered routes:", routes);
