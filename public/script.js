@@ -675,8 +675,9 @@ class ActivitiesDashboard {
                     }
                 }
                 
-                // Create offers for 1 to consecutiveDays nights
-                for (let nights = 1; nights <= consecutiveDays; nights++) {
+                // Create offers for 1 to 4 nights (capped at 4 nights maximum)
+                const maxNights = Math.min(consecutiveDays, 4);
+                for (let nights = 1; nights <= maxNights; nights++) {
                     const checkInDateObj = new Date(checkInDate);
                     checkInDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkInDateObj.toISOString().split('T')[0];
