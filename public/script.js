@@ -14,8 +14,6 @@ class ActivitiesDashboard {
         
         // DOM elements
         this.elements = {
-            refreshBtn: document.getElementById('refreshBtn'),
-            healthBtn: document.getElementById('healthBtn'),
             retryBtn: document.getElementById('retryBtn'),
 
             loadingSpinner: document.getElementById('loadingSpinner'),
@@ -54,8 +52,6 @@ class ActivitiesDashboard {
      * Initialize event listeners
      */
     initializeEventListeners() {
-        this.elements.refreshBtn.addEventListener('click', () => this.loadActivities());
-        this.elements.healthBtn.addEventListener('click', () => this.checkHealth());
         this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
         
         // Date filter listeners
@@ -518,11 +514,9 @@ class ActivitiesDashboard {
             this.elements.loadingSpinner.style.display = 'block';
         }
         
-        this.elements.refreshBtn.disabled = true;
+
         
-        // Add spinning animation to refresh button
-        const refreshIcon = this.elements.refreshBtn.querySelector('i');
-        refreshIcon.classList.add('fa-spin');
+
     }
     
     /**
@@ -543,11 +537,6 @@ class ActivitiesDashboard {
         this.hideAllStates();
         this.elements.errorMessage.style.display = 'block';
         this.elements.errorText.textContent = message;
-        this.elements.refreshBtn.disabled = false;
-        
-        // Remove spinning animation
-        const refreshIcon = this.elements.refreshBtn.querySelector('i');
-        refreshIcon.classList.remove('fa-spin');
         
 
     }
@@ -559,11 +548,6 @@ class ActivitiesDashboard {
         this.isLoading = false;
         this.hideAllStates();
         this.elements.emptyState.style.display = 'block';
-        this.elements.refreshBtn.disabled = false;
-        
-        // Remove spinning animation
-        const refreshIcon = this.elements.refreshBtn.querySelector('i');
-        refreshIcon.classList.remove('fa-spin');
         
 
     }
@@ -749,11 +733,6 @@ class ActivitiesDashboard {
         }
         
         this.elements.offersContainer.style.display = 'block';
-        this.elements.refreshBtn.disabled = false;
-        
-        // Remove spinning animation
-        const refreshIcon = this.elements.refreshBtn.querySelector('i');
-        refreshIcon.classList.remove('fa-spin');
         
 
     }
@@ -1094,36 +1073,7 @@ class ActivitiesDashboard {
         return div.innerHTML;
     }
     
-    /**
-     * Check database health
-     */
-    async checkHealth() {
-        try {
-            this.elements.healthBtn.disabled = true;
-            const healthIcon = this.elements.healthBtn.querySelector('i');
-            healthIcon.classList.add('fa-spin');
-            
-            const response = await fetch(`${this.apiBaseUrl}/health`);
-            const data = await response.json();
-            
-            if (data.success) {
-                this.updateStatus('success', 'Connection excellent');
-                this.showNotification('Live connection to villa data confirmed', 'success');
-            } else {
-                this.updateStatus('error', 'Connection issue');
-                this.showNotification(`Connection check failed: ${data.message}`, 'error');
-            }
-            
-        } catch (error) {
-            console.error('Health check error:', error);
-            this.updateStatus('error', 'Health check failed');
-            this.showNotification('Failed to check database health', 'error');
-        } finally {
-            this.elements.healthBtn.disabled = false;
-            const healthIcon = this.elements.healthBtn.querySelector('i');
-            healthIcon.classList.remove('fa-spin');
-        }
-    }
+
     
     /**
      * Show notification (simple alert for now, can be enhanced)
