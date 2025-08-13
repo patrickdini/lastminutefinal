@@ -706,7 +706,8 @@ class ActivitiesDashboard {
                         view_type: checkInRecord.view_type,
                         pool_type: checkInRecord.pool_type,
                         image_urls: checkInRecord.image_urls,
-                        key_amenities: checkInRecord.key_amenities
+                        key_amenities: checkInRecord.key_amenities,
+                        villa_display_name: checkInRecord.villa_display_name
                     });
                 }
             });
@@ -845,7 +846,7 @@ class ActivitiesDashboard {
                     <div class="villa-image-gallery">
                         <div class="villa-image-container">
                             <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
-                            ${imageUrls.length > 1 ? `<div class="image-count">+${imageUrls.length - 1}</div>` : ''}
+
                             ${villaDetails.class ? `<div class="villa-class-badge">${villaDetails.class}</div>` : ''}
                         </div>
                     </div>
@@ -853,7 +854,7 @@ class ActivitiesDashboard {
                 
                 <div class="villa-card-header">
                     <div class="villa-tagline">${tagline}</div>
-                    <div class="villa-name-subtitle">${villaName}</div>
+                    <div class="villa-name-subtitle">${villaDetails.villa_display_name || villaName}</div>
                     
                     ${specifications ? `
                         <div class="villa-specifications">
@@ -864,11 +865,11 @@ class ActivitiesDashboard {
                     <div class="villa-description" data-expanded="false">
                         <div class="description-preview">
                             <p>${this.truncateText(description, 100)}</p>
-                            ${description.length > 100 ? `<button class="expand-btn" onclick="app.toggleDescription(this)">Show more</button>` : ''}
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="toggleDescription(this)">Show more</button>` : ''}
                         </div>
                         <div class="description-full">
                             <p>${description}</p>
-                            ${description.length > 100 ? `<button class="expand-btn" onclick="app.toggleDescription(this)">Show less</button>` : ''}
+                            ${description.length > 100 ? `<button class="expand-btn" onclick="toggleDescription(this)">Show less</button>` : ''}
                         </div>
                     </div>
                     
@@ -1253,10 +1254,21 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Global variable for the app instance
+let app;
+
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new ActivitiesDashboard();
+    app = new ActivitiesDashboard();
 });
+
+// Global function for description toggle
+function toggleDescription(button) {
+    const descriptionContainer = button.closest('.villa-description');
+    const isExpanded = descriptionContainer.getAttribute('data-expanded') === 'true';
+    descriptionContainer.setAttribute('data-expanded', !isExpanded);
+    button.textContent = isExpanded ? 'Show more' : 'Show less';
+}
 
 // Handle window errors
 window.addEventListener('error', (event) => {
