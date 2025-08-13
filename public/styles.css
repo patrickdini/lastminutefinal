@@ -114,10 +114,89 @@ body {
     box-shadow: 0 0 0 3px rgba(170, 120, 49, 0.2);
 }
 
+/* Mobile-first guest selection optimizations */
 @media (max-width: 768px) {
+    .guest-selection {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
     .guest-inputs {
         grid-template-columns: 1fr;
         gap: 15px;
+    }
+    
+    .guest-input-group {
+        position: relative;
+    }
+    
+    .guest-input-group label {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+    
+    .guest-select {
+        padding: 14px 16px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        background-position: right 14px center;
+        padding-right: 50px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Arrow instruction for mobile */
+    .guest-input-group::after {
+        content: '↑';
+        position: absolute;
+        right: 55px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #AA7831;
+        font-size: 1.2rem;
+        font-weight: bold;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    /* Date filter grid - 2x2 matrix for mobile */
+    .date-filter-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .date-filter-box {
+        padding: 16px 12px;
+        min-height: 85px;
+        border-radius: 10px;
+    }
+    
+    .date-filter-box i {
+        font-size: 1.4rem;
+        margin-bottom: 4px;
+    }
+    
+    .filter-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .filter-subtitle {
+        font-size: 0.75rem;
+        opacity: 0.85;
+    }
+    
+    .filter-controls {
+        padding: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .filter-label {
+        font-size: 1rem;
+        margin-bottom: 12px;
     }
 }
 
@@ -1067,5 +1146,43 @@ body {
     
     .villa-card-header {
         padding: 15px;
+    }
+    
+    /* Even more compact for smaller screens */
+    .guest-selection {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .date-filter-box {
+        padding: 12px 8px;
+        min-height: 75px;
+    }
+    
+    .date-filter-box i {
+        font-size: 1.2rem;
+    }
+    
+    .filter-title {
+        font-size: 0.85rem;
+    }
+    
+    .filter-subtitle {
+        font-size: 0.7rem;
+    }
+    
+    .filter-controls {
+        padding: 15px;
+    }
+    
+    .guest-select {
+        font-size: 1rem;
+        min-height: 44px;
+        padding: 12px 14px;
+    }
+    
+    .guest-input-group::after {
+        right: 50px;
+        font-size: 1.1rem;
     }
 }
