@@ -45,6 +45,7 @@ class ActivitiesDashboard {
         
         this.initializeEventListeners();
         this.setupDynamicDateFilters();
+        this.setupMobileGuestSelectors();
         this.loadActivities();
     }
     
@@ -1237,6 +1238,47 @@ class ActivitiesDashboard {
         const isExpanded = descriptionContainer.getAttribute('data-expanded') === 'true';
         descriptionContainer.setAttribute('data-expanded', !isExpanded);
         button.textContent = isExpanded ? 'Show more' : 'Show less';
+    }
+
+    /**
+     * Setup mobile-specific guest selector labels
+     */
+    setupMobileGuestSelectors() {
+        const updateGuestSelectLabels = () => {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Update adults selector
+            const adultsSelect = this.elements.adultsCount;
+            if (adultsSelect) {
+                const adultsOptions = adultsSelect.querySelectorAll('option');
+                adultsOptions.forEach(option => {
+                    if (isMobile) {
+                        option.textContent = option.getAttribute('data-mobile');
+                    } else {
+                        option.textContent = option.getAttribute('data-desktop');
+                    }
+                });
+            }
+            
+            // Update children selector
+            const childrenSelect = this.elements.childrenCount;
+            if (childrenSelect) {
+                const childrenOptions = childrenSelect.querySelectorAll('option');
+                childrenOptions.forEach(option => {
+                    if (isMobile) {
+                        option.textContent = option.getAttribute('data-mobile');
+                    } else {
+                        option.textContent = option.getAttribute('data-desktop');
+                    }
+                });
+            }
+        };
+        
+        // Update on page load
+        updateGuestSelectLabels();
+        
+        // Update on window resize
+        window.addEventListener('resize', updateGuestSelectLabels);
     }
 
     /**
