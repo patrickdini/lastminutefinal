@@ -11,8 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/memoizee": "^0.4.12",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "mysql2": "^3.14.3"
+    "memoizee": "^0.4.17",
+    "mysql2": "^3.14.3",
+    "openid-client": "^6.6.4"
   }
 }
