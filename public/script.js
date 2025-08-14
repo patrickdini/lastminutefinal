@@ -234,27 +234,34 @@ class ActivitiesDashboard {
      * Get weekend date range starting from tomorrow onwards
      */
     getWeekendRange(currentDate) {
-        // Start from tomorrow
-        const tomorrow = new Date(currentDate);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const today = new Date(currentDate);
+        const currentDay = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
         
-        const saturday = new Date(tomorrow);
-        const sunday = new Date(tomorrow);
+        let saturday, sunday;
         
-        const tomorrowDay = tomorrow.getDay();
-        const daysUntilSaturday = (6 - tomorrowDay + 7) % 7;
-        
-        if (daysUntilSaturday === 0) { // Tomorrow is Saturday
-            sunday.setDate(tomorrow.getDate() + 1);
-            return [tomorrow, sunday];
-        } else if (tomorrowDay === 0) { // Tomorrow is Sunday
-            saturday.setDate(tomorrow.getDate() - 1);
-            return [saturday, tomorrow];
-        } else { // Weekday - get upcoming weekend
-            saturday.setDate(tomorrow.getDate() + daysUntilSaturday);
+        if (currentDay === 5) { // Today is Friday - this weekend is tomorrow and day after
+            saturday = new Date(today);
+            saturday.setDate(today.getDate() + 1); // Tomorrow (Saturday)
+            sunday = new Date(today);
+            sunday.setDate(today.getDate() + 2); // Day after tomorrow (Sunday)
+        } else if (currentDay === 6) { // Today is Saturday - this weekend is today and tomorrow
+            saturday = new Date(today); // Today (Saturday)
+            sunday = new Date(today);
+            sunday.setDate(today.getDate() + 1); // Tomorrow (Sunday)
+        } else if (currentDay === 0) { // Today is Sunday - this weekend is today only, next weekend starts in 6 days
+            saturday = new Date(today);
+            saturday.setDate(today.getDate() + 6); // Next Saturday
+            sunday = new Date(today);
+            sunday.setDate(today.getDate() + 7); // Next Sunday
+        } else { // Monday-Thursday - get upcoming weekend
+            const daysUntilSaturday = 6 - currentDay; // Days from today to Saturday
+            saturday = new Date(today);
+            saturday.setDate(today.getDate() + daysUntilSaturday);
+            sunday = new Date(saturday);
             sunday.setDate(saturday.getDate() + 1);
-            return [saturday, sunday];
         }
+        
+        return [saturday, sunday];
     }
 
     /**
