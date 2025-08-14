@@ -187,11 +187,12 @@ class ActivitiesDashboard {
         const nextWeekEnd = new Date(nextWeekStart);
         nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
         
-        const nextWeekendSaturday = new Date(nextWeekEnd);
-        nextWeekendSaturday.setDate(nextWeekEnd.getDate() + 1);
+        // Calculate next weekend (Friday-Sunday after next week)
+        const nextWeekendFriday = new Date(nextWeekEnd);
+        nextWeekendFriday.setDate(nextWeekEnd.getDate() + 1); // Friday after next week
         
-        const nextWeekendSunday = new Date(nextWeekendSaturday);
-        nextWeekendSunday.setDate(nextWeekendSaturday.getDate() + 1);
+        const nextWeekendSunday = new Date(nextWeekendFriday);
+        nextWeekendSunday.setDate(nextWeekendFriday.getDate() + 2); // Sunday after next week
         
         return {
             filter1: {
@@ -208,9 +209,9 @@ class ActivitiesDashboard {
             },
             filter3: {
                 title: 'Next Weekend',
-                subtitle: this.formatDateRange(nextWeekendSaturday, nextWeekendSunday),
+                subtitle: this.formatDateRange(nextWeekendFriday, nextWeekendSunday),
                 icon: 'fas fa-calendar-week',
-                dateRange: [nextWeekendSaturday, nextWeekendSunday]
+                dateRange: [nextWeekendFriday, nextWeekendSunday]
             },
             filter4: {
                 title: 'Pick Your Date',
