@@ -828,8 +828,8 @@ class ActivitiesDashboard {
                                 <div class="booking-info">
                                     <div class="booking-duration">
                                         ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
-                                        ${perksDisplay}
                                     </div>
+                                    ${perksDisplay}
                                     <div class="booking-dates">
                                         ${this.formatDateForDisplay(offer.checkIn)} - ${this.formatDateForDisplay(offer.checkOut)}
                                     </div>
