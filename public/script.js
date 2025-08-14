@@ -690,8 +690,20 @@ class ActivitiesDashboard {
                 const maxNights = Math.min(consecutiveDays, 4);
                 for (let nights = 1; nights <= maxNights; nights++) {
                     const checkInDateObj = new Date(checkInDate);
-                    checkInDateObj.setDate(checkInDateObj.getDate() + nights);
-                    const checkOutDateStr = checkInDateObj.toISOString().split('T')[0];
+                    const checkOutDateObj = new Date(checkInDateObj);
+                    checkOutDateObj.setDate(checkInDateObj.getDate() + nights);
+                    const checkOutDateStr = checkOutDateObj.toISOString().split('T')[0];
+                    
+                    // If we have a date filter applied, ensure checkout date is within the range
+                    if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
+                        const [startDate, endDate] = this.currentDateRange;
+                        const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
+                        
+                        // Skip this offer if checkout extends beyond the filtered date range
+                        if (checkOutDateStr > endStr) {
+                            continue;
+                        }
+                    }
                     
                     offers.push({
                         villa: villaName,
