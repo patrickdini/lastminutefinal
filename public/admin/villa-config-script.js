@@ -76,8 +76,10 @@ async function loadVillaConfigurations() {
             
             // Log first villa to see all available fields
             if (data.villas && data.villas.length > 0) {
-                console.log('Sample villa data:', data.villas[0]);
-                console.log('All villa fields:', Object.keys(data.villas[0]));
+                console.log('Frontend - Sample villa data:', data.villas[0]);
+                console.log('Frontend - All villa fields:', Object.keys(data.villas[0]));
+                console.log('Frontend - Villa name from API:', data.villas[0].name);
+                console.log('Frontend - Villa description from API:', data.villas[0].description);
             }
             
             renderVillaCards();

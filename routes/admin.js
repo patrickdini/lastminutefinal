@@ -271,13 +271,14 @@ router.post('/api/create-initial-admin', async (req, res) => {
 // Villa Configuration Management Endpoints
 router.get('/api/villa-config', isAuthenticated, async (req, res) => {
     try {
-        // Check if migration has been completed by testing for new columns
+        // Check if migration has been completed by testing for LMRoomDescription structure
         let migrationCompleted = false;
         try {
-            await pool.query('SELECT max_adults_per_unit FROM LMRoomDescription LIMIT 1');
+            // Check if this is the consolidated table structure by looking for expected fields
+            const [testResult] = await pool.query('SELECT villa_id, name FROM LMRoomDescription LIMIT 1');
             migrationCompleted = true;
         } catch (columnError) {
-            // Column doesn't exist, migration not completed yet
+            // Table doesn't exist or has wrong structure
             migrationCompleted = false;
         }
 
@@ -287,11 +288,34 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
         if (migrationCompleted) {
             // Use consolidated table structure - Get ALL villa fields from LMRoomDescription
             const villaQuery = `
-                SELECT *
+                SELECT 
+                    villa_id,
+                    name,
+                    class,
+                    villa_type,
+                    square_meters,
+                    webpage_url,
+                    bedrooms,
+                    bathrooms,
+                    max_guests,
+                    max_adults,
+                    tagline,
+                    description,
+                    image_urls,
+                    video_tour_url,
+                    ideal_for,
+                    is_featured,
+                    view_type,
+                    pool_type,
+                    key_amenities,
+                    active_status,
+                    created_at,
+                    updated_at
                 FROM LMRoomDescription 
                 ORDER BY name
             `;
             [villas] = await pool.query(villaQuery);
+            console.log('API - Full villa data retrieved:', villas[0] ? Object.keys(villas[0]) : 'No villas');
 
             // Get global configuration from LMGeneralConfig
             try {
@@ -343,6 +367,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
                 tableStructure = columns;
                 console.log('Villa config API - LMRoomDescription columns:', columns.map(c => c.Field));
                 console.log('Villa config API - Sample villa keys:', villas[0] ? Object.keys(villas[0]) : 'No villas');
+                console.log('Villa config API - Sample villa data:', villas[0]);
             } catch (err) {
                 console.log('Could not get table structure:', err.message);
             }
