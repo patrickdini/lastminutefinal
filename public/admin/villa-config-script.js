@@ -67,10 +67,21 @@ async function loadVillaConfigurations() {
         if (data.success) {
             villaConfigurations = data.villas;
             globalConfiguration = data.globalConfig || {};
+            
+            // Log table structure for debugging
+            if (data.tableStructure) {
+                console.log('LMRoomDescription table structure:', data.tableStructure);
+                console.log('Available fields:', data.tableStructure.map(col => col.Field));
+            }
+            
+            // Log first villa to see all available fields
+            if (data.villas && data.villas.length > 0) {
+                console.log('Sample villa data:', data.villas[0]);
+                console.log('All villa fields:', Object.keys(data.villas[0]));
+            }
+            
             renderVillaCards();
             updateGlobalSettings();
-            
-
         } else {
             throw new Error(data.message || 'Failed to load villa configurations');
         }

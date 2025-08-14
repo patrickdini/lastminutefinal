@@ -285,21 +285,9 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
         let globalConfig = [];
 
         if (migrationCompleted) {
-            // Use consolidated table structure - Get all villa fields from LMRoomDescription
+            // Use consolidated table structure - Get ALL villa fields from LMRoomDescription
             const villaQuery = `
-                SELECT 
-                    villa_id,
-                    name as villa_name,
-                    bedrooms,
-                    max_adults_per_unit,
-                    max_guests_per_unit,
-                    max_children_per_unit,
-                    privacy_level,
-                    pool_type,
-                    class as villa_class,
-                    active_status,
-                    created_at,
-                    updated_at
+                SELECT *
                 FROM LMRoomDescription 
                 ORDER BY name
             `;
@@ -347,11 +335,23 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
             };
         });
         
+        // Get table structure for debugging
+        let tableStructure = null;
+        if (migrationCompleted) {
+            try {
+                const [columns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
+                tableStructure = columns;
+            } catch (err) {
+                console.log('Could not get table structure:', err.message);
+            }
+        }
+
         res.json({
             success: true,
             villas: villas,
             globalConfig: config,
-            migrationCompleted: migrationCompleted
+            migrationCompleted: migrationCompleted,
+            tableStructure: tableStructure
         });
     } catch (error) {
         console.error('Error fetching villa configurations:', error);
@@ -429,6 +429,25 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
     }
 });
 
-
+// Debug endpoint to check table structure
+router.get('/api/debug/table-structure', isAuthenticated, async (req, res) => {
+    try {
+        const [columns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
+        const [sampleData] = await pool.query('SELECT * FROM LMRoomDescription LIMIT 1');
+        
+        res.json({
+            success: true,
+            columns: columns,
+            sampleData: sampleData[0] || null
+        });
+    } catch (error) {
+        console.error('Error checking table structure:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to check table structure',
+            error: error.message
+        });
+    }
+});
 
 module.exports = router;
