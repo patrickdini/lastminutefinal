@@ -73,3 +73,4 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 - **Performance Optimization**: Reduced auto-refresh from 30 seconds to 5 minutes to improve user experience and reduce server load
 - **Per-Person Activity Logic**: Smart detection of per-person vs fixed-price activities based on LMActivities comments field parsing
 - **Database Integration**: Rule-based perks attribution using villa_id, nights, adults, children parameters for personalized perk offerings
+- **Date Filtering Fix (Aug 14, 2025)**: Resolved critical date filtering reliability issues by eliminating double filtering logic, implementing single-point filtering in generateOffersFromData(), and correctly defining weekend as Friday-Sunday (Fri-Sun) rather than Saturday-Sunday for proper "This Weekend" filter behavior
