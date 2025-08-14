@@ -70,13 +70,7 @@ async function loadVillaConfigurations() {
             renderVillaCards();
             updateGlobalSettings();
             
-            // Hide migration button if migration is already completed
-            if (data.migrationCompleted) {
-                const migrationBtn = document.getElementById('migration-btn');
-                if (migrationBtn) {
-                    migrationBtn.style.display = 'none';
-                }
-            }
+
         } else {
             throw new Error(data.message || 'Failed to load villa configurations');
         }
@@ -172,58 +166,7 @@ function updateGlobalSettings() {
     }
 }
 
-// Database Migration Function
-async function runDatabaseMigration() {
-    const migrationBtn = document.getElementById('migration-btn');
-    const migrationStatus = document.getElementById('migration-status');
-    
-    if (!migrationBtn || !migrationStatus) return;
-    
-    try {
-        migrationBtn.disabled = true;
-        migrationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running Migration...';
-        migrationStatus.style.display = 'block';
-        migrationStatus.textContent = 'Consolidating villa tables...';
-        migrationStatus.className = 'status-message';
-        
-        const response = await fetch('/admin/api/migrate-villa-tables', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            migrationStatus.textContent = 'Migration completed successfully! Villa tables consolidated.';
-            migrationStatus.className = 'status-message success';
-            
-            // Hide migration button after successful migration
-            migrationBtn.style.display = 'none';
-            
-            // Reload villa configurations with new structure
-            setTimeout(() => {
-                loadVillaConfigurations();
-                migrationStatus.style.display = 'none';
-            }, 3000);
-            
-        } else {
-            throw new Error(data.message || 'Migration failed');
-        }
-        
-    } catch (error) {
-        console.error('Migration error:', error);
-        migrationStatus.textContent = `Migration failed: ${error.message}`;
-        migrationStatus.className = 'status-message error';
-        migrationBtn.disabled = false;
-        migrationBtn.innerHTML = '<i class="fas fa-database"></i> Run Database Migration';
-        
-        setTimeout(() => {
-            migrationStatus.style.display = 'none';
-        }, 5000);
-    }
-}
+
 
 // Save Villa Configurations
 async function saveVillaConfigurations() {
