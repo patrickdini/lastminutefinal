@@ -140,6 +140,91 @@ router.post('/api/logout', (req, res) => {
     });
 });
 
+// Villa Configuration API endpoints
+router.get('/api/villas', isAuthenticated, async (req, res) => {
+    try {
+        const [villas] = await pool.query(`
+            SELECT villa_id, villa_name, bedrooms, max_adults_per_unit, max_guests_per_unit,
+                   privacy_level, pool_type, villa_class, child_age_limit, description, active_status
+            FROM LMvilla_config 
+            ORDER BY villa_name
+        `);
+        
+        res.json({ success: true, villas });
+    } catch (error) {
+        console.error('Error fetching villas:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch villa configurations' 
+        });
+    }
+});
+
+router.put('/api/villas/:id', isAuthenticated, async (req, res) => {
+    try {
+        const villaId = req.params.id;
+        const {
+            villa_name,
+            bedrooms,
+            max_adults_per_unit,
+            max_guests_per_unit,
+            privacy_level,
+            pool_type,
+            villa_class,
+            child_age_limit,
+            description,
+            active_status
+        } = req.body;
+
+        // Validate required fields
+        if (!villa_name || !bedrooms || !max_adults_per_unit || !max_guests_per_unit) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields: villa_name, bedrooms, max_adults_per_unit, max_guests_per_unit'
+            });
+        }
+
+        // Validate numeric values
+        if (bedrooms < 1 || max_adults_per_unit < 1 || max_guests_per_unit < 1 || child_age_limit < 1) {
+            return res.status(400).json({
+                success: false,
+                message: 'Numeric values must be greater than 0'
+            });
+        }
+
+        // Validate that max_guests >= max_adults (guests include adults)
+        if (max_guests_per_unit < max_adults_per_unit) {
+            return res.status(400).json({
+                success: false,
+                message: 'Maximum guests cannot be less than maximum adults'
+            });
+        }
+
+        await pool.query(`
+            UPDATE LMvilla_config 
+            SET villa_name = ?, bedrooms = ?, max_adults_per_unit = ?, max_guests_per_unit = ?,
+                privacy_level = ?, pool_type = ?, villa_class = ?, child_age_limit = ?,
+                description = ?, active_status = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE villa_id = ?
+        `, [
+            villa_name, bedrooms, max_adults_per_unit, max_guests_per_unit,
+            privacy_level, pool_type, villa_class, child_age_limit,
+            description, active_status, villaId
+        ]);
+
+        res.json({ 
+            success: true, 
+            message: 'Villa configuration updated successfully' 
+        });
+    } catch (error) {
+        console.error('Error updating villa:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to update villa configuration' 
+        });
+    }
+});
+
 // Temporary route to create initial admin user (remove in production)
 router.post('/api/create-initial-admin', async (req, res) => {
     try {
@@ -174,6 +259,96 @@ router.post('/api/create-initial-admin', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Error creating initial admin user' 
+        });
+    }
+});
+
+// Villa Configuration Management Endpoints
+router.get('/api/villa-config', isAuthenticated, async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                id,
+                villa_name,
+                bedrooms,
+                max_adults_per_unit,
+                max_guests_per_unit,
+                privacy_level,
+                pool_type,
+                villa_class,
+                child_age_limit,
+                active_status
+            FROM LMvilla_config 
+            ORDER BY villa_name
+        `;
+
+        const [results] = await pool.promise().execute(query);
+        
+        res.json({
+            success: true,
+            villas: results
+        });
+    } catch (error) {
+        console.error('Error fetching villa configurations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch villa configurations'
+        });
+    }
+});
+
+router.post('/api/villa-config', isAuthenticated, async (req, res) => {
+    try {
+        const { villas, globalChildAge } = req.body;
+
+        if (!villas || !Array.isArray(villas)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid villa configuration data'
+            });
+        }
+
+        // Update each villa configuration
+        for (const villa of villas) {
+            const updateQuery = `
+                UPDATE LMvilla_config 
+                SET 
+                    bedrooms = ?,
+                    max_adults_per_unit = ?,
+                    max_guests_per_unit = ?,
+                    privacy_level = ?,
+                    pool_type = ?,
+                    villa_class = ?,
+                    child_age_limit = ?,
+                    active_status = ?,
+                    updated_at = NOW()
+                WHERE id = ?
+            `;
+
+            const updateValues = [
+                villa.bedrooms,
+                villa.max_adults_per_unit,
+                villa.max_guests_per_unit,
+                villa.privacy_level,
+                villa.pool_type,
+                villa.villa_class,
+                villa.child_age_limit,
+                villa.active_status ? 1 : 0,
+                villa.id
+            ];
+
+            await pool.promise().execute(updateQuery, updateValues);
+        }
+
+        res.json({
+            success: true,
+            message: 'Villa configurations updated successfully'
+        });
+    } catch (error) {
+        console.error('Error updating villa configurations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update villa configurations'
         });
     }
 });

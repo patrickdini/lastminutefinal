@@ -335,6 +335,18 @@ body {
     letter-spacing: 0.5px;
 }
 
+.card-action {
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(15, 49, 40, 0.9);
+    color: #E0E0E0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .info-section {
     margin-top: 40px;
 }
@@ -380,6 +392,294 @@ body {
 
 .status-value.success i {
     margin-right: 5px;
+}
+
+/* Villa Configuration Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    background: #0F3128;
+    border-radius: 12px;
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4A4A47;
+}
+
+.villa-config-modal {
+    width: 1200px;
+    max-width: 95vw;
+}
+
+.modal-header {
+    background: #262626;
+    color: #E0E0E0;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #4A4A47;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.8rem;
+    color: #AA7831;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #E0E0E0;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(170, 120, 49, 0.2);
+    color: #AA7831;
+}
+
+.modal-body {
+    padding: 30px;
+    max-height: calc(95vh - 100px);
+    overflow-y: auto;
+    background: #0F3128;
+    color: #E0E0E0;
+}
+
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #4A4A47;
+}
+
+.global-settings h4 {
+    color: #AA7831;
+    margin: 0 0 15px 0;
+    font-family: 'Crimson Text', serif;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.form-row label {
+    font-weight: 600;
+    color: #E0E0E0;
+    min-width: 120px;
+}
+
+.form-row input[type="number"],
+.form-row input[type="text"],
+.form-row select {
+    padding: 8px 12px;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100px;
+    background: #262626;
+    color: #E0E0E0;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: #AA7831;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: #AA7831;
+    color: #0F3128;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #c08c3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.4);
+}
+
+.btn-primary:disabled {
+    background: #4A4A47;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.status-message {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-message.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-message.error {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.villas-section h4 {
+    color: #AA7831;
+    margin: 0 0 20px 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.4rem;
+}
+
+.villas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.villa-card {
+    background: #262626;
+    border: 2px solid #4A4A47;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.villa-card:hover {
+    border-color: #AA7831;
+    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.2);
+}
+
+.villa-card h5 {
+    color: #AA7831;
+    margin: 0 0 15px 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.villa-status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.villa-status.active {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.villa-status.inactive {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.villa-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.villa-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.villa-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.villa-form label {
+    font-weight: 600;
+    color: #E0E0E0;
+    font-size: 14px;
+}
+
+.villa-form input,
+.villa-form select,
+.villa-form textarea {
+    padding: 8px 12px;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #0F3128;
+    color: #E0E0E0;
+}
+
+.villa-form textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.villa-form input:focus,
+.villa-form select:focus,
+.villa-form textarea:focus {
+    outline: none;
+    border-color: #AA7831;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 16px;
 }
 
 /* Responsive Design */
