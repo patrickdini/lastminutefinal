@@ -153,6 +153,8 @@
     border-radius: 12px;
     padding: 25px;
     transition: all 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .villa-card:hover {
@@ -201,6 +203,39 @@
 
 .villa-form .form-group.full-width {
     grid-column: 1 / -1;
+}
+
+.villa-form textarea {
+    background: #262626;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    padding: 10px;
+    color: #E0E0E0;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.villa-form textarea:focus {
+    outline: none;
+    border-color: #AA7831;
+}
+
+.villa-form input[type="url"],
+.villa-form input[type="text"] {
+    background: #262626;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    padding: 10px;
+    color: #E0E0E0;
+    font-size: 14px;
+}
+
+.villa-form input[type="url"]:focus,
+.villa-form input[type="text"]:focus {
+    outline: none;
+    border-color: #AA7831;
 }
 
 .villa-form label {

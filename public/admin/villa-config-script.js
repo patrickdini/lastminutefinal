@@ -108,60 +108,100 @@ function renderVillaCards() {
     const villaCards = villaConfigurations.map(villa => `
         <div class="villa-card" data-villa-id="${villa.villa_id}">
             <h3>
-                ${villa.villa_name}
+                ${villa.name || villa.villa_name || villa.villa_id}
                 <span class="villa-status ${villa.active_status ? 'active' : 'inactive'}">
                     ${villa.active_status ? 'Active' : 'Inactive'}
                 </span>
             </h3>
             <div class="villa-form">
                 <div class="form-group">
+                    <label for="name-${villa.villa_id}">Villa Name</label>
+                    <input type="text" id="name-${villa.villa_id}" value="${villa.name || ''}" placeholder="Villa Name">
+                </div>
+                <div class="form-group">
+                    <label for="class-${villa.villa_id}">Class</label>
+                    <select id="class-${villa.villa_id}">
+                        <option value="Masterpiece" ${villa.class === 'Masterpiece' ? 'selected' : ''}>Masterpiece</option>
+                        <option value="Sanctuary" ${villa.class === 'Sanctuary' ? 'selected' : ''}>Sanctuary</option>
+                        <option value="Premium" ${villa.class === 'Premium' ? 'selected' : ''}>Premium</option>
+                        <option value="Standard" ${villa.class === 'Standard' ? 'selected' : ''}>Standard</option>
+                        <option value="Budget" ${villa.class === 'Budget' ? 'selected' : ''}>Budget</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="villa-type-${villa.villa_id}">Villa Type</label>
+                    <input type="text" id="villa-type-${villa.villa_id}" value="${villa.villa_type || ''}" placeholder="e.g. Standalone Villa">
+                </div>
+                <div class="form-group">
+                    <label for="square-meters-${villa.villa_id}">Square Meters</label>
+                    <input type="number" id="square-meters-${villa.villa_id}" value="${villa.square_meters || ''}" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="webpage-url-${villa.villa_id}">Webpage URL</label>
+                    <input type="url" id="webpage-url-${villa.villa_id}" value="${villa.webpage_url || ''}" placeholder="https://...">
+                </div>
+                <div class="form-group">
                     <label for="bedrooms-${villa.villa_id}">Bedrooms</label>
                     <input type="number" id="bedrooms-${villa.villa_id}" value="${villa.bedrooms || 1}" min="1" max="10">
                 </div>
                 <div class="form-group">
+                    <label for="bathrooms-${villa.villa_id}">Bathrooms</label>
+                    <input type="number" id="bathrooms-${villa.villa_id}" value="${villa.bathrooms || 1}" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="max-guests-${villa.villa_id}">Max Guests</label>
+                    <input type="number" id="max-guests-${villa.villa_id}" value="${villa.max_guests || 2}" min="1" max="20">
+                </div>
+                <div class="form-group">
                     <label for="max-adults-${villa.villa_id}">Max Adults</label>
-                    <input type="number" id="max-adults-${villa.villa_id}" value="${villa.max_adults_per_unit || 2}" min="1" max="20">
+                    <input type="number" id="max-adults-${villa.villa_id}" value="${villa.max_adults || 2}" min="1" max="20">
                 </div>
                 <div class="form-group">
-                    <label for="max-guests-${villa.villa_id}">Max Total Guests</label>
-                    <input type="number" id="max-guests-${villa.villa_id}" value="${villa.max_guests_per_unit || 2}" min="1" max="20">
+                    <label for="tagline-${villa.villa_id}">Tagline</label>
+                    <input type="text" id="tagline-${villa.villa_id}" value="${villa.tagline || ''}" placeholder="Short villa tagline">
                 </div>
                 <div class="form-group">
-                    <label for="max-children-${villa.villa_id}">Max Children</label>
-                    <input type="number" id="max-children-${villa.villa_id}" value="${villa.max_children_per_unit || 2}" min="0" max="10">
+                    <label for="description-${villa.villa_id}">Description</label>
+                    <textarea id="description-${villa.villa_id}" rows="3" placeholder="Villa description">${villa.description || ''}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="privacy-${villa.villa_id}">Privacy Level</label>
-                    <select id="privacy-${villa.villa_id}">
-                        <option value="Full Privacy" ${villa.privacy_level === 'Full Privacy' ? 'selected' : ''}>Full Privacy</option>
-                        <option value="Semi-Private" ${villa.privacy_level === 'Semi-Private' ? 'selected' : ''}>Semi-Private</option>
-                        <option value="Shared" ${villa.privacy_level === 'Shared' ? 'selected' : ''}>Shared</option>
+                    <label for="image-urls-${villa.villa_id}">Image URLs (JSON)</label>
+                    <textarea id="image-urls-${villa.villa_id}" rows="2" placeholder='["url1", "url2"]'>${villa.image_urls || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="video-tour-url-${villa.villa_id}">Video Tour URL</label>
+                    <input type="url" id="video-tour-url-${villa.villa_id}" value="${villa.video_tour_url || ''}" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="ideal-for-${villa.villa_id}">Ideal For</label>
+                    <textarea id="ideal-for-${villa.villa_id}" rows="2" placeholder="Target audience description">${villa.ideal_for || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="is-featured-${villa.villa_id}">Featured Villa</label>
+                    <select id="is-featured-${villa.villa_id}">
+                        <option value="1" ${villa.is_featured ? 'selected' : ''}>Yes</option>
+                        <option value="0" ${!villa.is_featured ? 'selected' : ''}>No</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="pool-${villa.villa_id}">Pool Type</label>
-                    <select id="pool-${villa.villa_id}">
+                    <label for="view-type-${villa.villa_id}">View Type</label>
+                    <input type="text" id="view-type-${villa.villa_id}" value="${villa.view_type || ''}" placeholder="e.g. Ocean View, Garden View">
+                </div>
+                <div class="form-group">
+                    <label for="pool-type-${villa.villa_id}">Pool Type</label>
+                    <select id="pool-type-${villa.villa_id}">
                         <option value="Private Pool" ${villa.pool_type === 'Private Pool' ? 'selected' : ''}>Private Pool</option>
                         <option value="Shared Pool" ${villa.pool_type === 'Shared Pool' ? 'selected' : ''}>Shared Pool</option>
-                        <option value="None" ${villa.pool_type === 'None' ? 'selected' : ''}>No Pool</option>
+                        <option value="No Pool" ${villa.pool_type === 'No Pool' ? 'selected' : ''}>No Pool</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="villa-class-${villa.villa_id}">Villa Class</label>
-                    <select id="villa-class-${villa.villa_id}">
-                        <option value="Premium" ${villa.villa_class === 'Premium' ? 'selected' : ''}>Premium</option>
-                        <option value="Normal" ${villa.villa_class === 'Normal' ? 'selected' : ''}>Normal</option>
-                        <option value="Standard" ${villa.villa_class === 'Standard' ? 'selected' : ''}>Standard</option>
-                        <option value="Budget" ${villa.villa_class === 'Budget' ? 'selected' : ''}>Budget</option>
-                    </select>
+                    <label for="key-amenities-${villa.villa_id}">Key Amenities</label>
+                    <textarea id="key-amenities-${villa.villa_id}" rows="2" placeholder="List of key amenities">${villa.key_amenities || ''}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="child-age-${villa.villa_id}">Child Age Limit</label>
-                    <input type="number" id="child-age-${villa.villa_id}" value="${villa.child_age_limit || 12}" min="1" max="18">
-                </div>
-                <div class="form-group">
-                    <label for="active-${villa.villa_id}">Status</label>
-                    <select id="active-${villa.villa_id}">
+                    <label for="active-status-${villa.villa_id}">Status</label>
+                    <select id="active-status-${villa.villa_id}">
                         <option value="1" ${villa.active_status ? 'selected' : ''}>Active</option>
                         <option value="0" ${!villa.active_status ? 'selected' : ''}>Inactive</option>
                     </select>
@@ -206,15 +246,25 @@ async function saveVillaConfigurations() {
         for (const villa of villaConfigurations) {
             const villaUpdate = {
                 villa_id: villa.villa_id,
-                villa_name: villa.villa_name,
+                name: document.getElementById(`name-${villa.villa_id}`).value,
+                class: document.getElementById(`class-${villa.villa_id}`).value,
+                villa_type: document.getElementById(`villa-type-${villa.villa_id}`).value,
+                square_meters: parseFloat(document.getElementById(`square-meters-${villa.villa_id}`).value) || null,
+                webpage_url: document.getElementById(`webpage-url-${villa.villa_id}`).value,
                 bedrooms: parseInt(document.getElementById(`bedrooms-${villa.villa_id}`).value),
-                max_adults_per_unit: parseInt(document.getElementById(`max-adults-${villa.villa_id}`).value),
-                max_guests_per_unit: parseInt(document.getElementById(`max-guests-${villa.villa_id}`).value),
-                max_children_per_unit: parseInt(document.getElementById(`max-children-${villa.villa_id}`).value) || 2,
-                privacy_level: document.getElementById(`privacy-${villa.villa_id}`).value,
-                pool_type: document.getElementById(`pool-${villa.villa_id}`).value,
-                villa_class: document.getElementById(`villa-class-${villa.villa_id}`).value,
-                active_status: parseInt(document.getElementById(`active-${villa.villa_id}`).value) === 1
+                bathrooms: parseInt(document.getElementById(`bathrooms-${villa.villa_id}`).value),
+                max_guests: parseInt(document.getElementById(`max-guests-${villa.villa_id}`).value),
+                max_adults: parseInt(document.getElementById(`max-adults-${villa.villa_id}`).value),
+                tagline: document.getElementById(`tagline-${villa.villa_id}`).value,
+                description: document.getElementById(`description-${villa.villa_id}`).value,
+                image_urls: document.getElementById(`image-urls-${villa.villa_id}`).value,
+                video_tour_url: document.getElementById(`video-tour-url-${villa.villa_id}`).value,
+                ideal_for: document.getElementById(`ideal-for-${villa.villa_id}`).value,
+                is_featured: parseInt(document.getElementById(`is-featured-${villa.villa_id}`).value) === 1,
+                view_type: document.getElementById(`view-type-${villa.villa_id}`).value,
+                pool_type: document.getElementById(`pool-type-${villa.villa_id}`).value,
+                key_amenities: document.getElementById(`key-amenities-${villa.villa_id}`).value,
+                active_status: parseInt(document.getElementById(`active-status-${villa.villa_id}`).value) === 1
             };
             updates.push(villaUpdate);
         }
