@@ -1,6 +1,7 @@
 // Villa Configuration Page JavaScript
 
 let villaConfigurations = [];
+let globalConfiguration = {};
 
 // Load user information
 async function loadUserInfo() {
@@ -65,7 +66,9 @@ async function loadVillaConfigurations() {
         const data = await response.json();
         if (data.success) {
             villaConfigurations = data.villas;
+            globalConfiguration = data.globalConfig || {};
             renderVillaCards();
+            updateGlobalSettings();
         } else {
             throw new Error(data.message || 'Failed to load villa configurations');
         }
@@ -153,6 +156,67 @@ function renderVillaCards() {
     villasGrid.innerHTML = villaCards;
 }
 
+// Update global settings form
+function updateGlobalSettings() {
+    const globalChildAge = document.getElementById('global-child-age-limit');
+    if (globalChildAge && globalConfiguration.child_age_limit) {
+        globalChildAge.value = globalConfiguration.child_age_limit.value || '12';
+    }
+}
+
+// Database Migration Function
+async function runDatabaseMigration() {
+    const migrationBtn = document.getElementById('migration-btn');
+    const migrationStatus = document.getElementById('migration-status');
+    
+    if (!migrationBtn || !migrationStatus) return;
+    
+    try {
+        migrationBtn.disabled = true;
+        migrationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running Migration...';
+        migrationStatus.style.display = 'block';
+        migrationStatus.textContent = 'Consolidating villa tables...';
+        migrationStatus.className = 'status-message';
+        
+        const response = await fetch('/admin/api/migrate-villa-tables', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            migrationStatus.textContent = 'Migration completed successfully! Villa tables consolidated.';
+            migrationStatus.className = 'status-message success';
+            
+            // Hide migration button after successful migration
+            migrationBtn.style.display = 'none';
+            
+            // Reload villa configurations with new structure
+            setTimeout(() => {
+                loadVillaConfigurations();
+                migrationStatus.style.display = 'none';
+            }, 3000);
+            
+        } else {
+            throw new Error(data.message || 'Migration failed');
+        }
+        
+    } catch (error) {
+        console.error('Migration error:', error);
+        migrationStatus.textContent = `Migration failed: ${error.message}`;
+        migrationStatus.className = 'status-message error';
+        migrationBtn.disabled = false;
+        migrationBtn.innerHTML = '<i class="fas fa-database"></i> Run Database Migration';
+        
+        setTimeout(() => {
+            migrationStatus.style.display = 'none';
+        }, 5000);
+    }
+}
+
 // Save Villa Configurations
 async function saveVillaConfigurations() {
     const saveBtn = document.getElementById('save-villa-config');
@@ -165,7 +229,13 @@ async function saveVillaConfigurations() {
         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
         const updates = [];
-        const globalChildAge = document.getElementById('global-child-age-limit').value;
+        const globalConfig = {};
+
+        // Get global configuration values
+        const globalChildAge = document.getElementById('global-child-age-limit');
+        if (globalChildAge) {
+            globalConfig.child_age_limit = globalChildAge.value;
+        }
 
         for (const villa of villaConfigurations) {
             const villaUpdate = {
@@ -177,7 +247,6 @@ async function saveVillaConfigurations() {
                 privacy_level: document.getElementById(`privacy-${villa.villa_id}`).value,
                 pool_type: document.getElementById(`pool-${villa.villa_id}`).value,
                 villa_class: document.getElementById(`villa-class-${villa.villa_id}`).value,
-                child_age_limit: parseInt(document.getElementById(`child-age-${villa.villa_id}`).value),
                 active_status: parseInt(document.getElementById(`active-${villa.villa_id}`).value) === 1
             };
             updates.push(villaUpdate);
@@ -190,7 +259,7 @@ async function saveVillaConfigurations() {
             },
             body: JSON.stringify({
                 villas: updates,
-                globalChildAge: parseInt(globalChildAge)
+                globalConfig: globalConfig
             })
         });
 

@@ -271,27 +271,47 @@ router.post('/api/create-initial-admin', async (req, res) => {
 // Villa Configuration Management Endpoints
 router.get('/api/villa-config', isAuthenticated, async (req, res) => {
     try {
-        const query = `
+        // Get villa data from LMRoomDescription
+        const villaQuery = `
             SELECT 
                 villa_id,
-                villa_name,
+                name as villa_name,
                 bedrooms,
                 max_adults_per_unit,
                 max_guests_per_unit,
                 privacy_level,
                 pool_type,
-                villa_class,
-                child_age_limit,
-                active_status
-            FROM LMvilla_config 
-            ORDER BY villa_name
+                class as villa_class,
+                active_status,
+                created_at,
+                updated_at
+            FROM LMRoomDescription 
+            ORDER BY name
         `;
 
-        const [results] = await pool.query(query);
+        // Get global configuration from LMGeneralConfig
+        const configQuery = `
+            SELECT config_key, config_value, description
+            FROM LMGeneralConfig
+            ORDER BY config_key
+        `;
+
+        const [villas] = await pool.query(villaQuery);
+        const [globalConfig] = await pool.query(configQuery);
+
+        // Convert global config to object for easier access
+        const config = {};
+        globalConfig.forEach(item => {
+            config[item.config_key] = {
+                value: item.config_value,
+                description: item.description
+            };
+        });
         
         res.json({
             success: true,
-            villas: results
+            villas: villas,
+            globalConfig: config
         });
     } catch (error) {
         console.error('Error fetching villa configurations:', error);
@@ -304,7 +324,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
 
 router.post('/api/villa-config', isAuthenticated, async (req, res) => {
     try {
-        const { villas, globalChildAge } = req.body;
+        const { villas, globalConfig } = req.body;
 
         if (!villas || !Array.isArray(villas)) {
             return res.status(400).json({
@@ -313,18 +333,17 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
             });
         }
 
-        // Update each villa configuration
+        // Update each villa configuration in LMRoomDescription
         for (const villa of villas) {
             const updateQuery = `
-                UPDATE LMvilla_config 
+                UPDATE LMRoomDescription 
                 SET 
                     bedrooms = ?,
                     max_adults_per_unit = ?,
                     max_guests_per_unit = ?,
                     privacy_level = ?,
                     pool_type = ?,
-                    villa_class = ?,
-                    child_age_limit = ?,
+                    class = ?,
                     active_status = ?,
                     updated_at = NOW()
                 WHERE villa_id = ?
@@ -337,12 +356,22 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                 villa.privacy_level,
                 villa.pool_type,
                 villa.villa_class,
-                villa.child_age_limit,
                 villa.active_status ? 1 : 0,
                 villa.villa_id
             ];
 
             await pool.query(updateQuery, updateValues);
+        }
+
+        // Update global configuration if provided
+        if (globalConfig) {
+            for (const [key, value] of Object.entries(globalConfig)) {
+                await pool.query(`
+                    UPDATE LMGeneralConfig 
+                    SET config_value = ?, updated_at = NOW() 
+                    WHERE config_key = ?
+                `, [value, key]);
+            }
         }
 
         res.json({
@@ -354,6 +383,134 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to update villa configurations'
+        });
+    }
+});
+
+// Temporary migration endpoint for database consolidation
+router.post('/api/migrate-villa-tables', isAuthenticated, async (req, res) => {
+    try {
+        const results = {};
+
+        // Step 1: Check current LMRoomDescription structure
+        const [currentColumns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
+        results.currentStructure = currentColumns;
+
+        // Step 2: Add missing fields to LMRoomDescription (if not already present)
+        const hasActiveStatus = currentColumns.some(col => col.Field === 'active_status');
+        const hasCreatedAt = currentColumns.some(col => col.Field === 'created_at');
+        const hasUpdatedAt = currentColumns.some(col => col.Field === 'updated_at');
+
+        if (!hasActiveStatus || !hasCreatedAt || !hasUpdatedAt) {
+            let alterQuery = 'ALTER TABLE LMRoomDescription ';
+            const addColumns = [];
+            
+            if (!hasActiveStatus) addColumns.push('ADD COLUMN active_status TINYINT(1) DEFAULT 1');
+            if (!hasCreatedAt) addColumns.push('ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+            if (!hasUpdatedAt) addColumns.push('ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+            
+            alterQuery += addColumns.join(', ');
+            await pool.query(alterQuery);
+            results.addedColumns = addColumns;
+        } else {
+            results.addedColumns = 'All columns already exist';
+        }
+
+        // Step 3: Create LMGeneralConfig table (if not exists)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS LMGeneralConfig (
+                config_id INT AUTO_INCREMENT PRIMARY KEY,
+                config_key VARCHAR(100) NOT NULL UNIQUE,
+                config_value VARCHAR(255) NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Step 4: Insert default global configuration values
+        const configInserts = [
+            ['child_age_limit', '12', 'Children below this age count as children for booking purposes'],
+            ['default_privacy_level', 'Full Privacy', 'Default privacy level for new villas'],
+            ['default_pool_type', 'Private Pool', 'Default pool type for new villas'],
+            ['default_villa_class', 'Premium', 'Default villa class for new villas']
+        ];
+
+        for (const [key, value, description] of configInserts) {
+            try {
+                await pool.query(
+                    'INSERT INTO LMGeneralConfig (config_key, config_value, description) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description)',
+                    [key, value, description]
+                );
+            } catch (err) {
+                // Handle duplicate key errors gracefully
+                console.log(`Config ${key} already exists, updating...`);
+            }
+        }
+
+        // Step 5: Update LMRoomDescription with active_status from LMvilla_config
+        await pool.query(`
+            UPDATE LMRoomDescription lrd 
+            SET lrd.active_status = (
+                SELECT lvc.active_status 
+                FROM LMvilla_config lvc 
+                WHERE lvc.villa_name = CASE 
+                    WHEN lrd.name = 'The Pearl Villa' THEN 'Pearl & Shell'
+                    WHEN lrd.name = 'The Leaf Villa' THEN 'Leaf'
+                    WHEN lrd.name = 'The Shore Villa' THEN 'Shore'
+                    WHEN lrd.name = 'The Sunset Room' THEN 'Sunset Room'
+                    WHEN lrd.name = 'The Swell 2BR' THEN 'Swell 2BR'
+                    WHEN lrd.name = 'The Swell 3BR' THEN 'Swell 3BR'
+                    WHEN lrd.name = 'The Swell 4BR' THEN 'Swell 4BR'
+                    WHEN lrd.name = 'The Tide Villa' THEN 'Tide'
+                    WHEN lrd.name = 'The Wave Villa' THEN 'Wave'
+                    ELSE lrd.name
+                END
+            )
+            WHERE EXISTS (
+                SELECT 1 FROM LMvilla_config lvc 
+                WHERE lvc.villa_name = CASE 
+                    WHEN lrd.name = 'The Pearl Villa' THEN 'Pearl & Shell'
+                    WHEN lrd.name = 'The Leaf Villa' THEN 'Leaf'
+                    WHEN lrd.name = 'The Shore Villa' THEN 'Shore'
+                    WHEN lrd.name = 'The Sunset Room' THEN 'Sunset Room'
+                    WHEN lrd.name = 'The Swell 2BR' THEN 'Swell 2BR'
+                    WHEN lrd.name = 'The Swell 3BR' THEN 'Swell 3BR'
+                    WHEN lrd.name = 'The Swell 4BR' THEN 'Swell 4BR'
+                    WHEN lrd.name = 'The Tide Villa' THEN 'Tide'
+                    WHEN lrd.name = 'The Wave Villa' THEN 'Wave'
+                    ELSE lrd.name
+                END
+            )
+        `);
+
+        // Step 6: Verify the migration - get updated structure
+        const [newColumns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
+        results.newStructure = newColumns;
+
+        // Get sample data from both tables
+        const [roomData] = await pool.query(`
+            SELECT villa_id, name, active_status, created_at, updated_at
+            FROM LMRoomDescription 
+            ORDER BY villa_id
+        `);
+        results.roomDescriptionData = roomData;
+
+        const [configData] = await pool.query('SELECT * FROM LMGeneralConfig ORDER BY config_key');
+        results.generalConfigData = configData;
+
+        res.json({
+            success: true,
+            message: 'Migration completed successfully',
+            results: results
+        });
+
+    } catch (error) {
+        console.error('Migration error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Migration failed',
+            error: error.message
         });
     }
 });
