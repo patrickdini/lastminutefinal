@@ -341,6 +341,8 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
             try {
                 const [columns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
                 tableStructure = columns;
+                console.log('Villa config API - LMRoomDescription columns:', columns.map(c => c.Field));
+                console.log('Villa config API - Sample villa keys:', villas[0] ? Object.keys(villas[0]) : 'No villas');
             } catch (err) {
                 console.log('Could not get table structure:', err.message);
             }
@@ -434,6 +436,9 @@ router.get('/api/debug/table-structure', isAuthenticated, async (req, res) => {
     try {
         const [columns] = await pool.query('SHOW COLUMNS FROM LMRoomDescription');
         const [sampleData] = await pool.query('SELECT * FROM LMRoomDescription LIMIT 1');
+        
+        console.log('LMRoomDescription columns from database:', columns.map(c => c.Field));
+        console.log('Sample data keys:', sampleData[0] ? Object.keys(sampleData[0]) : 'No data');
         
         res.json({
             success: true,
