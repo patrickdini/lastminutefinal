@@ -679,38 +679,59 @@ class ActivitiesDashboard {
                 
                 // Create offers for 1 to 4 nights (capped at 4 nights maximum)
                 const maxNights = Math.min(consecutiveDays, 4);
+                console.log(`Creating ${maxNights} night options for ${villaName} starting ${checkInDate} (consecutive days: ${consecutiveDays})`);
+                
                 for (let nights = 1; nights <= maxNights; nights++) {
                     const checkInDateObj = new Date(checkInDate);
                     const checkOutDateObj = new Date(checkInDateObj);
                     checkOutDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkOutDateObj.toISOString().split('T')[0];
                     
-                    // No need to check date range again - workingData is already filtered
+                    // Verify all required dates are available for this booking
+                    let allDatesAvailable = true;
+                    for (let dayOffset = 0; dayOffset < nights; dayOffset++) {
+                        const testDate = new Date(checkInDateObj);
+                        testDate.setDate(checkInDateObj.getDate() + dayOffset);
+                        const testDateStr = testDate.toISOString().split('T')[0];
+                        
+                        const isDateAvailable = records.some(record => 
+                            record.EntryDate.split('T')[0] === testDateStr && record.AvailabilityCount > 0
+                        );
+                        
+                        if (!isDateAvailable) {
+                            allDatesAvailable = false;
+                            break;
+                        }
+                    }
                     
-                    offers.push({
-                        villa: villaName,
-                        checkIn: checkInDate,
-                        nights: nights,
-                        checkOut: checkOutDateStr,
-                        rate: checkInRecord.LowestRateAmount,
-                        ratePlan: checkInRecord.RatePlanName,
-                        bedrooms: checkInRecord.Bedrooms,
-                        maxGuests: checkInRecord.MaxAdultsPerUnit,
-                        villaClass: checkInRecord.UserDefinedClass,
-                        class: checkInRecord.class,
-                        pool: checkInRecord.Pool,
-                        totalRate: checkInRecord.LowestRateAmount * nights,
-                        // Enhanced villa data from LMRoomDescription
-                        tagline: checkInRecord.tagline,
-                        description: checkInRecord.description,
-                        square_meters: checkInRecord.square_meters,
-                        bathrooms: checkInRecord.bathrooms,
-                        view_type: checkInRecord.view_type,
-                        pool_type: checkInRecord.pool_type,
-                        image_urls: checkInRecord.image_urls,
-                        key_amenities: checkInRecord.key_amenities,
-                        villa_display_name: checkInRecord.villa_display_name
-                    });
+                    if (allDatesAvailable) {
+                        offers.push({
+                            villa: villaName,
+                            checkIn: checkInDate,
+                            nights: nights,
+                            checkOut: checkOutDateStr,
+                            rate: checkInRecord.LowestRateAmount,
+                            ratePlan: checkInRecord.RatePlanName,
+                            bedrooms: checkInRecord.Bedrooms,
+                            maxGuests: checkInRecord.MaxAdultsPerUnit,
+                            villaClass: checkInRecord.UserDefinedClass,
+                            class: checkInRecord.class,
+                            pool: checkInRecord.Pool,
+                            totalRate: checkInRecord.LowestRateAmount * nights,
+                            // Enhanced villa data from LMRoomDescription
+                            tagline: checkInRecord.tagline,
+                            description: checkInRecord.description,
+                            square_meters: checkInRecord.square_meters,
+                            bathrooms: checkInRecord.bathrooms,
+                            view_type: checkInRecord.view_type,
+                            pool_type: checkInRecord.pool_type,
+                            image_urls: checkInRecord.image_urls,
+                            key_amenities: checkInRecord.key_amenities,
+                            villa_display_name: checkInRecord.villa_display_name
+                        });
+                    } else {
+                        console.log(`${nights} nights not available for ${villaName} starting ${checkInDate} - missing availability`);
+                    }
                 }
             });
         });
@@ -832,13 +853,16 @@ class ActivitiesDashboard {
                     const defaultPerksDisplay = this.formatPerksDisplay(defaultPerks);
                     const defaultFaceValue = this.calculateFaceValue(defaultOffer.rate, defaultOffer.nights, defaultPerks, this.selectedAdults, this.selectedChildren);
                     
-                    // Create night selector buttons
+                    // Create night selector buttons only for available night options
+                    const availableNights = dateOffers.map(offer => offer.nights).sort((a, b) => a - b);
+                    console.log(`Available nights for ${villaName} on ${checkInDate}:`, availableNights);
+                    
                     const nightSelector = dateOffers.map(offer => {
                         const isActive = offer.nights === defaultOffer.nights;
                         return `<button class="night-selector-btn ${isActive ? 'active' : ''}" 
                                        data-nights="${offer.nights}" 
                                        data-card-id="${cardId}"
-                                       onclick="app.selectNights('${cardId}', ${offer.nights}, '${villaName}', '${checkInDate}')">
+                                       onclick="app.selectNights('${cardId}', ${offer.nights}, '${villaName}', '${checkInDate}'); return false;">
                                     ${offer.nights === 1 ? '①' : offer.nights === 2 ? '②' : offer.nights === 3 ? '③' : '④'}
                                 </button>`;
                     }).join('');
@@ -1456,6 +1480,9 @@ class ActivitiesDashboard {
      */
     async selectNights(cardId, nights, villaName, checkInDate) {
         try {
+            // Prevent page refresh
+            event.preventDefault();
+            event.stopPropagation();
             // Update active button state
             const card = document.querySelector(`[data-card-id="${cardId}"]`);
             if (!card) return;
@@ -1494,7 +1521,10 @@ class ActivitiesDashboard {
             if (!offer) {
                 console.error('Offer not found for', villaName, checkInDate, nights);
                 console.log('All offers for villa:', villaOffers.filter(o => o.villa === villaName));
-                return;
+                
+                // Show user-friendly error
+                this.showNotification(`Sorry, ${nights} night${nights === 1 ? '' : 's'} not available for this date`, 'error');
+                return false;
             }
             
             // Fetch new perks for the selected nights
@@ -1542,7 +1572,9 @@ class ActivitiesDashboard {
             
         } catch (error) {
             console.error('Error updating night selection:', error);
+            this.showNotification('Error updating selection. Please try again.', 'error');
         }
+        return false;
     }
 
     /**
