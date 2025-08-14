@@ -197,4 +197,54 @@ router.get('/health', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/perks-structure
+ * Examine the structure and sample data of LMActivities and LMPerkRules tables
+ */
+router.get('/perks-structure', async (req, res) => {
+    try {
+        console.log('Examining perks tables structure...');
+        
+        const connection = await db.getConnection();
+        
+        // Get structure of LMActivities table
+        const [activitiesStructure] = await connection.execute('DESCRIBE LMActivities');
+        
+        // Get structure of LMPerkRules table
+        const [perkRulesStructure] = await connection.execute('DESCRIBE LMPerkRules');
+        
+        // Get sample data from LMActivities
+        const [activitiesSample] = await connection.execute('SELECT * FROM LMActivities LIMIT 10');
+        
+        // Get sample data from LMPerkRules
+        const [perkRulesSample] = await connection.execute('SELECT * FROM LMPerkRules LIMIT 10');
+        
+        connection.release();
+        
+        console.log('Successfully retrieved perks table structures');
+        
+        res.json({
+            success: true,
+            tables: {
+                LMActivities: {
+                    structure: activitiesStructure,
+                    sampleData: activitiesSample
+                },
+                LMPerkRules: {
+                    structure: perkRulesStructure,
+                    sampleData: perkRulesSample
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error examining perks tables:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to examine perks tables structure',
+            details: error.message
+        });
+    }
+});
+
 module.exports = router;
