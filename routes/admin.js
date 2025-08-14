@@ -116,6 +116,11 @@ router.get('/', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/admin/dashboard.html'));
 });
 
+// Villa Configuration page
+router.get('/villa-config', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/admin/villa-config.html'));
+});
+
 // Get current user info
 router.get('/api/user', isAuthenticated, (req, res) => {
     res.json({
@@ -282,7 +287,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
             ORDER BY villa_name
         `;
 
-        const [results] = await pool.promise().execute(query);
+        const [results] = await pool.query(query);
         
         res.json({
             success: true,
@@ -337,7 +342,7 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                 villa.id
             ];
 
-            await pool.promise().execute(updateQuery, updateValues);
+            await pool.query(updateQuery, updateValues);
         }
 
         res.json({

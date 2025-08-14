@@ -1,0 +1,304 @@
+/* Villa Configuration Page Specific Styles */
+
+.config-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.nav-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.config-section {
+    margin-bottom: 40px;
+    background: rgba(74, 74, 71, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+    border: 1px solid #4A4A47;
+}
+
+.section-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #4A4A47;
+}
+
+.section-header h2 {
+    color: #AA7831;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.8rem;
+    margin: 0 0 8px 0;
+}
+
+.section-header p {
+    color: #E0E0E0;
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.global-settings {
+    background: rgba(15, 49, 40, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #0F3128;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.form-row label {
+    font-weight: 600;
+    color: #E0E0E0;
+    min-width: 120px;
+}
+
+.form-row input[type="number"],
+.form-row input[type="text"],
+.form-row select {
+    padding: 8px 12px;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100px;
+    background: #262626;
+    color: #E0E0E0;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: #AA7831;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+}
+
+.btn-primary {
+    background: #AA7831;
+    color: #0F3128;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #c08c3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.4);
+}
+
+.btn-primary:disabled {
+    background: #4A4A47;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.status-message {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-message.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-message.error {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.villas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 25px;
+}
+
+.villa-card {
+    background: #0F3128;
+    border: 2px solid #4A4A47;
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.villa-card:hover {
+    border-color: #AA7831;
+    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.2);
+}
+
+.villa-card h3 {
+    color: #AA7831;
+    margin: 0 0 20px 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.villa-status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.villa-status.active {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.villa-status.inactive {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.villa-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.villa-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.villa-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.villa-form label {
+    font-weight: 600;
+    color: #E0E0E0;
+    font-size: 14px;
+}
+
+.villa-form input,
+.villa-form select,
+.villa-form textarea {
+    padding: 10px 12px;
+    border: 2px solid #4A4A47;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #262626;
+    color: #E0E0E0;
+}
+
+.villa-form textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.villa-form input:focus,
+.villa-form select:focus,
+.villa-form textarea:focus {
+    outline: none;
+    border-color: #AA7831;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 60px;
+    color: #999;
+    font-size: 18px;
+    grid-column: 1 / -1;
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+    color: #f44336;
+    font-size: 16px;
+    grid-column: 1 / -1;
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-content {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .nav-actions {
+        justify-content: center;
+    }
+    
+    .config-main {
+        padding: 20px 15px;
+    }
+    
+    .config-section {
+        padding: 20px;
+    }
+    
+    .villas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .villa-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .form-row label {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .villa-card h3 {
+        font-size: 1.2rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
