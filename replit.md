@@ -65,3 +65,9 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 - **Typography**: Crimson Text serif for headings, Nexa for body text (fallback to system fonts)
 - **Brand Voice**: Villa Tokay's "Knowing Guide" approach - comfortable luxury, quietly confident, genuinely warm
 - **User Experience**: Villa-focused language ("villas" instead of "records", "availability" instead of "activities")
+
+### Recent Changes (August 2025)
+- **Perks System Integration**: Added comprehensive perks system using LMActivities and LMPerkRules tables to display complimentary activities next to night counts in booking options
+- **Performance Optimization**: Reduced auto-refresh from 30 seconds to 5 minutes to improve user experience and reduce server load
+- **Enhanced User Experience**: Perks display shows up to 2 activities with "+X more" notation, styled in brand gold color (#AA7831) with gift icon
+- **Database Integration**: Rule-based perks attribution using villa_id, nights, adults, children parameters for personalized perk offerings

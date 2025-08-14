@@ -69,12 +69,12 @@ class ActivitiesDashboard {
         this.elements.adultsCount.addEventListener('change', () => this.handleGuestCountChange());
         this.elements.childrenCount.addEventListener('change', () => this.handleGuestCountChange());
         
-        // Auto-refresh every 30 seconds
+        // Auto-refresh every 5 minutes (reduced frequency)
         setInterval(() => {
             if (!this.isLoading) {
                 this.loadActivities(true); // Silent refresh
             }
-        }, 30000);
+        }, 300000);
     }
     
     /**
