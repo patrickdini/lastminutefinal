@@ -576,7 +576,7 @@ class ActivitiesDashboard {
             this.currentData = data.data;
             
             // Show all data initially - filters will be applied when user clicks them
-            this.displayActivities(this.currentData);
+            await this.displayActivities(this.currentData);
             
         } catch (error) {
             console.error('Error loading activities:', error);
@@ -729,7 +729,7 @@ class ActivitiesDashboard {
     /**
      * Display offers data
      */
-    displayActivities(activities) {
+    async displayActivities(activities) {
         this.isLoading = false;
         this.hideAllStates();
         
@@ -741,7 +741,7 @@ class ActivitiesDashboard {
         
         // Generate villa cards
         if (offers.length > 0) {
-            this.generateVillaCards(offers);
+            await this.generateVillaCards(offers);
         }
         
         this.elements.offersContainer.style.display = 'block';
@@ -752,17 +752,20 @@ class ActivitiesDashboard {
     /**
      * Generate villa cards from offers
      */
-    generateVillaCards(offers) {
+    async generateVillaCards(offers) {
         // Group offers by villa, then by check-in date
         const villaGroups = this.groupOffersByVillaAndDate(offers);
         
-        this.elements.villaCards.innerHTML = Object.keys(villaGroups)
-            .map(villaName => {
+        const villaCardsHtml = await Promise.all(
+            Object.keys(villaGroups).map(async villaName => {
                 const villaOffers = villaGroups[villaName];
                 const firstOffer = Object.values(villaOffers)[0][0]; // Get first offer for villa details
                 
-                return this.generateVillaCard(villaName, firstOffer, villaOffers);
-            }).join('');
+                return await this.generateVillaCard(villaName, firstOffer, villaOffers);
+            })
+        );
+        
+        this.elements.villaCards.innerHTML = villaCardsHtml.join('');
     }
 
     /**
@@ -796,50 +799,63 @@ class ActivitiesDashboard {
     /**
      * Generate individual villa card HTML
      */
-    generateVillaCard(villaName, villaDetails, villaOffers) {
+    async generateVillaCard(villaName, villaDetails, villaOffers) {
         const villaClass = villaDetails.villaClass || '';
         const tagline = villaDetails.tagline || villaName;
         const description = villaDetails.description || this.getVillaDescription(villaName);
         const imageUrls = this.parseImageUrls(villaDetails.image_urls);
         const specifications = this.formatVillaSpecs(villaDetails);
         
-        // Generate check-in date groups
-        const checkinGroups = Object.keys(villaOffers)
-            .sort() // Sort dates chronologically
-            .map(checkInDate => {
-                const dateOffers = villaOffers[checkInDate];
-                const dateObj = new Date(checkInDate.includes('T') ? checkInDate : checkInDate + 'T00:00:00');
-                const checkinDay = this.getDayOfWeek(dateObj);
-                const daysFromNow = this.calculateDaysFromNow(dateObj);
-                
-                return `
-                    <div class="checkin-group">
-                        <div class="checkin-date-header">
-                            Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}${daysFromNow}
-                        </div>
-                        <div class="booking-options">
-                            ${dateOffers.map(offer => `
-                                <div class="booking-option">
-                                    <div class="booking-info">
-                                        <div class="booking-duration">
-                                            ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
-                                        </div>
-                                        <div class="booking-dates">
-                                            ${this.formatDateForDisplay(offer.checkIn)} - ${this.formatDateForDisplay(offer.checkOut)}
-                                        </div>
+        // Generate check-in date groups with perks
+        const checkinGroups = await Promise.all(
+            Object.keys(villaOffers)
+                .sort() // Sort dates chronologically
+                .map(async checkInDate => {
+                    const dateOffers = villaOffers[checkInDate];
+                    const dateObj = new Date(checkInDate.includes('T') ? checkInDate : checkInDate + 'T00:00:00');
+                    const checkinDay = this.getDayOfWeek(dateObj);
+                    const daysFromNow = this.calculateDaysFromNow(dateObj);
+                    
+                    // Generate booking options with perks
+                    const bookingOptionsHtml = await Promise.all(dateOffers.map(async offer => {
+                        // Map villa display name to database villa_id
+                        const villaId = this.mapVillaNameToId(villaName);
+                        const perks = await this.fetchPerks(villaId, offer.nights, this.selectedAdults, this.selectedChildren);
+                        const perksDisplay = this.formatPerksDisplay(perks);
+                        
+                        return `
+                            <div class="booking-option">
+                                <div class="booking-info">
+                                    <div class="booking-duration">
+                                        ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
+                                        ${perksDisplay}
                                     </div>
-                                    <div class="booking-price">
-                                        <div class="rate">${this.formatRate(offer.rate)}</div>
+                                    <div class="booking-dates">
+                                        ${this.formatDateForDisplay(offer.checkIn)} - ${this.formatDateForDisplay(offer.checkOut)}
                                     </div>
-                                    <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkIn}', ${offer.nights})">
-                                        Book
-                                    </button>
                                 </div>
-                            `).join('')}
+                                <div class="booking-price">
+                                    <div class="rate">${this.formatRate(offer.rate)}</div>
+                                </div>
+                                <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkIn}', ${offer.nights})">
+                                    Book
+                                </button>
+                            </div>
+                        `;
+                    }));
+                    
+                    return `
+                        <div class="checkin-group">
+                            <div class="checkin-date-header">
+                                Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}${daysFromNow}
+                            </div>
+                            <div class="booking-options">
+                                ${bookingOptionsHtml.join('')}
+                            </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                })
+        );
         
         return `
             <div class="villa-card">
@@ -892,7 +908,7 @@ class ActivitiesDashboard {
                 </div>
                 <div class="villa-booking-options">
                     <div class="booking-section-title">Select Your Stay:</div>
-                    ${checkinGroups}
+                    ${checkinGroups.join('')}
                 </div>
             </div>
         `;
@@ -1279,6 +1295,59 @@ class ActivitiesDashboard {
         
         // Update on window resize
         window.addEventListener('resize', updateGuestSelectLabels);
+    }
+
+    /**
+     * Fetch perks for a specific booking combination
+     */
+    async fetchPerks(villaId, nights, adults, children) {
+        try {
+            const response = await fetch(`/api/perks/${villaId}/${nights}/${adults}/${children}`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.success ? data.perks : [];
+            }
+        } catch (error) {
+            console.error('Error fetching perks:', error);
+        }
+        return [];
+    }
+
+    /**
+     * Map villa display name to database villa_id
+     */
+    mapVillaNameToId(villaName) {
+        const mapping = {
+            'Pearl': 'Pearl',
+            'Leaf': 'Leaf',
+            'Shore': 'Shore',
+            'Sunset Room': 'Sunset Room',
+            'Swell 2BR': 'Swell 2BR',
+            'Swell 3BR': 'Swell 3BR', 
+            'Swell 4BR': 'Swell 4BR',
+            'Tide': 'Tide',
+            'Wave': 'Wave'
+        };
+        return mapping[villaName] || villaName;
+    }
+
+    /**
+     * Format perks for display
+     */
+    formatPerksDisplay(perks) {
+        if (!perks || perks.length === 0) {
+            return '';
+        }
+        
+        // Show first 2 perks with "+" if there are more
+        const displayPerks = perks.slice(0, 2);
+        const perkNames = displayPerks.map(perk => perk.name);
+        
+        if (perks.length > 2) {
+            perkNames.push(`+${perks.length - 2} more`);
+        }
+        
+        return `<div class="perks-display">🎁 ${perkNames.join(', ')}</div>`;
     }
 
     /**

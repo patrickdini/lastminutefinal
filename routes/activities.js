@@ -198,6 +198,68 @@ router.get('/health', async (req, res) => {
 });
 
 /**
+ * GET /api/perks/:villaId/:nights/:adults/:children
+ * Get applicable perks for a specific booking combination
+ */
+router.get('/perks/:villaId/:nights/:adults/:children', async (req, res) => {
+    try {
+        const { villaId, nights, adults, children } = req.params;
+        console.log(`Fetching perks for ${villaId}, ${nights} nights, ${adults} adults, ${children} children`);
+        
+        const connection = await db.getConnection();
+        
+        // Find matching perk rule
+        const [perkRules] = await connection.execute(`
+            SELECT perk_activity_ids 
+            FROM LMPerkRules 
+            WHERE villa_id = ? AND num_nights = ? AND num_adults = ? AND num_children = ?
+        `, [villaId, parseInt(nights), parseInt(adults), parseInt(children)]);
+        
+        if (perkRules.length === 0) {
+            connection.release();
+            return res.json({
+                success: true,
+                perks: []
+            });
+        }
+        
+        // Parse the activity IDs from JSON
+        const activityIds = JSON.parse(perkRules[0].perk_activity_ids || '[]');
+        
+        if (activityIds.length === 0) {
+            connection.release();
+            return res.json({
+                success: true,
+                perks: []
+            });
+        }
+        
+        // Get the actual activities
+        const placeholders = activityIds.map(() => '?').join(',');
+        const [activities] = await connection.execute(`
+            SELECT activity_id, name, tagline, description, face_price, comments
+            FROM LMActivities 
+            WHERE activity_id IN (${placeholders})
+        `, activityIds);
+        
+        connection.release();
+        
+        res.json({
+            success: true,
+            perks: activities
+        });
+        
+    } catch (error) {
+        console.error('Error fetching perks:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch perks',
+            details: error.message
+        });
+    }
+});
+
+/**
  * GET /api/perks-structure
  * Examine the structure and sample data of LMActivities and LMPerkRules tables
  */
