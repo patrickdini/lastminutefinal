@@ -807,7 +807,7 @@ class ActivitiesDashboard {
         const imageUrls = this.parseImageUrls(villaDetails.image_urls);
         const specifications = this.formatVillaSpecs(villaDetails);
         
-        // Generate check-in date groups with perks
+        // Generate consolidated check-in date groups with night selector
         const checkinGroups = await Promise.all(
             Object.keys(villaOffers)
                 .sort() // Sort dates chronologically
@@ -817,43 +817,61 @@ class ActivitiesDashboard {
                     const checkinDay = this.getDayOfWeek(dateObj);
                     const daysFromNow = this.calculateDaysFromNow(dateObj);
                     
-                    // Generate booking options with perks
-                    const bookingOptionsHtml = await Promise.all(dateOffers.map(async offer => {
-                        // Map villa display name to database villa_id
-                        const villaId = this.mapVillaNameToId(villaName);
-                        const perks = await this.fetchPerks(villaId, offer.nights, this.selectedAdults, this.selectedChildren);
-                        const perksDisplay = this.formatPerksDisplay(perks);
-                        const faceValue = this.calculateFaceValue(offer.rate, offer.nights, perks, this.selectedAdults, this.selectedChildren);
-                        
-                        return `
-                            <div class="booking-option">
-                                <div class="booking-info">
-                                    <div class="booking-duration">
-                                        ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
-                                    </div>
-                                    ${perksDisplay}
-                                    <div class="booking-dates">
-                                        ${this.formatDateForDisplay(offer.checkIn)} - ${this.formatDateForDisplay(offer.checkOut)}
-                                    </div>
-                                </div>
-                                <div class="booking-price">
-                                    ${faceValue > offer.rate * offer.nights ? `<div class="face-value">Face Value: ${this.formatRate(faceValue)}</div>` : ''}
-                                    <div class="rate">Your Price: ${this.formatRate(offer.rate * offer.nights)}</div>
-                                </div>
-                                <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkIn}', ${offer.nights})">
-                                    Book
-                                </button>
-                            </div>
-                        `;
-                    }));
+                    // Create unique card ID
+                    const cardId = `${villaName.replace(/\s+/g, '')}-${checkInDate.split('T')[0]}`;
+                    
+                    // Default to 2 nights (or first available option)
+                    const defaultOffer = dateOffers.find(offer => offer.nights === 2) || dateOffers[0];
+                    const villaId = this.mapVillaNameToId(villaName);
+                    
+                    // Get perks for default selection
+                    const defaultPerks = await this.fetchPerks(villaId, defaultOffer.nights, this.selectedAdults, this.selectedChildren);
+                    const defaultPerksDisplay = this.formatPerksDisplay(defaultPerks);
+                    const defaultFaceValue = this.calculateFaceValue(defaultOffer.rate, defaultOffer.nights, defaultPerks, this.selectedAdults, this.selectedChildren);
+                    
+                    // Create night selector buttons
+                    const nightSelector = dateOffers.map(offer => {
+                        const isActive = offer.nights === defaultOffer.nights;
+                        return `<button class="night-selector-btn ${isActive ? 'active' : ''}" 
+                                       data-nights="${offer.nights}" 
+                                       data-card-id="${cardId}"
+                                       onclick="app.selectNights('${cardId}', ${offer.nights}, '${villaName}', '${checkInDate}')">
+                                    ${offer.nights === 1 ? '①' : offer.nights === 2 ? '②' : offer.nights === 3 ? '③' : '④'}
+                                </button>`;
+                    }).join('');
                     
                     return `
-                        <div class="checkin-group">
+                        <div class="checkin-group" data-card-id="${cardId}">
                             <div class="checkin-date-header">
                                 Check-in: ${checkinDay}, ${this.formatDateForDisplay(checkInDate)}${daysFromNow}
                             </div>
-                            <div class="booking-options">
-                                ${bookingOptionsHtml.join('')}
+                            <div class="consolidated-booking-card">
+                                <div class="night-selector">
+                                    <label class="night-selector-label">Nights:</label>
+                                    ${nightSelector}
+                                </div>
+                                <div class="booking-content">
+                                    <div class="booking-info">
+                                        <div class="booking-duration" data-field="duration">
+                                            ${defaultOffer.nights} ${defaultOffer.nights === 1 ? 'Night' : 'Nights'}
+                                        </div>
+                                        <div data-field="perks">
+                                            ${defaultPerksDisplay}
+                                        </div>
+                                        <div class="booking-dates" data-field="dates">
+                                            ${this.formatDateForDisplay(defaultOffer.checkIn)} - ${this.formatDateForDisplay(defaultOffer.checkOut)}
+                                        </div>
+                                    </div>
+                                    <div class="booking-price">
+                                        <div data-field="face-value" style="${defaultFaceValue > defaultOffer.rate * defaultOffer.nights ? '' : 'display: none;'}">
+                                            Face Value: ${this.formatRate(defaultFaceValue)}
+                                        </div>
+                                        <div class="rate" data-field="price">Your Price: ${this.formatRate(defaultOffer.rate * defaultOffer.nights)}</div>
+                                    </div>
+                                    <button class="book-btn" data-field="book-btn" onclick="app.handleBooking('${villaName}', '${checkInDate}', ${defaultOffer.nights})">
+                                        Book
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1428,6 +1446,101 @@ class ActivitiesDashboard {
             console.log('Error parsing key amenities:', error);
             return '';
         }
+    }
+
+    /**
+     * Handle night selection change in consolidated booking cards
+     */
+    async selectNights(cardId, nights, villaName, checkInDate) {
+        try {
+            // Update active button state
+            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (!card) return;
+            
+            // Remove active class from all buttons in this card
+            card.querySelectorAll('.night-selector-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            const selectedBtn = card.querySelector(`[data-nights="${nights}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+            
+            // Calculate new checkout date
+            const checkInDateObj = new Date(checkInDate.includes('T') ? checkInDate : checkInDate + 'T00:00:00');
+            const checkOutDateObj = new Date(checkInDateObj);
+            checkOutDateObj.setDate(checkInDateObj.getDate() + nights);
+            const checkOutDateStr = checkOutDateObj.toISOString().split('T')[0];
+            
+            // Get villa rate for this date and night combination
+            const villaOffers = this.currentOffers || [];
+            const offer = villaOffers.find(o => 
+                o.villa === villaName && 
+                o.checkIn.split('T')[0] === checkInDate.split('T')[0] && 
+                o.nights === nights
+            );
+            
+            if (!offer) {
+                console.error('Offer not found for', villaName, checkInDate, nights);
+                return;
+            }
+            
+            // Fetch new perks for the selected nights
+            const villaId = this.mapVillaNameToId(villaName);
+            const perks = await this.fetchPerks(villaId, nights, this.selectedAdults, this.selectedChildren);
+            const perksDisplay = this.formatPerksDisplay(perks);
+            const faceValue = this.calculateFaceValue(offer.rate, nights, perks, this.selectedAdults, this.selectedChildren);
+            
+            // Update the card content dynamically
+            const duration = card.querySelector('[data-field="duration"]');
+            const perksContainer = card.querySelector('[data-field="perks"]');
+            const dates = card.querySelector('[data-field="dates"]');
+            const faceValueElement = card.querySelector('[data-field="face-value"]');
+            const price = card.querySelector('[data-field="price"]');
+            const bookBtn = card.querySelector('[data-field="book-btn"]');
+            
+            if (duration) {
+                duration.textContent = `${nights} ${nights === 1 ? 'Night' : 'Nights'}`;
+            }
+            
+            if (perksContainer) {
+                perksContainer.innerHTML = perksDisplay;
+            }
+            
+            if (dates) {
+                dates.textContent = `${this.formatDateForDisplay(checkInDate)} - ${this.formatDateForDisplay(checkOutDateStr)}`;
+            }
+            
+            if (faceValueElement) {
+                if (faceValue > offer.rate * nights) {
+                    faceValueElement.textContent = `Face Value: ${this.formatRate(faceValue)}`;
+                    faceValueElement.style.display = 'block';
+                } else {
+                    faceValueElement.style.display = 'none';
+                }
+            }
+            
+            if (price) {
+                price.textContent = `Your Price: ${this.formatRate(offer.rate * nights)}`;
+            }
+            
+            if (bookBtn) {
+                bookBtn.onclick = () => this.handleBooking(villaName, checkInDate, nights);
+            }
+            
+        } catch (error) {
+            console.error('Error updating night selection:', error);
+        }
+    }
+
+    /**
+     * Handle booking button click
+     */
+    handleBooking(villaName, checkInDate, nights) {
+        console.log(`Booking: ${villaName}, Check-in: ${checkInDate}, Nights: ${nights}`);
+        this.showNotification(`Booking ${villaName} for ${nights} night${nights === 1 ? '' : 's'} starting ${this.formatDateForDisplay(checkInDate)}`, 'success');
     }
 }
 

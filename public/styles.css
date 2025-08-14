@@ -1098,6 +1098,74 @@ body {
     box-shadow: 0 4px 12px rgba(170, 120, 49, 0.4);
 }
 
+/* Consolidated Booking Card Styles */
+.consolidated-booking-card {
+    background: rgba(38, 38, 38, 0.9);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(170, 120, 49, 0.3);
+    transition: all 0.3s ease;
+}
+
+.consolidated-booking-card:hover {
+    border-color: rgba(170, 120, 49, 0.6);
+    background: rgba(38, 38, 38, 0.95);
+}
+
+/* Night Selector Styles */
+.night-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(170, 120, 49, 0.3);
+}
+
+.night-selector-label {
+    color: #AA7831;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-right: 5px;
+}
+
+.night-selector-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(170, 120, 49, 0.5);
+    background: transparent;
+    color: #AA7831;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.night-selector-btn:hover {
+    border-color: #AA7831;
+    background: rgba(170, 120, 49, 0.1);
+    transform: scale(1.05);
+}
+
+.night-selector-btn.active {
+    background: #AA7831;
+    color: #0F3128;
+    border-color: #AA7831;
+    box-shadow: 0 0 12px rgba(170, 120, 49, 0.4);
+}
+
+/* Booking Content Layout */
+.booking-content {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 20px;
+    align-items: center;
+}
+
 /* Villa Cards Responsive */
 @media (max-width: 768px) {
     .villa-image-gallery {
@@ -1138,6 +1206,22 @@ body {
     .booking-price {
         margin-right: 0;
         align-self: flex-end;
+    }
+    
+    .booking-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .night-selector {
+        justify-content: center;
+    }
+    
+    .night-selector-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
 }
 
