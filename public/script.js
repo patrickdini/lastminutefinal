@@ -694,13 +694,15 @@ class ActivitiesDashboard {
                     checkOutDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkOutDateObj.toISOString().split('T')[0];
                     
-                    // If we have a date filter applied, ensure checkout date is within the range
+                    // If we have a date filter applied, ensure check-in date is within the range
                     if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
                         const [startDate, endDate] = this.currentDateRange;
+                        const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
                         const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
+                        const checkInStr = checkInDate.split('T')[0];
                         
-                        // Skip this offer if checkout extends beyond the filtered date range
-                        if (checkOutDateStr > endStr) {
+                        // Skip this offer if check-in is outside the filtered date range
+                        if (checkInStr < startStr || checkInStr > endStr) {
                             continue;
                         }
                     }
