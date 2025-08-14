@@ -69,6 +69,14 @@ async function loadVillaConfigurations() {
             globalConfiguration = data.globalConfig || {};
             renderVillaCards();
             updateGlobalSettings();
+            
+            // Hide migration button if migration is already completed
+            if (data.migrationCompleted) {
+                const migrationBtn = document.getElementById('migration-btn');
+                if (migrationBtn) {
+                    migrationBtn.style.display = 'none';
+                }
+            }
         } else {
             throw new Error(data.message || 'Failed to load villa configurations');
         }

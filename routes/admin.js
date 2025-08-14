@@ -271,33 +271,71 @@ router.post('/api/create-initial-admin', async (req, res) => {
 // Villa Configuration Management Endpoints
 router.get('/api/villa-config', isAuthenticated, async (req, res) => {
     try {
-        // Get villa data from LMRoomDescription
-        const villaQuery = `
-            SELECT 
-                villa_id,
-                name as villa_name,
-                bedrooms,
-                max_adults_per_unit,
-                max_guests_per_unit,
-                privacy_level,
-                pool_type,
-                class as villa_class,
-                active_status,
-                created_at,
-                updated_at
-            FROM LMRoomDescription 
-            ORDER BY name
-        `;
+        // Check if migration has been completed by testing for new columns
+        let migrationCompleted = false;
+        try {
+            await pool.query('SELECT max_adults_per_unit FROM LMRoomDescription LIMIT 1');
+            migrationCompleted = true;
+        } catch (columnError) {
+            // Column doesn't exist, migration not completed yet
+            migrationCompleted = false;
+        }
 
-        // Get global configuration from LMGeneralConfig
-        const configQuery = `
-            SELECT config_key, config_value, description
-            FROM LMGeneralConfig
-            ORDER BY config_key
-        `;
+        let villas = [];
+        let globalConfig = [];
 
-        const [villas] = await pool.query(villaQuery);
-        const [globalConfig] = await pool.query(configQuery);
+        if (migrationCompleted) {
+            // Use consolidated table structure
+            const villaQuery = `
+                SELECT 
+                    villa_id,
+                    name as villa_name,
+                    bedrooms,
+                    max_adults_per_unit,
+                    max_guests_per_unit,
+                    privacy_level,
+                    pool_type,
+                    class as villa_class,
+                    active_status,
+                    created_at,
+                    updated_at
+                FROM LMRoomDescription 
+                ORDER BY name
+            `;
+            [villas] = await pool.query(villaQuery);
+
+            // Get global configuration from LMGeneralConfig
+            try {
+                const configQuery = `
+                    SELECT config_key, config_value, description
+                    FROM LMGeneralConfig
+                    ORDER BY config_key
+                `;
+                [globalConfig] = await pool.query(configQuery);
+            } catch (err) {
+                // LMGeneralConfig doesn't exist yet
+                globalConfig = [];
+            }
+        } else {
+            // Use original table structure - get from LMvilla_config
+            const villaQuery = `
+                SELECT 
+                    villa_id,
+                    villa_name,
+                    bedrooms,
+                    max_adults_per_unit,
+                    max_guests_per_unit,
+                    privacy_level,
+                    pool_type,
+                    villa_class,
+                    child_age_limit,
+                    active_status
+                FROM LMvilla_config 
+                ORDER BY villa_name
+            `;
+            [villas] = await pool.query(villaQuery);
+            globalConfig = []; // No global config yet
+        }
 
         // Convert global config to object for easier access
         const config = {};
@@ -311,7 +349,8 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
         res.json({
             success: true,
             villas: villas,
-            globalConfig: config
+            globalConfig: config,
+            migrationCompleted: migrationCompleted
         });
     } catch (error) {
         console.error('Error fetching villa configurations:', error);
@@ -400,18 +439,24 @@ router.post('/api/migrate-villa-tables', isAuthenticated, async (req, res) => {
         const hasActiveStatus = currentColumns.some(col => col.Field === 'active_status');
         const hasCreatedAt = currentColumns.some(col => col.Field === 'created_at');
         const hasUpdatedAt = currentColumns.some(col => col.Field === 'updated_at');
+        const hasMaxAdults = currentColumns.some(col => col.Field === 'max_adults_per_unit');
+        const hasMaxGuests = currentColumns.some(col => col.Field === 'max_guests_per_unit');
+        const hasPrivacyLevel = currentColumns.some(col => col.Field === 'privacy_level');
+        const hasPoolType = currentColumns.some(col => col.Field === 'pool_type');
 
-        if (!hasActiveStatus || !hasCreatedAt || !hasUpdatedAt) {
-            let alterQuery = 'ALTER TABLE LMRoomDescription ';
-            const addColumns = [];
-            
-            if (!hasActiveStatus) addColumns.push('ADD COLUMN active_status TINYINT(1) DEFAULT 1');
-            if (!hasCreatedAt) addColumns.push('ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-            if (!hasUpdatedAt) addColumns.push('ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
-            
-            alterQuery += addColumns.join(', ');
+        const columnsToAdd = [];
+        if (!hasActiveStatus) columnsToAdd.push('ADD COLUMN active_status TINYINT(1) DEFAULT 1');
+        if (!hasCreatedAt) columnsToAdd.push('ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+        if (!hasUpdatedAt) columnsToAdd.push('ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+        if (!hasMaxAdults) columnsToAdd.push('ADD COLUMN max_adults_per_unit INT DEFAULT 4');
+        if (!hasMaxGuests) columnsToAdd.push('ADD COLUMN max_guests_per_unit INT DEFAULT 6');
+        if (!hasPrivacyLevel) columnsToAdd.push('ADD COLUMN privacy_level VARCHAR(50) DEFAULT "Full Privacy"');
+        if (!hasPoolType) columnsToAdd.push('ADD COLUMN pool_type VARCHAR(50) DEFAULT "Private Pool"');
+
+        if (columnsToAdd.length > 0) {
+            let alterQuery = 'ALTER TABLE LMRoomDescription ' + columnsToAdd.join(', ');
             await pool.query(alterQuery);
-            results.addedColumns = addColumns;
+            results.addedColumns = columnsToAdd;
         } else {
             results.addedColumns = 'All columns already exist';
         }
@@ -448,13 +493,11 @@ router.post('/api/migrate-villa-tables', isAuthenticated, async (req, res) => {
             }
         }
 
-        // Step 5: Update LMRoomDescription with active_status from LMvilla_config
+        // Step 5: Transfer data from LMvilla_config to LMRoomDescription
         await pool.query(`
             UPDATE LMRoomDescription lrd 
-            SET lrd.active_status = (
-                SELECT lvc.active_status 
-                FROM LMvilla_config lvc 
-                WHERE lvc.villa_name = CASE 
+            INNER JOIN LMvilla_config lvc ON (
+                lvc.villa_name = CASE 
                     WHEN lrd.name = 'The Pearl Villa' THEN 'Pearl & Shell'
                     WHEN lrd.name = 'The Leaf Villa' THEN 'Leaf'
                     WHEN lrd.name = 'The Shore Villa' THEN 'Shore'
@@ -467,21 +510,13 @@ router.post('/api/migrate-villa-tables', isAuthenticated, async (req, res) => {
                     ELSE lrd.name
                 END
             )
-            WHERE EXISTS (
-                SELECT 1 FROM LMvilla_config lvc 
-                WHERE lvc.villa_name = CASE 
-                    WHEN lrd.name = 'The Pearl Villa' THEN 'Pearl & Shell'
-                    WHEN lrd.name = 'The Leaf Villa' THEN 'Leaf'
-                    WHEN lrd.name = 'The Shore Villa' THEN 'Shore'
-                    WHEN lrd.name = 'The Sunset Room' THEN 'Sunset Room'
-                    WHEN lrd.name = 'The Swell 2BR' THEN 'Swell 2BR'
-                    WHEN lrd.name = 'The Swell 3BR' THEN 'Swell 3BR'
-                    WHEN lrd.name = 'The Swell 4BR' THEN 'Swell 4BR'
-                    WHEN lrd.name = 'The Tide Villa' THEN 'Tide'
-                    WHEN lrd.name = 'The Wave Villa' THEN 'Wave'
-                    ELSE lrd.name
-                END
-            )
+            SET 
+                lrd.max_adults_per_unit = lvc.max_adults_per_unit,
+                lrd.max_guests_per_unit = lvc.max_guests_per_unit,
+                lrd.privacy_level = lvc.privacy_level,
+                lrd.pool_type = lvc.pool_type,
+                lrd.active_status = lvc.active_status,
+                lrd.updated_at = NOW()
         `);
 
         // Step 6: Verify the migration - get updated structure
