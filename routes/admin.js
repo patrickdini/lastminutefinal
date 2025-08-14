@@ -273,7 +273,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
     try {
         const query = `
             SELECT 
-                id,
+                villa_id,
                 villa_name,
                 bedrooms,
                 max_adults_per_unit,
@@ -327,7 +327,7 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                     child_age_limit = ?,
                     active_status = ?,
                     updated_at = NOW()
-                WHERE id = ?
+                WHERE villa_id = ?
             `;
 
             const updateValues = [
@@ -339,7 +339,7 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                 villa.villa_class,
                 villa.child_age_limit,
                 villa.active_status ? 1 : 0,
-                villa.id
+                villa.villa_id
             ];
 
             await pool.query(updateQuery, updateValues);
