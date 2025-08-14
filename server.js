@@ -2,9 +2,11 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const fs = require("fs");
+const session = require("express-session");
 console.log("Loading activities routes...");
 const activitiesRoutes = require("./routes/activities");
 console.log("Activities routes loaded:", typeof activitiesRoutes);
+const adminRoutes = require("./routes/admin");
 const pkg = require("./package.json");
 
 const app = express();
@@ -14,6 +16,18 @@ const PORT = process.env.PORT || 5000; // Infomaniak GUI listens on 5000
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware for admin panel
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'villa-tokay-admin-secret-2025',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
 
 // Disable caching so new CSS/JS show up immediately
 app.use((req, res, next) => {
@@ -56,6 +70,11 @@ try {
 console.log("Registering API routes...");
 app.use("/api", activitiesRoutes);
 console.log("API routes registered");
+
+// Admin routes
+console.log("Registering Admin routes...");
+app.use("/admin", adminRoutes);
+console.log("Admin routes registered");
 
 // Root
 app.get("/", (req, res) => {
