@@ -1321,7 +1321,7 @@ class ActivitiesDashboard {
             'Pearl': 'Pearl',
             'Leaf': 'Leaf',
             'Shore': 'Shore',
-            'Sunset Room': 'Sunset Room',
+            'Sunset Room': 'Sunset',
             'Swell 2BR': 'Swell 2BR',
             'Swell 3BR': 'Swell 3BR', 
             'Swell 4BR': 'Swell 4BR',
@@ -1339,13 +1339,8 @@ class ActivitiesDashboard {
             return '';
         }
         
-        // Show first 2 perks with "+" if there are more
-        const displayPerks = perks.slice(0, 2);
-        const perkNames = displayPerks.map(perk => perk.name);
-        
-        if (perks.length > 2) {
-            perkNames.push(`+${perks.length - 2} more`);
-        }
+        // Show all perks
+        const perkNames = perks.map(perk => perk.name);
         
         return `<div class="perks-display">🎁 ${perkNames.join(', ')}</div>`;
     }
