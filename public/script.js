@@ -490,13 +490,11 @@ class ActivitiesDashboard {
             return;
         }
         
-        // Filter the data
-        this.filteredData = this.currentData.filter(activity => {
-            const activityDate = activity.EntryDate.split('T')[0]; // Extract date part only
-            return activityDate >= startStr && activityDate <= endStr;
-        });
+        // Store the filter range for use in generateOffersFromData
+        this.currentDateRange = [startStr, endStr];
         
-        this.displayActivities(this.filteredData);
+        // Display activities - let generateOffersFromData handle the filtering
+        this.displayActivities(this.currentData);
     }
     
 
@@ -589,36 +587,37 @@ class ActivitiesDashboard {
     generateOffersFromData(data) {
         const offers = [];
         
-        // Use existing filtered data if available from date filter, otherwise apply default filter
+        // Determine which data to work with
         let workingData = data;
         let dateRangeDesc = "all data";
         
-        if (this.filteredData && this.filteredData.length > 0) {
-            workingData = this.filteredData;
-            dateRangeDesc = "filtered date range";
-        } else if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
-            // Apply the current date range filter
+        if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
+            // Apply the current date range filter - filter ALL data to check-in dates within range
             const [startDate, endDate] = this.currentDateRange;
             const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
             const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
             
+            // Filter data to only include records where EntryDate (check-in) is within the selected range
             workingData = data.filter(record => {
-                const activityDate = record.EntryDate.split('T')[0];
-                return activityDate >= startStr && activityDate <= endStr;
+                const checkInDate = record.EntryDate.split('T')[0];
+                return checkInDate >= startStr && checkInDate <= endStr;
             });
             dateRangeDesc = `${startStr} to ${endStr}`;
         } else {
-            // Default to next 7 days from tomorrow
-            const today = new Date();
-            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-            const weekLater = new Date(tomorrow.getTime() + 7 * 24 * 60 * 60 * 1000);
+            // Default to next 7 days from tomorrow in Bali time
+            const now = new Date();
+            const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+            const tomorrow = new Date(baliTime);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const weekLater = new Date(tomorrow);
+            weekLater.setDate(tomorrow.getDate() + 7);
             
             const startStr = tomorrow.toISOString().split('T')[0];
             const endStr = weekLater.toISOString().split('T')[0];
             
             workingData = data.filter(record => {
-                const activityDate = record.EntryDate.split('T')[0];
-                return activityDate >= startStr && activityDate <= endStr;
+                const checkInDate = record.EntryDate.split('T')[0];
+                return checkInDate >= startStr && checkInDate <= endStr;
             });
             dateRangeDesc = `${startStr} to ${endStr} (default)`;
         }
@@ -686,18 +685,7 @@ class ActivitiesDashboard {
                     checkOutDateObj.setDate(checkInDateObj.getDate() + nights);
                     const checkOutDateStr = checkOutDateObj.toISOString().split('T')[0];
                     
-                    // If we have a date filter applied, ensure check-in date is within the range
-                    if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
-                        const [startDate, endDate] = this.currentDateRange;
-                        const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
-                        const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
-                        const checkInStr = checkInDate.split('T')[0];
-                        
-                        // Skip this offer if check-in is outside the filtered date range
-                        if (checkInStr < startStr || checkInStr > endStr) {
-                            continue;
-                        }
-                    }
+                    // No need to check date range again - workingData is already filtered
                     
                     offers.push({
                         villa: villaName,
