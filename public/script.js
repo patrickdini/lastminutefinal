@@ -716,7 +716,7 @@ class ActivitiesDashboard {
         });
 
         // Sort offers by check-in date, then by villa name, then by nights
-        return offers.sort((a, b) => {
+        const sortedOffers = offers.sort((a, b) => {
             const dateCompare = new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime();
             if (dateCompare !== 0) return dateCompare;
             
@@ -725,6 +725,11 @@ class ActivitiesDashboard {
             
             return a.nights - b.nights;
         });
+        
+        // Store all offers for night selector functionality
+        this.currentOffers = sortedOffers;
+        
+        return sortedOffers;
     }
 
     /**
@@ -746,8 +751,6 @@ class ActivitiesDashboard {
         }
         
         this.elements.offersContainer.style.display = 'block';
-        
-
     }
 
     /**
@@ -1476,14 +1479,21 @@ class ActivitiesDashboard {
             
             // Get villa rate for this date and night combination
             const villaOffers = this.currentOffers || [];
+            const checkInDateStr = checkInDate.split('T')[0];
+            
+            // Debug logging
+            console.log('Looking for offer:', villaName, checkInDateStr, nights);
+            console.log('Available offers:', villaOffers.filter(o => o.villa === villaName && o.checkIn.split('T')[0] === checkInDateStr));
+            
             const offer = villaOffers.find(o => 
                 o.villa === villaName && 
-                o.checkIn.split('T')[0] === checkInDate.split('T')[0] && 
+                o.checkIn.split('T')[0] === checkInDateStr && 
                 o.nights === nights
             );
             
             if (!offer) {
                 console.error('Offer not found for', villaName, checkInDate, nights);
+                console.log('All offers for villa:', villaOffers.filter(o => o.villa === villaName));
                 return;
             }
             
