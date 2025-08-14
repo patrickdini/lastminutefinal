@@ -68,6 +68,8 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 
 ### Recent Changes (August 2025)
 - **Perks System Integration**: Added comprehensive perks system using LMActivities and LMPerkRules tables to display complimentary activities next to night counts in booking options
+- **Face Value Calculation**: Implemented total value calculation showing room cost (rate × nights) + perks face_price values, with per-person activity pricing support
+- **Enhanced Pricing Display**: Shows both "Face Value" (crossed out) and "Your Price" to highlight guest savings and value proposition
 - **Performance Optimization**: Reduced auto-refresh from 30 seconds to 5 minutes to improve user experience and reduce server load
-- **Enhanced User Experience**: Perks display shows up to 2 activities with "+X more" notation, styled in brand gold color (#AA7831) with gift icon
+- **Per-Person Activity Logic**: Smart detection of per-person vs fixed-price activities based on LMActivities comments field parsing
 - **Database Integration**: Rule-based perks attribution using villa_id, nights, adults, children parameters for personalized perk offerings

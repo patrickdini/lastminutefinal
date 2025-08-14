@@ -822,6 +822,7 @@ class ActivitiesDashboard {
                         const villaId = this.mapVillaNameToId(villaName);
                         const perks = await this.fetchPerks(villaId, offer.nights, this.selectedAdults, this.selectedChildren);
                         const perksDisplay = this.formatPerksDisplay(perks);
+                        const faceValue = this.calculateFaceValue(offer.rate, offer.nights, perks, this.selectedAdults, this.selectedChildren);
                         
                         return `
                             <div class="booking-option">
@@ -835,7 +836,8 @@ class ActivitiesDashboard {
                                     </div>
                                 </div>
                                 <div class="booking-price">
-                                    <div class="rate">${this.formatRate(offer.rate)}</div>
+                                    ${faceValue > offer.rate * offer.nights ? `<div class="face-value">Face Value: ${this.formatRate(faceValue)}</div>` : ''}
+                                    <div class="rate">Your Price: ${this.formatRate(offer.rate * offer.nights)}</div>
                                 </div>
                                 <button class="book-btn" onclick="app.handleBooking('${villaName}', '${offer.checkIn}', ${offer.nights})">
                                     Book
@@ -1329,6 +1331,53 @@ class ActivitiesDashboard {
             'Wave': 'Wave'
         };
         return mapping[villaName] || villaName;
+    }
+
+    /**
+     * Calculate total face value (room cost + perks value)
+     */
+    calculateFaceValue(roomRate, nights, perks, adults, children) {
+        // Base room cost (room rate × nights)
+        const roomCost = roomRate * nights;
+        
+        // Calculate total perks value
+        const perksValue = perks.reduce((total, perk) => {
+            const facePrice = parseFloat(perk.face_price) || 0;
+            
+            // Check if perk is per person based on comments
+            if (this.isPerPersonActivity(perk.comments)) {
+                return total + (facePrice * (adults + children));
+            } else {
+                return total + facePrice;
+            }
+        }, 0);
+        
+        return roomCost + perksValue;
+    }
+    
+    /**
+     * Check if activity pricing is per person based on comments
+     */
+    isPerPersonActivity(comments) {
+        if (!comments) return false;
+        
+        const lowerComments = comments.toLowerCase();
+        
+        // Per person indicators
+        if (lowerComments.includes('per pax') || 
+            lowerComments.includes('per person') ||
+            lowerComments.includes('pp') ||
+            lowerComments.includes('each person')) {
+            return true;
+        }
+        
+        // Fixed quantity indicators (not per person)
+        if (lowerComments.match(/^\d+\s*pax$/i) || // "2 pax", "3 pax"
+            lowerComments.match(/^\d+-\d+\s*pax$/i)) { // "2-3 pax"
+            return false;
+        }
+        
+        return false; // Default to fixed price
     }
 
     /**
