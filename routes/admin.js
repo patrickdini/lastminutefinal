@@ -29,9 +29,9 @@ router.post('/api/login', async (req, res) => {
     }
 
     try {
-        // Query the database for the user
+        // Query the database for the user (using plain text password field)
         const [users] = await pool.query(
-            'SELECT * FROM LMadmin_users WHERE username = ? AND is_active = TRUE',
+            'SELECT id, username, password, full_name, email, role, login_attempts, locked_until, is_active FROM LMadmin_users WHERE username = ? AND is_active = TRUE',
             [username]
         );
 
@@ -52,8 +52,8 @@ router.post('/api/login', async (req, res) => {
             });
         }
 
-        // Verify password
-        const passwordMatch = await bcrypt.compare(password, user.password_hash);
+        // Simple password verification (plain text)
+        const passwordMatch = (password === user.password);
 
         if (!passwordMatch) {
             // Increment login attempts
@@ -230,40 +230,68 @@ router.put('/api/villas/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// Temporary route to create initial admin user (remove in production)
-router.post('/api/create-initial-admin', async (req, res) => {
+// Temporary route to migrate admin users to plain text passwords (remove in production)
+router.post('/api/migrate-admin-passwords', async (req, res) => {
     try {
-        // Check if any admin users exist
-        const [existingUsers] = await pool.query(
-            'SELECT COUNT(*) as count FROM LMadmin_users'
-        );
+        // First check if password column exists
+        const [columns] = await pool.query('SHOW COLUMNS FROM LMadmin_users');
+        const hasPasswordColumn = columns.some(col => col.Field === 'password');
 
-        if (existingUsers[0].count > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Admin users already exist' 
-            });
+        if (!hasPasswordColumn) {
+            // Add password column
+            await pool.query('ALTER TABLE LMadmin_users ADD COLUMN password VARCHAR(255) AFTER username');
+            console.log('Added password column to LMadmin_users table');
         }
 
-        // Create default admin user
-        const hashedPassword = await bcrypt.hash('VillaTokay2025!', 10);
-        
+        // Update patrick user to use plain text password and reset lock status
         await pool.query(
-            `INSERT INTO LMadmin_users (username, password_hash, email, full_name, role, is_active) 
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            ['admin', hashedPassword, 'admin@villatokay.com', 'Villa Tokay Administrator', 'super_admin', true]
+            `UPDATE LMadmin_users SET password = 'VillaTokay2025!', login_attempts = 0, locked_until = NULL WHERE username = 'patrick'`
         );
+
+        // Also create a backup admin user if needed
+        const [existingAdmin] = await pool.query(
+            'SELECT COUNT(*) as count FROM LMadmin_users WHERE username = "admin"'
+        );
+
+        if (existingAdmin[0].count === 0) {
+            await pool.query(
+                `INSERT INTO LMadmin_users (username, password, email, full_name, role, is_active) 
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                ['admin', 'VillaTokay2025!', 'admin@villatokay.com', 'Villa Tokay Administrator', 'super_admin', true]
+            );
+        }
 
         res.json({ 
             success: true, 
-            message: 'Initial admin user created. Username: admin, Password: VillaTokay2025!' 
+            message: 'Admin users migrated to plain text passwords. Username: patrick/admin, Password: VillaTokay2025!' 
         });
 
     } catch (error) {
-        console.error('Error creating initial admin:', error);
+        console.error('Error migrating admin passwords:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Error creating initial admin user' 
+            message: 'Error migrating admin passwords: ' + error.message 
+        });
+    }
+});
+
+// Reset admin user locks
+router.post('/api/reset-admin-locks', async (req, res) => {
+    try {
+        await pool.query(
+            'UPDATE LMadmin_users SET login_attempts = 0, locked_until = NULL WHERE 1=1'
+        );
+        
+        res.json({ 
+            success: true, 
+            message: 'All admin user locks have been reset' 
+        });
+
+    } catch (error) {
+        console.error('Error resetting admin locks:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error resetting admin locks: ' + error.message 
         });
     }
 });
