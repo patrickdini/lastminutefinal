@@ -116,6 +116,10 @@ function renderVillaCards() {
                     <input type="number" id="max-guests-${villa.villa_id}" value="${villa.max_guests_per_unit || 2}" min="1" max="20">
                 </div>
                 <div class="form-group">
+                    <label for="max-children-${villa.villa_id}">Max Children</label>
+                    <input type="number" id="max-children-${villa.villa_id}" value="${villa.max_children_per_unit || 2}" min="0" max="10">
+                </div>
+                <div class="form-group">
                     <label for="privacy-${villa.villa_id}">Privacy Level</label>
                     <select id="privacy-${villa.villa_id}">
                         <option value="Full Privacy" ${villa.privacy_level === 'Full Privacy' ? 'selected' : ''}>Full Privacy</option>
@@ -195,6 +199,7 @@ async function saveVillaConfigurations() {
                 bedrooms: parseInt(document.getElementById(`bedrooms-${villa.villa_id}`).value),
                 max_adults_per_unit: parseInt(document.getElementById(`max-adults-${villa.villa_id}`).value),
                 max_guests_per_unit: parseInt(document.getElementById(`max-guests-${villa.villa_id}`).value),
+                max_children_per_unit: parseInt(document.getElementById(`max-children-${villa.villa_id}`).value) || 2,
                 privacy_level: document.getElementById(`privacy-${villa.villa_id}`).value,
                 pool_type: document.getElementById(`pool-${villa.villa_id}`).value,
                 villa_class: document.getElementById(`villa-class-${villa.villa_id}`).value,

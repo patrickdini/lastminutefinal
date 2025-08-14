@@ -285,7 +285,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
         let globalConfig = [];
 
         if (migrationCompleted) {
-            // Use consolidated table structure
+            // Use consolidated table structure - Get all villa fields from LMRoomDescription
             const villaQuery = `
                 SELECT 
                     villa_id,
@@ -293,6 +293,7 @@ router.get('/api/villa-config', isAuthenticated, async (req, res) => {
                     bedrooms,
                     max_adults_per_unit,
                     max_guests_per_unit,
+                    max_children_per_unit,
                     privacy_level,
                     pool_type,
                     class as villa_class,
@@ -380,6 +381,7 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                     bedrooms = ?,
                     max_adults_per_unit = ?,
                     max_guests_per_unit = ?,
+                    max_children_per_unit = ?,
                     privacy_level = ?,
                     pool_type = ?,
                     class = ?,
@@ -392,6 +394,7 @@ router.post('/api/villa-config', isAuthenticated, async (req, res) => {
                 villa.bedrooms,
                 villa.max_adults_per_unit,
                 villa.max_guests_per_unit,
+                villa.max_children_per_unit || 2,
                 villa.privacy_level,
                 villa.pool_type,
                 villa.villa_class,
