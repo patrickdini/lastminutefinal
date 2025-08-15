@@ -84,21 +84,27 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Found ${localChampions.length} local champions`);
         
-        // STEP B: Select Global Champion villa/date combinations with variety and pagination
+        // STEP B: Select Global Champion villa/date combinations with pagination
         const championCombinations = [];
-        const usedVillaIds = new Set();
-        let skipCount = 0;
+        let processedCount = 0;
+        
+        // Create unique combinations (villa_id + checkin_date)
+        const uniqueCombinationsList = [];
+        const seenCombinations = new Set();
         
         for (const offer of localChampions) {
-            // Skip if we already have an offer from this villa (ensure variety)
-            if (usedVillaIds.has(offer.villa_id)) {
-                continue;
+            const combinationKey = `${offer.villa_id}_${offer.checkin_date}`;
+            if (!seenCombinations.has(combinationKey)) {
+                seenCombinations.add(combinationKey);
+                uniqueCombinationsList.push(offer);
             }
-            
+        }
+        
+        // Apply pagination to unique combinations
+        for (const offer of uniqueCombinationsList) {
             // Apply offset - skip the first offsetCount combinations
-            if (skipCount < offsetCount) {
-                skipCount++;
-                usedVillaIds.add(offer.villa_id); // Still mark as used for variety
+            if (processedCount < offsetCount) {
+                processedCount++;
                 continue;
             }
             
@@ -108,7 +114,6 @@ router.get('/activities', async (req, res) => {
                 checkin_date: offer.checkin_date,
                 best_score: offer.attractiveness_score
             });
-            usedVillaIds.add(offer.villa_id);
             
             // Stop once we have the requested limit
             if (championCombinations.length >= limitCount) {
@@ -219,9 +224,12 @@ router.get('/activities', async (req, res) => {
         });
         
         // Check if there are more offers available
-        const totalLocalChampions = localChampions.length;
-        const uniqueVillasTotal = new Set(localChampions.map(offer => offer.villa_id)).size;
-        const hasMore = (offsetCount + limitCount) < uniqueVillasTotal;
+        const uniqueCombinations = new Set();
+        localChampions.forEach(offer => {
+            uniqueCombinations.add(`${offer.villa_id}_${offer.checkin_date}`);
+        });
+        const totalUniqueCombinations = uniqueCombinations.size;
+        const hasMore = (offsetCount + limitCount) < totalUniqueCombinations;
         
         res.json({
             success: true,
@@ -231,7 +239,7 @@ router.get('/activities', async (req, res) => {
                 offset: offsetCount,
                 limit: limitCount,
                 hasMore: hasMore,
-                totalAvailable: uniqueVillasTotal
+                totalAvailable: totalUniqueCombinations
             },
             query_params: {
                 date_range: `${queryStartDate} to ${queryEndDate}`,
