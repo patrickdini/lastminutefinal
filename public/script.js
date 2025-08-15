@@ -1014,10 +1014,7 @@ class ActivitiesDashboard {
                     <div class="villa-image-gallery">
                         <div class="villa-image-container">
                             <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
-                            <div class="champion-badge">
-                                <i class="fas fa-star"></i>
-                                Champion Offer
-                            </div>
+
                             ${villaDetails.class ? `<div class="villa-class-badge">${villaDetails.class}</div>` : ''}
                         </div>
                     </div>
