@@ -82,8 +82,8 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Found ${localChampions.length} local champions`);
         
-        // STEP B: Select Top 3 Global Champions with villa variety
-        const globalChampions = [];
+        // STEP B: Select Top 3 Global Champion villa/date combinations with variety
+        const championCombinations = [];
         const usedVillaIds = new Set();
         
         for (const offer of localChampions) {
@@ -92,24 +92,67 @@ router.get('/activities', async (req, res) => {
                 continue;
             }
             
-            // Add to global champions
-            globalChampions.push(offer);
+            // Add this villa/date combination to champions
+            championCombinations.push({
+                villa_id: offer.villa_id,
+                checkin_date: offer.checkin_date,
+                best_score: offer.attractiveness_score
+            });
             usedVillaIds.add(offer.villa_id);
             
-            // Stop once we have 3 champions
-            if (globalChampions.length >= 3) {
+            // Stop once we have 3 champion combinations
+            if (championCombinations.length >= 3) {
                 break;
             }
+        }
+        
+        console.log(`Selected ${championCombinations.length} champion villa/date combinations`);
+        
+        // STEP C: For each champion combination, fetch ALL available night options
+        let allChampionOffers = [];
+        
+        if (championCombinations.length > 0) {
+            // Create query to get all night options for the selected champion combinations
+            const championOffersQuery = `
+                SELECT 
+                    co.*,
+                    lrd.tagline,
+                    lrd.description,
+                    lrd.square_meters,
+                    lrd.bathrooms,
+                    lrd.view_type,
+                    lrd.pool_type,
+                    lrd.image_urls,
+                    lrd.key_amenities,
+                    lrd.webpage_url
+                FROM LMCurrentOffers co
+                LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+                WHERE co.adults = ? AND co.children = ?
+                AND co.offer_status IN ('Target Met', 'Best Effort')
+                AND (${championCombinations.map(() => '(co.villa_id = ? AND co.checkin_date = ?)').join(' OR ')})
+                ORDER BY 
+                    FIELD(co.villa_id, ${championCombinations.map(c => c.villa_id).join(', ')}),
+                    co.attractiveness_score DESC
+            `;
+            
+            // Prepare parameters: adults, children, then pairs of (villa_id, checkin_date)
+            const queryParams = [adultsCount, childrenCount];
+            championCombinations.forEach(combo => {
+                queryParams.push(combo.villa_id, combo.checkin_date);
+            });
+            
+            const [championOffers] = await connection.execute(championOffersQuery, queryParams);
+            allChampionOffers = championOffers;
+            
+            console.log(`Found ${allChampionOffers.length} total offers for ${championCombinations.length} champion combinations`);
         }
         
         // Release the connection back to the pool
         connection.release();
         
-        console.log(`Selected ${globalChampions.length} global champion offers`);
-        
         // Transform offers to match the frontend expected format
         // The frontend expects data similar to RoomAvailabilityStore format for compatibility
-        const transformedOffers = globalChampions.map(offer => {
+        const transformedOffers = allChampionOffers.map(offer => {
             // Parse JSON fields
             let perkIds = [];
             let imageUrls = [];
