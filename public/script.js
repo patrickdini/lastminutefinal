@@ -1154,7 +1154,6 @@ class ActivitiesDashboard {
                 
                 <div class="villa-card-header">
                     <div class="villa-tagline">${tagline}</div>
-                    <div class="villa-name-subtitle">${villaDetails.villa_display_name || villaKey}</div>
                     
                     ${specifications ? `
                         <div class="villa-specifications">
