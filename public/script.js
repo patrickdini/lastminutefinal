@@ -36,12 +36,19 @@ class ActivitiesDashboard {
             selectedEndDate: document.getElementById('selectedEndDate'),
             endDayOfWeek: document.getElementById('endDayOfWeek'),
             adultsCount: document.getElementById('adultsCount'),
-            childrenCount: document.getElementById('childrenCount')
+            childrenCount: document.getElementById('childrenCount'),
+            loadMoreBtn: document.getElementById('loadMoreBtn'),
+            loadMoreContainer: document.getElementById('loadMoreContainer'),
+            loadMoreCount: document.getElementById('loadMoreCount')
         };
         
         // Guest count properties
         this.selectedAdults = 2; // Default to 2 adults
         this.selectedChildren = 0; // Default to no children
+        
+        // Pagination properties
+        this.currentOffset = 0;
+        this.hasMoreOffers = false;
         
         this.initializeEventListeners();
         this.setupDynamicDateFilters();
@@ -68,6 +75,9 @@ class ActivitiesDashboard {
         // Guest count listeners
         this.elements.adultsCount.addEventListener('change', () => this.handleGuestCountChange());
         this.elements.childrenCount.addEventListener('change', () => this.handleGuestCountChange());
+        
+        // Load more button listener
+        this.elements.loadMoreBtn.addEventListener('click', () => this.loadMoreOffers());
         
         // Auto-refresh every 5 minutes (reduced frequency)
         setInterval(() => {
@@ -583,13 +593,20 @@ class ActivitiesDashboard {
     /**
      * Load activities from API with current filter parameters
      */
-    async loadActivities(silent = false) {
+    async loadActivities(silent = false, loadMore = false) {
         try {
+            // Reset offset if not loading more
+            if (!loadMore) {
+                this.currentOffset = 0;
+            }
+            
             this.showLoading(silent);
             
             // Build query parameters based on current selections
             const queryParams = this.buildQueryParameters();
-            const url = `${this.apiBaseUrl}/activities?${queryParams}`;
+            // Add pagination parameters
+            const paginationParams = `&offset=${this.currentOffset}&limit=3`;
+            const url = `${this.apiBaseUrl}/activities?${queryParams}${paginationParams}`;
             
             console.log('Fetching champion offers from:', url);
             const response = await fetch(url);
@@ -604,7 +621,18 @@ class ActivitiesDashboard {
                 throw new Error(data.message || 'API returned unsuccessful response');
             }
             
-            this.currentData = data.data;
+            // Handle pagination
+            this.hasMoreOffers = data.pagination?.hasMore || false;
+            
+            // Update data based on whether we're loading more or starting fresh
+            if (loadMore) {
+                // Append new data to existing
+                this.currentData = [...(this.currentData || []), ...data.data];
+            } else {
+                // Replace with fresh data
+                this.currentData = data.data;
+            }
+            
             console.log(`Received ${data.count} champion offers:`, data.query_params);
             
             // Display the pre-calculated champion offers directly
@@ -613,6 +641,34 @@ class ActivitiesDashboard {
         } catch (error) {
             console.error('Error loading champion offers:', error);
             this.showError(this.getErrorMessage(error));
+        }
+    }
+    
+    /**
+     * Load more offers (pagination)
+     */
+    async loadMoreOffers() {
+        if (!this.hasMoreOffers || this.isLoading) {
+            return;
+        }
+        
+        // Increment offset by 3 (limit)
+        this.currentOffset += 3;
+        
+        // Load more offers without resetting existing data
+        await this.loadActivities(false, true);
+    }
+    
+    /**
+     * Update Load More button visibility and state
+     */
+    updateLoadMoreButton() {
+        if (this.hasMoreOffers) {
+            this.elements.loadMoreContainer.style.display = 'block';
+            this.elements.loadMoreBtn.disabled = false;
+            this.elements.loadMoreCount.textContent = '(3 more)';
+        } else {
+            this.elements.loadMoreContainer.style.display = 'none';
         }
     }
     
@@ -912,6 +968,9 @@ class ActivitiesDashboard {
         );
         
         this.elements.villaCards.innerHTML = villaCardsHtml.join('');
+        
+        // Show or hide Load More button
+        this.updateLoadMoreButton();
     }
     
     /**

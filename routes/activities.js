@@ -16,7 +16,7 @@ router.get('/activities', async (req, res) => {
         console.log('Fetching champion offers from LMCurrentOffers...');
         
         // Extract query parameters or use defaults
-        const { startDate, endDate, adults = '2', children = '0' } = req.query;
+        const { startDate, endDate, adults = '2', children = '0', offset = '0', limit = '3' } = req.query;
         
         // Calculate default date range if not provided: today to today + 7 days in Bali time
         let queryStartDate, queryEndDate;
@@ -38,8 +38,10 @@ router.get('/activities', async (req, res) => {
         
         const adultsCount = parseInt(adults);
         const childrenCount = parseInt(children);
+        const offsetCount = parseInt(offset);
+        const limitCount = parseInt(limit);
         
-        console.log(`Querying offers: ${queryStartDate} to ${queryEndDate}, ${adultsCount} adults, ${childrenCount} children`);
+        console.log(`Querying offers: ${queryStartDate} to ${queryEndDate}, ${adultsCount} adults, ${childrenCount} children, offset: ${offsetCount}, limit: ${limitCount}`);
         
         // Get database connection
         const connection = await db.getConnection();
@@ -82,13 +84,21 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Found ${localChampions.length} local champions`);
         
-        // STEP B: Select Top 3 Global Champion villa/date combinations with variety
+        // STEP B: Select Global Champion villa/date combinations with variety and pagination
         const championCombinations = [];
         const usedVillaIds = new Set();
+        let skipCount = 0;
         
         for (const offer of localChampions) {
             // Skip if we already have an offer from this villa (ensure variety)
             if (usedVillaIds.has(offer.villa_id)) {
+                continue;
+            }
+            
+            // Apply offset - skip the first offsetCount combinations
+            if (skipCount < offsetCount) {
+                skipCount++;
+                usedVillaIds.add(offer.villa_id); // Still mark as used for variety
                 continue;
             }
             
@@ -100,13 +110,13 @@ router.get('/activities', async (req, res) => {
             });
             usedVillaIds.add(offer.villa_id);
             
-            // Stop once we have 3 champion combinations
-            if (championCombinations.length >= 3) {
+            // Stop once we have the requested limit
+            if (championCombinations.length >= limitCount) {
                 break;
             }
         }
         
-        console.log(`Selected ${championCombinations.length} champion villa/date combinations`);
+        console.log(`Selected ${championCombinations.length} champion villa/date combinations (offset: ${offsetCount}, limit: ${limitCount})`);
         
         // STEP C: For each champion combination, fetch ALL available night options
         let allChampionOffers = [];
@@ -208,10 +218,21 @@ router.get('/activities', async (req, res) => {
             };
         });
         
+        // Check if there are more offers available
+        const totalLocalChampions = localChampions.length;
+        const uniqueVillasTotal = new Set(localChampions.map(offer => offer.villa_id)).size;
+        const hasMore = (offsetCount + limitCount) < uniqueVillasTotal;
+        
         res.json({
             success: true,
             count: transformedOffers.length,
             data: transformedOffers,
+            pagination: {
+                offset: offsetCount,
+                limit: limitCount,
+                hasMore: hasMore,
+                totalAvailable: uniqueVillasTotal
+            },
             query_params: {
                 date_range: `${queryStartDate} to ${queryEndDate}`,
                 adults: adultsCount,

@@ -1309,3 +1309,55 @@ body {
         padding-right: 35px;
     }
 }
+
+/* Load More Button */
+.load-more-container {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+}
+
+.load-more-btn {
+    background: linear-gradient(135deg, #0F3128, #1a4a3b);
+    border: 2px solid #AA7831;
+    color: #FFFFFF;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(15, 49, 40, 0.3);
+}
+
+.load-more-btn:hover {
+    background: linear-gradient(135deg, #1a4a3b, #0F3128);
+    border-color: #D4AF37;
+    box-shadow: 0 6px 20px rgba(15, 49, 40, 0.4);
+    transform: translateY(-2px);
+}
+
+.load-more-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 10px rgba(15, 49, 40, 0.3);
+}
+
+.load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.load-more-count {
+    color: #AA7831;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.load-more-btn i {
+    font-size: 1.2rem;
+}
