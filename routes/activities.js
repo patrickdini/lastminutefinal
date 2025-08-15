@@ -131,7 +131,6 @@ router.get('/activities', async (req, res) => {
                 AND co.offer_status IN ('Target Met', 'Best Effort')
                 AND (${championCombinations.map(() => '(co.villa_id = ? AND co.checkin_date = ?)').join(' OR ')})
                 ORDER BY 
-                    FIELD(co.villa_id, ${championCombinations.map(c => c.villa_id).join(', ')}),
                     co.attractiveness_score DESC
             `;
             
