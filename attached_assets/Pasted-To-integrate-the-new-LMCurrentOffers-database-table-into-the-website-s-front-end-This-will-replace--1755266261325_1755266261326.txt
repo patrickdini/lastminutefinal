@@ -1,0 +1,35 @@
+To integrate the new LMCurrentOffers database table into the website's front-end. This will replace any existing offer calculation logic. The new system provides a pre-calculated, fully optimized database of all possible offers, which the website will query to display the most attractive deals to users.
+The Golden Rule: The website's job is not to calculate anything. It only needs to filter and display the pre-calculated offers from the database. This will ensure the website is extremely fast and responsive.
+Part 1: The Data Source
+The single source of truth for all offers is a new MySQL table:
+Table Name: LMCurrentOffers
+Update Frequency: This table is completely rebuilt automatically every hour (at 15 minutes past the hour). The data is always fresh.
+Key Column for Ranking: The most important column for decision-making is attractiveness_score. This is a pre-calculated number from 0-100 that represents the optimal balance of guest appeal and business value. Higher is better.
+Part 2: Website User Search Functionality
+The user will provide three inputs on the website:
+A check-in date range (e.g., September 1st to September 15th).
+A specific number of adults.
+A specific number of children.
+When the user clicks "Search," the back-end of the website must perform the following query logic.
+Part 3: The Query Logic - Displaying the Top 3 "Champion" Offers
+The goal is to always display a maximum of 3 "Champion" offers on the initial results page. To find these champions, the back-end must perform a two-step query process.
+Step A: Find the "Local Champion" for Each Available Stay
+First, we need to find the single best offer for each unique villa on each unique check-in date within the user's search.
+Filter the database: Select all offers from LMCurrentOffers that match the user's search criteria.
+code
+SQL
+-- Pseudo-code for the initial filter
+SELECT * FROM LMCurrentOffers
+WHERE 
+    checkin_date >= 'USER_START_DATE' AND
+    checkin_date <= 'USER_END_DATE' AND
+    adults = USER_ADULTS_COUNT AND
+    children = USER_CHILDREN_COUNT;
+Identify the best offer for each block: From these results, we need to find the "Local Champion." This is the offer with the highest attractiveness_score for each unique (villa_id, checkin_date) combination.
+This can be done efficiently in a single SQL query using window functions (like ROW_NUMBER()) or by grouping and selecting the MAX(attractiveness_score).
+The result of Step A is a clean list of the single best offer for each available villa and date.
+Step B: Select the Top 3 "Global Champions" to Display
+From the list of "Local Champions" generated in Step A, we simply select the top 3.
+Sort the list: Order the entire list of "Local Champions" by attractiveness_score in descending order.
+Ensure Variety: To avoid showing three offers for the same villa, apply a simple de-duplication rule. After selecting the #1 champion, ignore all other offers for that same villa_id before selecting the #2 champion, and so on.
+Take the Top 3: The first 3 offers from this final, sorted, and de-duplicated list are your "Global Champions."
