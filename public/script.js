@@ -77,7 +77,11 @@ class ActivitiesDashboard {
         this.elements.childrenCount.addEventListener('change', () => this.handleGuestCountChange());
         
         // Load more button listener
-        this.elements.loadMoreBtn.addEventListener('click', () => this.loadMoreOffers());
+        this.elements.loadMoreBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.loadMoreOffers();
+        });
         
         // Auto-refresh every 5 minutes (reduced frequency)
         setInterval(() => {
@@ -652,11 +656,36 @@ class ActivitiesDashboard {
             return;
         }
         
-        // Increment offset by 3 (limit)
-        this.currentOffset += 3;
+        // Store current scroll position
+        const currentScrollY = window.scrollY;
         
-        // Load more offers without resetting existing data
-        await this.loadActivities(false, true);
+        // Show loading state on button
+        const loadMoreBtn = this.elements.loadMoreBtn;
+        const originalText = loadMoreBtn.innerHTML;
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        
+        try {
+            // Increment offset by 3 (limit)
+            this.currentOffset += 3;
+            
+            // Load more offers without resetting existing data
+            await this.loadActivities(true, true); // Silent loading to prevent UI jump
+            
+            // Small delay to ensure content is rendered, then restore scroll
+            setTimeout(() => {
+                window.scrollTo(0, currentScrollY);
+            }, 100);
+            
+        } catch (error) {
+            console.error('Error loading more offers:', error);
+            // Reset offset on error
+            this.currentOffset -= 3;
+        } finally {
+            // Restore button state
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.innerHTML = originalText;
+        }
     }
     
     /**
@@ -967,7 +996,14 @@ class ActivitiesDashboard {
             })
         );
         
-        this.elements.villaCards.innerHTML = villaCardsHtml.join('');
+        // For load more, append to existing content instead of replacing
+        if (this.currentOffset > 0) {
+            // Append new cards to existing ones
+            this.elements.villaCards.insertAdjacentHTML('beforeend', villaCardsHtml.join(''));
+        } else {
+            // Replace all content for fresh load
+            this.elements.villaCards.innerHTML = villaCardsHtml.join('');
+        }
         
         // Show or hide Load More button
         this.updateLoadMoreButton();
