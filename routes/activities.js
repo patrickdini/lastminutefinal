@@ -123,6 +123,11 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Selected ${championCombinations.length} champion villa/date combinations (offset: ${offsetCount}, limit: ${limitCount})`);
         
+        // Log the selected champions with their scores for verification
+        championCombinations.forEach((combo, index) => {
+            console.log(`  Champion ${index + 1 + offsetCount}: Villa ${combo.villa_id}, Date ${combo.checkin_date}, Score: ${combo.best_score}`);
+        });
+        
         // STEP C: For each champion combination, fetch ALL available night options
         let allChampionOffers = [];
         
