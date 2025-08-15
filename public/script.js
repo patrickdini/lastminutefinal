@@ -912,8 +912,7 @@ class ActivitiesDashboard {
         // Store current offers for night selection functionality
         this.currentOffers = offers;
         
-        // Update count
-        this.elements.offersCount.textContent = `${offers.length} champion offers`;
+        // Count updated but not displayed
         
         // Generate villa cards
         if (offers.length > 0) {
