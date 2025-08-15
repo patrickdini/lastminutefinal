@@ -113,8 +113,11 @@ class ActivitiesDashboard {
             filters = this.getThurFriFilters(baliTime);
         }
         
+        // Sort filters chronologically by start date (excluding custom date picker)
+        const sortedFilters = this.sortFiltersByDate(filters);
+        
         // Update filter boxes
-        this.updateFilterBoxes(filters);
+        this.updateFilterBoxes(sortedFilters);
         
         // Set default active filter
         this.setActiveFilter('filter1');
@@ -282,6 +285,41 @@ class ActivitiesDashboard {
         } else {
             return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
         }
+    }
+
+    /**
+     * Sort filters chronologically by start date (custom filter always last)
+     */
+    sortFiltersByDate(filters) {
+        // Convert filters to array for sorting
+        const filterArray = Object.entries(filters).map(([key, value]) => ({
+            key,
+            ...value
+        }));
+        
+        // Sort by start date (custom filter goes last)
+        filterArray.sort((a, b) => {
+            if (a.dateRange === 'custom') return 1;
+            if (b.dateRange === 'custom') return -1;
+            
+            const startA = a.dateRange[0];
+            const startB = b.dateRange[0];
+            return startA.getTime() - startB.getTime();
+        });
+        
+        // Convert back to object with sequential filter IDs
+        const sortedFilters = {};
+        filterArray.forEach((filter, index) => {
+            const filterId = `filter${index + 1}`;
+            sortedFilters[filterId] = {
+                title: filter.title,
+                subtitle: filter.subtitle,
+                icon: filter.icon,
+                dateRange: filter.dateRange
+            };
+        });
+        
+        return sortedFilters;
     }
 
     /**
