@@ -393,14 +393,8 @@ class ActivitiesDashboard {
         
         console.log(`Guest count changed: ${this.selectedAdults} adults, ${this.selectedChildren} children`);
         
-        // Re-filter the current data with new guest requirements
-        if (this.currentData) {
-            if (this.filteredData && this.filteredData.length > 0) {
-                this.displayActivities(this.filteredData);
-            } else {
-                this.displayActivities(this.currentData);
-            }
-        }
+        // Reload offers with new guest requirements
+        this.loadActivities();
     }
 
     /**
@@ -461,12 +455,10 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Apply date filter to current data
+     * Apply date filter and reload offers
      */
     applyDateFilter(dateRange) {
-        if (!this.currentData) return;
-        
-        // If dateRange is already string format [startStr, endStr], use directly
+        // Convert date range to proper format
         let startStr, endStr;
         
         if (Array.isArray(dateRange) && dateRange.length === 2) {
@@ -482,20 +474,19 @@ class ActivitiesDashboard {
                 endStr = end.toISOString().split('T')[0];
             } else {
                 console.error('Invalid date format in dateRange:', dateRange);
-                this.displayActivities(this.currentData);
                 return;
             }
         } else {
             console.error('Invalid dateRange format:', dateRange);
-            this.displayActivities(this.currentData);
             return;
         }
         
-        // Store the filter range for use in generateOffersFromData
+        // Store the filter range and reload offers with new date range
         this.currentDateRange = [startStr, endStr];
+        console.log(`Date filter applied: ${startStr} to ${endStr}`);
         
-        // Display activities - let generateOffersFromData handle the filtering
-        this.displayActivities(this.currentData);
+        // Reload offers with the new date range
+        this.loadActivities();
     }
     
 
@@ -552,14 +543,18 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Load activities from API
+     * Load activities from API with current filter parameters
      */
     async loadActivities(silent = false) {
         try {
             this.showLoading(silent);
             
-            console.log('Fetching from:', `${this.apiBaseUrl}/activities`);
-            const response = await fetch(`${this.apiBaseUrl}/activities`);
+            // Build query parameters based on current selections
+            const queryParams = this.buildQueryParameters();
+            const url = `${this.apiBaseUrl}/activities?${queryParams}`;
+            
+            console.log('Fetching champion offers from:', url);
+            const response = await fetch(url);
             console.log('Response status:', response.status, response.statusText);
             const data = await response.json();
             
@@ -572,14 +567,39 @@ class ActivitiesDashboard {
             }
             
             this.currentData = data.data;
+            console.log(`Received ${data.count} champion offers:`, data.query_params);
             
-            // Show all data initially - filters will be applied when user clicks them
+            // Display the pre-calculated champion offers directly
             await this.displayActivities(this.currentData);
             
         } catch (error) {
-            console.error('Error loading activities:', error);
+            console.error('Error loading champion offers:', error);
             this.showError(this.getErrorMessage(error));
         }
+    }
+    
+    /**
+     * Build query parameters for the API based on current selections
+     */
+    buildQueryParameters() {
+        const params = new URLSearchParams();
+        
+        // Add guest counts
+        params.append('adults', this.selectedAdults.toString());
+        params.append('children', this.selectedChildren.toString());
+        
+        // Add date range if available
+        if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
+            const [startDate, endDate] = this.currentDateRange;
+            const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
+            const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
+            
+            params.append('startDate', startStr);
+            params.append('endDate', endStr);
+        }
+        // If no date range specified, API will use default (tomorrow + 7 days)
+        
+        return params.toString();
     }
     
     /**
@@ -755,43 +775,211 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Display offers data
+     * Display pre-calculated champion offers
      */
-    async displayActivities(activities) {
+    async displayActivities(championOffers) {
         this.isLoading = false;
         this.hideAllStates();
         
-        // Generate offers from activities data
-        const offers = this.generateOffersFromData(activities);
+        console.log('Displaying champion offers:', championOffers);
+        
+        // Transform champion offers to match expected format
+        const offers = this.transformChampionOffers(championOffers);
         
         // Update count
-        this.elements.offersCount.textContent = `${offers.length} offers`;
+        this.elements.offersCount.textContent = `${offers.length} champion offers`;
         
         // Generate villa cards
         if (offers.length > 0) {
-            await this.generateVillaCards(offers);
+            await this.generateChampionCards(offers);
+        } else {
+            this.showEmpty();
         }
         
         this.elements.offersContainer.style.display = 'block';
     }
+    
+    /**
+     * Transform LMCurrentOffers champion data to match frontend expected format
+     */
+    transformChampionOffers(championOffers) {
+        return championOffers.map(championOffer => {
+            // Calculate check-out date
+            const checkInDate = new Date(championOffer.EntryDate);
+            const checkOutDate = new Date(checkInDate);
+            checkOutDate.setDate(checkInDate.getDate() + championOffer.nights);
+            
+            return {
+                // Core booking details
+                villa: championOffer.UserRoomDisplayName,
+                checkIn: championOffer.EntryDate,
+                checkOut: checkOutDate.toISOString().split('T')[0],
+                nights: championOffer.nights,
+                
+                // Pricing (from LMCurrentOffers)
+                rate: parseFloat(championOffer.price_for_guests),
+                totalRate: parseFloat(championOffer.price_for_guests), // Already total for all nights
+                faceValue: parseFloat(championOffer.total_face_value),
+                savings: parseFloat(championOffer.guest_savings_value),
+                savingsPercent: parseFloat(championOffer.guest_savings_percent),
+                
+                // Villa details
+                villa_display_name: championOffer.villa_display_name,
+                tagline: championOffer.tagline,
+                description: championOffer.description,
+                square_meters: championOffer.square_meters,
+                bathrooms: championOffer.bathrooms,
+                view_type: championOffer.view_type,
+                pool_type: championOffer.pool_type,
+                image_urls: championOffer.image_urls,
+                key_amenities: championOffer.key_amenities,
+                webpage_url: championOffer.webpage_url,
+                
+                // Booking constraints
+                maxGuests: championOffer.MaxGuestsPerUnit,
+                bedrooms: championOffer.Bedrooms,
+                pool: championOffer.Pool,
+                ratePlan: championOffer.RatePlanName,
+                class: championOffer.class,
+                
+                // LMCurrentOffers specific
+                offer_id: championOffer.offer_id,
+                attractiveness_score: championOffer.attractiveness_score,
+                perks_included: championOffer.perks_included,
+                perk_ids: championOffer.perk_ids || [],
+                has_wow_factor: championOffer.has_wow_factor_perk
+            };
+        });
+    }
 
     /**
-     * Generate villa cards from offers
+     * Generate simplified villa cards for champion offers (max 3)
      */
-    async generateVillaCards(offers) {
-        // Group offers by villa, then by check-in date
-        const villaGroups = this.groupOffersByVillaAndDate(offers);
+    async generateChampionCards(offers) {
+        console.log('Generating champion cards for', offers.length, 'offers');
         
         const villaCardsHtml = await Promise.all(
-            Object.keys(villaGroups).map(async villaName => {
-                const villaOffers = villaGroups[villaName];
-                const firstOffer = Object.values(villaOffers)[0][0]; // Get first offer for villa details
-                
-                return await this.generateVillaCard(villaName, firstOffer, villaOffers);
+            offers.map(async offer => {
+                return await this.generateChampionVillaCard(offer);
             })
         );
         
         this.elements.villaCards.innerHTML = villaCardsHtml.join('');
+    }
+    
+    /**
+     * Generate individual champion villa card (simplified version)
+     */
+    async generateChampionVillaCard(offer) {
+        const villaName = offer.villa;
+        const tagline = offer.tagline || offer.villa_display_name || villaName;
+        const description = offer.description || this.getVillaDescription(villaName);
+        const imageUrls = this.parseImageUrls(offer.image_urls);
+        const specifications = this.formatVillaSpecs(offer);
+        
+        // Format check-in date display
+        const checkInDate = new Date(offer.checkIn);
+        const checkinDay = this.getDayOfWeek(checkInDate);
+        const daysFromNow = this.calculateDaysFromNow(checkInDate);
+        
+        // Format perks display
+        const perksDisplay = offer.perks_included ? `
+            <div class="perks-included">
+                <i class="fas fa-gift"></i>
+                <span>${offer.perks_included}</span>
+            </div>
+        ` : '';
+        
+        // Format pricing with face value if there are savings
+        const showFaceValue = offer.faceValue > offer.totalRate;
+        const faceValueDisplay = showFaceValue ? `
+            <div class="face-value-crossed">
+                Face Value: ${this.formatRate(offer.faceValue)}
+            </div>
+        ` : '';
+        
+        const savingsDisplay = showFaceValue ? `
+            <div class="savings-highlight">
+                You Save: ${this.formatRate(offer.savings)} (${(offer.savingsPercent * 100).toFixed(1)}%)
+            </div>
+        ` : '';
+        
+        return `
+            <div class="villa-card champion-offer" data-offer-id="${offer.offer_id}">
+                ${imageUrls.length > 0 ? `
+                    <div class="villa-image-gallery">
+                        <div class="villa-image-container">
+                            <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
+                            <div class="champion-badge">
+                                <i class="fas fa-star"></i>
+                                Champion Offer
+                            </div>
+                            ${offer.class ? `<div class="villa-class-badge">${offer.class}</div>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="villa-card-header">
+                    <div class="villa-tagline">${tagline}</div>
+                    <div class="villa-name-subtitle">${offer.villa_display_name || villaName}</div>
+                    
+                    ${specifications ? `
+                        <div class="villa-specifications">
+                            ${specifications}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="villa-description">
+                        <p>${this.truncateText(description, 150)}</p>
+                        ${this.formatKeyAmenities(offer.key_amenities)}
+                    </div>
+                    
+                    <div class="villa-details">
+                        <div class="villa-detail-item">
+                            <i class="fas fa-users"></i>
+                            <span>${offer.maxGuests} Guests</span>
+                        </div>
+                        <div class="villa-detail-item">
+                            <i class="fas fa-bed"></i>
+                            <span>${offer.bedrooms || 'N/A'} Bedrooms</span>
+                        </div>
+                        <div class="villa-detail-item">
+                            <i class="fas fa-swimming-pool"></i>
+                            <span>${offer.pool_type || 'Private Pool'}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="champion-booking-section">
+                    <div class="booking-section-title">Champion Offer Details:</div>
+                    <div class="champion-booking-card">
+                        <div class="booking-info">
+                            <div class="booking-duration">
+                                ${offer.nights} ${offer.nights === 1 ? 'Night' : 'Nights'}
+                            </div>
+                            <div class="booking-dates">
+                                Check-in: ${checkinDay}, ${this.formatDateForDisplay(offer.checkIn)}${daysFromNow}
+                                <br>
+                                Check-out: ${this.formatDateForDisplay(offer.checkOut)}
+                            </div>
+                            ${perksDisplay}
+                        </div>
+                        
+                        <div class="booking-price-section">
+                            ${faceValueDisplay}
+                            <div class="your-price">
+                                Your Price: ${this.formatRate(offer.totalRate)}
+                            </div>
+                            ${savingsDisplay}
+                        </div>
+                        
+                        <button class="book-btn champion-book-btn" onclick="app.handleChampionBooking('${offer.offer_id}', '${villaName}', '${offer.checkIn}', ${offer.nights})">
+                            Book This Champion Offer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     /**
@@ -1584,6 +1772,14 @@ class ActivitiesDashboard {
     handleBooking(villaName, checkInDate, nights) {
         console.log(`Booking: ${villaName}, Check-in: ${checkInDate}, Nights: ${nights}`);
         this.showNotification(`Booking ${villaName} for ${nights} night${nights === 1 ? '' : 's'} starting ${this.formatDateForDisplay(checkInDate)}`, 'success');
+    }
+    
+    /**
+     * Handle champion offer booking
+     */
+    handleChampionBooking(offerId, villaName, checkInDate, nights) {
+        console.log(`Champion booking action: Offer ID ${offerId}, ${villaName}: ${nights} nights starting ${checkInDate}`);
+        this.showNotification(`🏆 Champion Offer Booking!\nOffer ID: ${offerId}\nVilla: ${villaName}\n${nights} nights starting ${this.formatDateForDisplay(checkInDate)}`, 'success');
     }
 }
 

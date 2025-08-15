@@ -4,31 +4,51 @@ const db = require('../config/database');
 
 /**
  * GET /api/activities
- * Retrieve all room availability data from RoomAvailabilityStore table
+ * Retrieve the top 3 champion offers from LMCurrentOffers using Two-Step Champion Selection
+ * Query parameters:
+ * - startDate: check-in date range start (YYYY-MM-DD)
+ * - endDate: check-in date range end (YYYY-MM-DD) 
+ * - adults: number of adults
+ * - children: number of children
  */
 router.get('/activities', async (req, res) => {
     try {
-        console.log('Fetching activities from database...');
+        console.log('Fetching champion offers from LMCurrentOffers...');
         
-        // Calculate date range: today to today + 60 days in Bali time (UTC+8)
-        const now = new Date();
-        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-        const today = baliTime.toISOString().split('T')[0];
+        // Extract query parameters or use defaults
+        const { startDate, endDate, adults = '2', children = '0' } = req.query;
         
-        const endDate = new Date(baliTime);
-        endDate.setDate(endDate.getDate() + 60);
-        const maxDate = endDate.toISOString().split('T')[0];
+        // Calculate default date range if not provided: today to today + 7 days in Bali time
+        let queryStartDate, queryEndDate;
         
-        console.log(`Querying availability from ${today} to ${maxDate} (Bali time)`);
+        if (startDate && endDate) {
+            queryStartDate = startDate;
+            queryEndDate = endDate;
+        } else {
+            const now = new Date();
+            const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+            const tomorrow = new Date(baliTime);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            queryStartDate = tomorrow.toISOString().split('T')[0];
+            
+            const weekLater = new Date(tomorrow);
+            weekLater.setDate(tomorrow.getDate() + 7);
+            queryEndDate = weekLater.toISOString().split('T')[0];
+        }
+        
+        const adultsCount = parseInt(adults);
+        const childrenCount = parseInt(children);
+        
+        console.log(`Querying offers: ${queryStartDate} to ${queryEndDate}, ${adultsCount} adults, ${childrenCount} children`);
         
         // Get database connection
         const connection = await db.getConnection();
         
-        // Query RoomAvailabilityStore with villa descriptions from LMRoomDescription
-        const [rows] = await connection.execute(`
+        // STEP A: Find Local Champions (best offer per villa_id + checkin_date combination)
+        // Using window functions to get the highest attractiveness_score for each (villa_id, checkin_date) pair
+        const localChampionsQuery = `
             SELECT 
-                ras.*,
-                lrd.name as villa_display_name,
+                co.*,
                 lrd.tagline,
                 lrd.description,
                 lrd.square_meters,
@@ -37,51 +57,128 @@ router.get('/activities', async (req, res) => {
                 lrd.pool_type,
                 lrd.image_urls,
                 lrd.key_amenities,
-                lrd.class
-            FROM RoomAvailabilityStore ras
-            LEFT JOIN LMRoomDescription lrd ON (
-                CASE 
-                    WHEN ras.UserRoomDisplayName = 'Pearl & Shell' THEN lrd.name = 'The Pearl Villa'
-                    WHEN ras.UserRoomDisplayName = 'Leaf' THEN lrd.name = 'The Leaf Villa'
-                    WHEN ras.UserRoomDisplayName = 'Shore' THEN lrd.name = 'The Shore Villa'
-                    WHEN ras.UserRoomDisplayName = 'Sunset Room' THEN lrd.name = 'The Sunset Room'
-                    WHEN ras.UserRoomDisplayName = 'Sunset' THEN lrd.name = 'The Sunset Room'
-                    WHEN ras.UserRoomDisplayName = 'Swell 2BR' THEN lrd.name = 'The Swell 2BR'
-                    WHEN ras.UserRoomDisplayName = 'Swell 3BR' THEN lrd.name = 'The Swell 3BR'
-                    WHEN ras.UserRoomDisplayName = 'Swell 4BR' THEN lrd.name = 'The Swell 4BR'
-                    WHEN ras.UserRoomDisplayName = 'Tide' THEN lrd.name = 'The Tide Villa'
-                    WHEN ras.UserRoomDisplayName = 'Wave' THEN lrd.name = 'The Wave Villa'
-                    ELSE ras.UserRoomDisplayName = lrd.name
-                END
-            )
-            WHERE ras.EntryDate >= ? AND ras.EntryDate <= ? 
-            ORDER BY ras.EntryDate ASC, ras.UserRoomDisplayName ASC
-        `, [today, maxDate]);
+                lrd.webpage_url
+            FROM (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY villa_id, checkin_date 
+                        ORDER BY attractiveness_score DESC
+                    ) as rn
+                FROM LMCurrentOffers 
+                WHERE checkin_date >= ? 
+                    AND checkin_date <= ?
+                    AND adults = ?
+                    AND children = ?
+                    AND offer_status IN ('Target Met', 'Best Effort')
+            ) co
+            LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+            WHERE co.rn = 1
+            ORDER BY co.attractiveness_score DESC
+        `;
+        
+        const [localChampions] = await connection.execute(localChampionsQuery, [
+            queryStartDate, queryEndDate, adultsCount, childrenCount
+        ]);
+        
+        console.log(`Found ${localChampions.length} local champions`);
+        
+        // STEP B: Select Top 3 Global Champions with villa variety
+        const globalChampions = [];
+        const usedVillaIds = new Set();
+        
+        for (const offer of localChampions) {
+            // Skip if we already have an offer from this villa (ensure variety)
+            if (usedVillaIds.has(offer.villa_id)) {
+                continue;
+            }
+            
+            // Add to global champions
+            globalChampions.push(offer);
+            usedVillaIds.add(offer.villa_id);
+            
+            // Stop once we have 3 champions
+            if (globalChampions.length >= 3) {
+                break;
+            }
+        }
         
         // Release the connection back to the pool
         connection.release();
         
-        console.log(`Successfully retrieved ${rows.length} activities`);
+        console.log(`Selected ${globalChampions.length} global champion offers`);
         
-        // Transform room names: "Pearl & Shell" -> "Pearl"
-        const transformedRows = rows.map(row => {
-            if (row.UserRoomDisplayName === 'Pearl & Shell') {
-                return {
-                    ...row,
-                    UserRoomDisplayName: 'Pearl'
-                };
+        // Transform offers to match the frontend expected format
+        // The frontend expects data similar to RoomAvailabilityStore format for compatibility
+        const transformedOffers = globalChampions.map(offer => {
+            // Parse JSON fields
+            let perkIds = [];
+            let imageUrls = [];
+            let keyAmenities = [];
+            
+            try {
+                perkIds = JSON.parse(offer.perk_ids || '[]');
+                imageUrls = JSON.parse(offer.image_urls || '[]');
+                keyAmenities = JSON.parse(offer.key_amenities || '[]');
+            } catch (e) {
+                console.warn('Error parsing JSON fields for offer:', offer.offer_id, e.message);
             }
-            return row;
+            
+            // Transform to match expected frontend format (similar to RoomAvailabilityStore)
+            return {
+                // Match RoomAvailabilityStore field names for frontend compatibility
+                EntryDate: offer.checkin_date,
+                UserRoomDisplayName: offer.villa_id,
+                AvailabilityCount: 1, // Offer is available
+                LowestRateAmount: parseFloat(offer.price_for_guests),
+                RatePlanName: offer.offer_status,
+                Bedrooms: null, // Will be populated from LMRoomDescription if needed
+                MaxAdultsPerUnit: offer.adults,
+                MaxGuestsPerUnit: offer.adults + offer.children,
+                Privacy: null,
+                Pool: 'Private', // Default for villas
+                UserDefinedClass: null,
+                
+                // Enhanced villa data from LMRoomDescription join
+                villa_display_name: offer.villa_name,
+                tagline: offer.tagline,
+                description: offer.description,
+                square_meters: offer.square_meters,
+                bathrooms: offer.bathrooms,
+                view_type: offer.view_type,
+                pool_type: offer.pool_type,
+                image_urls: offer.image_urls,
+                key_amenities: offer.key_amenities,
+                class: null,
+                webpage_url: offer.webpage_url,
+                
+                // LMCurrentOffers specific fields
+                offer_id: offer.offer_id,
+                nights: offer.nights,
+                attractiveness_score: offer.attractiveness_score,
+                price_for_guests: offer.price_for_guests,
+                total_face_value: offer.total_face_value,
+                guest_savings_value: offer.guest_savings_value,
+                guest_savings_percent: offer.guest_savings_percent,
+                has_wow_factor_perk: offer.has_wow_factor_perk,
+                perk_ids: perkIds,
+                perks_included: offer.perks_included,
+                last_calculated_at: offer.last_calculated_at
+            };
         });
         
         res.json({
             success: true,
-            count: transformedRows.length,
-            data: transformedRows
+            count: transformedOffers.length,
+            data: transformedOffers,
+            query_params: {
+                date_range: `${queryStartDate} to ${queryEndDate}`,
+                adults: adultsCount,
+                children: childrenCount
+            }
         });
         
     } catch (error) {
-        console.error('Error fetching activities:', error);
+        console.error('Error fetching champion offers:', error);
         
         // Handle specific database errors
         if (error.code === 'ECONNREFUSED') {
@@ -96,7 +193,7 @@ router.get('/activities', async (req, res) => {
             return res.status(404).json({
                 success: false,
                 error: 'Table not found',
-                message: 'RoomAvailabilityStore table does not exist'
+                message: 'LMCurrentOffers table does not exist'
             });
         }
         
@@ -112,7 +209,7 @@ router.get('/activities', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Internal server error',
-            message: 'Failed to retrieve activities from database'
+            message: 'Failed to retrieve champion offers from database'
         });
     }
 });
