@@ -955,6 +955,7 @@ class ActivitiesDashboard {
                 description: championOffer.description,
                 square_meters: championOffer.square_meters,
                 bathrooms: championOffer.bathrooms,
+                bedrooms: championOffer.bedrooms, // Use lowercase from backend
                 view_type: championOffer.view_type,
                 pool_type: championOffer.pool_type,
                 image_urls: championOffer.image_urls,
@@ -963,7 +964,6 @@ class ActivitiesDashboard {
                 
                 // Booking constraints
                 maxGuests: championOffer.MaxGuestsPerUnit,
-                bedrooms: championOffer.Bedrooms,
                 pool: championOffer.Pool,
                 ratePlan: championOffer.RatePlanName,
                 class: championOffer.class,
