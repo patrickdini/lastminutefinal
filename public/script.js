@@ -1279,6 +1279,141 @@ class ActivitiesDashboard {
     }
     
     /**
+     * Generate timeline for a specific offer showing extension options
+     */
+    generateTimelineForOffer(primaryOffer, allOffers, villaKey) {
+        const checkInDate = new Date(primaryOffer.checkIn);
+        const checkOutDate = new Date(checkInDate);
+        checkOutDate.setDate(checkInDate.getDate() + primaryOffer.nights);
+        
+        // Generate timeline dates (2 days before to 2 days after)
+        const timelineDates = [];
+        
+        // Extension dates before check-in
+        for (let i = 2; i >= 1; i--) {
+            const extDate = new Date(checkInDate);
+            extDate.setDate(checkInDate.getDate() - i);
+            timelineDates.push({
+                date: extDate,
+                type: 'extension',
+                label: `+${i} night${i > 1 ? 's' : ''}`,
+                dayNumber: extDate.getDate(),
+                isAvailable: this.isDateAvailable(extDate, allOffers)
+            });
+        }
+        
+        // Check-in date
+        timelineDates.push({
+            date: checkInDate,
+            type: 'checkin',
+            label: 'Check-in',
+            dayNumber: checkInDate.getDate(),
+            isSelected: true
+        });
+        
+        // Stay nights
+        for (let i = 1; i < primaryOffer.nights; i++) {
+            const stayDate = new Date(checkInDate);
+            stayDate.setDate(checkInDate.getDate() + i);
+            timelineDates.push({
+                date: stayDate,
+                type: 'stay',
+                label: 'Stay',
+                dayNumber: stayDate.getDate(),
+                isSelected: true
+            });
+        }
+        
+        // Check-out date
+        timelineDates.push({
+            date: checkOutDate,
+            type: 'checkout',
+            label: 'Check-out',
+            dayNumber: checkOutDate.getDate(),
+            isSelected: true
+        });
+        
+        // Extension dates after check-out
+        for (let i = 1; i <= 2; i++) {
+            const extDate = new Date(checkOutDate);
+            extDate.setDate(checkOutDate.getDate() + i);
+            timelineDates.push({
+                date: extDate,
+                type: 'extension',
+                label: `+${i} night${i > 1 ? 's' : ''}`,
+                dayNumber: extDate.getDate(),
+                isAvailable: this.isDateAvailable(extDate, allOffers)
+            });
+        }
+        
+        // Generate timeline HTML
+        const timelineNodes = timelineDates.map((dateInfo, index) => {
+            const { date, type, label, dayNumber, isSelected, isAvailable } = dateInfo;
+            const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+            
+            let circleClass = '';
+            let clickable = '';
+            
+            if (type === 'extension') {
+                circleClass = isAvailable ? 'extension' : 'unavailable';
+                if (isAvailable) {
+                    clickable = `onclick="app.extendStay('${primaryOffer.offer_id}', '${villaKey}', '${date.toISOString().split('T')[0]}', '${type}')"`;
+                }
+            } else if (isSelected) {
+                circleClass = 'selected';
+            }
+            
+            const connector = index < timelineDates.length - 1 ? '<div class="timeline-connector"></div>' : '';
+            
+            return `
+                <div class="date-node">
+                    <div class="date-circle ${circleClass}" ${clickable} title="${label}">
+                        ${dayNumber}
+                    </div>
+                    <div class="date-label">
+                        ${monthName} ${dayNumber}<br>
+                        <small>${label}</small>
+                    </div>
+                </div>
+                ${connector}
+            `;
+        }).join('');
+        
+        return `
+            <div class="timeline-container">
+                <div class="timeline-title">Customize Your Stay</div>
+                <div class="timeline-dates">
+                    ${timelineNodes}
+                </div>
+                <div class="extend-hint">💡 Tap the dotted circles to extend your stay</div>
+            </div>
+        `;
+    }
+    
+    /**
+     * Check if a date is available for extension
+     */
+    isDateAvailable(date, allOffers) {
+        // Simple check - you might want to add more sophisticated logic
+        const dateString = date.toISOString().split('T')[0];
+        return allOffers.some(offer => 
+            offer.checkIn.split('T')[0] === dateString || 
+            this.isDateInOfferRange(date, offer)
+        );
+    }
+    
+    /**
+     * Check if date falls within an offer's range
+     */
+    isDateInOfferRange(date, offer) {
+        const checkIn = new Date(offer.checkIn);
+        const checkOut = new Date(checkIn);
+        checkOut.setDate(checkIn.getDate() + offer.nights);
+        
+        return date >= checkIn && date <= checkOut;
+    }
+
+    /**
      * Generate special offer villa card with night selectors (new design)
      */
     async generateChampionVillaCardWithNights(villaKey, villaDetails, dateGroups) {
@@ -1349,39 +1484,8 @@ class ActivitiesDashboard {
             `;
         }
         
-        // Generate date selector buttons
-        const dateButtons = allOffers.slice(0, 5).map((offer, index) => {
-            const offerDate = new Date(offer.checkIn);
-            const isSelected = offer.offer_id === primaryOffer.offer_id;
-            const monthLabel = offerDate.toLocaleDateString('en-US', { month: 'short' });
-            const dayLabel = offerDate.getDate();
-            const nightsLabel = `${offer.nights} night${offer.nights > 1 ? 's' : ''}`;
-            
-            return `
-                <div class="date-selector-item ${isSelected ? 'selected' : ''}" 
-                     onclick="app.selectChampionOffer('${offer.offer_id}', '${villaKey}')">
-                    <div class="date-circle">
-                        <span class="date-number">${dayLabel}</span>
-                    </div>
-                    <div class="date-labels">
-                        <span class="month-label">${monthLabel} ${dayLabel}</span>
-                        <span class="nights-label">${nightsLabel}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        // Add dotted circles for additional dates if there are more
-        let additionalDates = '';
-        if (allOffers.length > 5) {
-            additionalDates = `
-                <div class="date-selector-item dotted">
-                    <div class="date-circle dotted">
-                        <span>+${allOffers.length - 5}</span>
-                    </div>
-                </div>
-            `;
-        }
+        // Generate timeline dates
+        const timelineHtml = this.generateTimelineForOffer(primaryOffer, allOffers, villaKey);
         
         // Get primary image
         const heroImage = imageUrls.length > 0 ? imageUrls[0] : '/api/placeholder/400/280';
@@ -1408,15 +1512,8 @@ class ActivitiesDashboard {
                     <!-- Included Perks -->
                     ${perksHtml}
                     
-                    <!-- Date Selector -->
-                    <div class="champion-date-selector">
-                        <h4>Customize Your Stay</h4>
-                        <div class="date-selector-grid">
-                            ${dateButtons}
-                            ${additionalDates}
-                        </div>
-                        ${allOffers.length > 1 ? '<p class="selector-hint"><i class="fas fa-lightbulb"></i> Tap the dotted circles to extend your stay</p>' : ''}
-                    </div>
+                    <!-- Timeline Extension -->
+                    ${timelineHtml}
                     
                     <!-- Book Button -->
                     <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
@@ -1425,6 +1522,76 @@ class ActivitiesDashboard {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Handle stay extension from timeline
+     */
+    extendStay(offerId, villaKey, extensionDate, extensionType) {
+        console.log('Extending stay:', { offerId, villaKey, extensionDate, extensionType });
+        
+        // Show confirmation popup
+        const confirmMessage = `Extend your stay to include ${extensionDate}?`;
+        if (confirm(confirmMessage)) {
+            // Find the current offer
+            const currentCard = document.querySelector(`[data-offer-id="${offerId}"]`);
+            if (currentCard) {
+                // Update the timeline to show the extended dates
+                this.updateTimelineSelection(currentCard, extensionDate, extensionType);
+                
+                // Recalculate pricing for extended stay
+                this.recalculatePricingForExtension(currentCard, extensionDate, extensionType);
+            }
+        }
+    }
+    
+    /**
+     * Update timeline selection when extending
+     */
+    updateTimelineSelection(card, extensionDate, extensionType) {
+        const timelineContainer = card.querySelector('.timeline-container');
+        if (timelineContainer) {
+            // Find the date node for the extension
+            const dateNodes = timelineContainer.querySelectorAll('.date-node');
+            dateNodes.forEach(node => {
+                const circle = node.querySelector('.date-circle');
+                const label = node.querySelector('.date-label small');
+                
+                if (circle.textContent.trim() === new Date(extensionDate).getDate().toString()) {
+                    // Update the circle to selected state
+                    circle.classList.remove('extension');
+                    circle.classList.add('selected');
+                    
+                    // Update the label
+                    if (label) {
+                        label.textContent = extensionType === 'before' ? 'Check-in' : 'Stay';
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Recalculate pricing for extended stay
+     */
+    recalculatePricingForExtension(card, extensionDate, extensionType) {
+        // This would normally connect to your pricing API
+        // For now, just show a visual update
+        const priceOverlay = card.querySelector('.champion-price-overlay .amount');
+        const bookBtn = card.querySelector('.champion-book-btn');
+        
+        if (priceOverlay && bookBtn) {
+            // Simplified calculation - add ~20% for extension
+            const currentPrice = parseFloat(priceOverlay.textContent);
+            const newPrice = (currentPrice * 1.2).toFixed(1);
+            
+            priceOverlay.textContent = `${newPrice}M`;
+            
+            // Update button text
+            const currentNights = parseInt(bookBtn.textContent.match(/\d+/)[0]);
+            const newNights = currentNights + 1;
+            bookBtn.textContent = `BOOK SPECIAL OFFER (${newNights} NIGHT${newNights > 1 ? 'S' : ''})`;
+        }
     }
 
     /**

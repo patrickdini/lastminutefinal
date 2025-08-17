@@ -1588,6 +1588,7 @@ body {
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4A4A47;
 }
 
 /* Hero Image Section */
@@ -1701,95 +1702,100 @@ body {
     font-size: 1rem;
 }
 
-/* Date Selector Section */
-.champion-date-selector {
-    margin-bottom: 1.5rem;
+/* Timeline Extension */
+.timeline-container {
+    background: rgba(74, 74, 71, 0.3);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
-.champion-date-selector h4 {
-    color: rgba(255, 255, 255, 0.9);
+.timeline-title {
+    color: #AA7831;
     font-size: 1rem;
-    font-weight: 500;
-    margin: 0 0 1rem 0;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-align: center;
+    font-family: 'Crimson Text', serif;
 }
 
-.date-selector-grid {
+.timeline-dates {
     display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding: 0.5rem 0;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
-.date-selector-item {
+.date-node {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+}
+
+.date-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.date-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 2px solid #AA7831;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.date-selector-item.selected .date-circle {
+.date-circle.selected {
     background: #AA7831;
-    border-color: #AA7831;
-}
-
-.date-circle .date-number {
-    color: #AA7831;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.date-selector-item.selected .date-circle .date-number {
     color: white;
+    box-shadow: 0 0 12px rgba(170, 120, 49, 0.4);
 }
 
-.date-circle.dotted {
-    border: 2px dashed rgba(170, 120, 49, 0.5);
-}
-
-.date-labels {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.month-label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.nights-label {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.7rem;
-}
-
-.selector-hint {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.8rem;
-    margin-top: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.selector-hint i {
+.date-circle.available {
+    background: rgba(170, 120, 49, 0.2);
     color: #AA7831;
+    border: 2px solid #AA7831;
+}
+
+.date-circle.extension {
+    background: rgba(170, 120, 49, 0.1);
+    color: #AA7831;
+    border: 2px dashed #AA7831;
+}
+
+.date-circle.unavailable {
+    background: rgba(102, 102, 102, 0.2);
+    color: #666;
+    border: 2px solid #666;
+    cursor: not-allowed;
+}
+
+.date-label {
+    font-size: 0.6rem;
+    color: #ccc;
+    margin-top: 4px;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.timeline-connector {
+    width: 20px;
+    height: 2px;
+    background: #AA7831;
+    margin: 0 4px;
+    align-self: center;
+    margin-top: -15px;
+}
+
+.extend-hint {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #AA7831;
+    margin-top: 10px;
+    font-style: italic;
 }
 
 /* Book Button */
@@ -1815,6 +1821,24 @@ body {
 }
 
 /* Responsive Design */
+/* Mobile optimizations for timeline */
+@media (max-width: 400px) {
+    .timeline-dates {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .date-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.7rem;
+    }
+    
+    .timeline-connector {
+        width: 15px;
+    }
+}
+
 @media (max-width: 768px) {
     .champion-offer-card {
         max-width: 100%;
