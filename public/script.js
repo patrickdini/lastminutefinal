@@ -121,10 +121,12 @@ class ActivitiesDashboard {
         const currentDate = new Date(startOfWeek);
         this.calendarDates = []; // Reset the dates array
         let dateIndex = 0;
+        let cellIndex = 0; // Track DOM cell position
         
         while (currentDate <= endOfWeek) {
             const dayCell = document.createElement('div');
             dayCell.className = 'calendar-date';
+            dayCell.dataset.cellIndex = cellIndex; // Always set cell index
             
             // Check if this date is in our 15-day range
             const isInRange = dates.some(d => 
@@ -136,14 +138,15 @@ class ActivitiesDashboard {
             if (isInRange) {
                 dayCell.textContent = currentDate.getDate();
                 dayCell.dataset.date = currentDate.toISOString().split('T')[0];
-                dayCell.dataset.index = dateIndex;
+                dayCell.dataset.dateIndex = dateIndex; // Separate index for calendarDates array
                 
                 // Store date info for later reference
                 this.calendarDates.push({
                     date: new Date(currentDate),
                     day: currentDate.getDate(),
                     isToday: currentDate.getTime() === baliTime.getTime(),
-                    isSelectable: currentDate.getTime() !== baliTime.getTime() // Today is not selectable
+                    isSelectable: currentDate.getTime() !== baliTime.getTime(), // Today is not selectable
+                    cellIndex: cellIndex // Store which DOM cell this corresponds to
                 });
                 
                 // Disable today (first date) but keep it visible
@@ -161,6 +164,7 @@ class ActivitiesDashboard {
             
             this.elements.calendarGrid.appendChild(dayCell);
             currentDate.setDate(currentDate.getDate() + 1);
+            cellIndex++;
         }
     }
     
@@ -218,19 +222,40 @@ class ActivitiesDashboard {
             element.classList.remove('selected', 'in-range');
         });
         
-        // Apply styling to selected dates
-        const selectableDates = this.elements.calendarGrid.querySelectorAll('.calendar-date[data-index]:not(.disabled):not(.empty)');
-        
-        selectableDates.forEach(element => {
-            const elementIndex = parseInt(element.dataset.index);
-            
-            if (elementIndex === this.selectedCheckIn || elementIndex === this.selectedCheckOut) {
-                element.classList.add('selected');
-            } else if (this.selectedCheckIn !== null && this.selectedCheckOut !== null && 
-                      elementIndex > this.selectedCheckIn && elementIndex < this.selectedCheckOut) {
-                element.classList.add('in-range');
+        // Apply styling to selected dates based on cellIndex
+        if (this.selectedCheckIn !== null) {
+            const checkInCellIndex = this.calendarDates[this.selectedCheckIn]?.cellIndex;
+            if (checkInCellIndex !== undefined) {
+                const checkInElement = this.elements.calendarGrid.querySelector(`[data-cell-index="${checkInCellIndex}"]`);
+                if (checkInElement) checkInElement.classList.add('selected');
             }
-        });
+        }
+        
+        if (this.selectedCheckOut !== null) {
+            const checkOutCellIndex = this.calendarDates[this.selectedCheckOut]?.cellIndex;
+            if (checkOutCellIndex !== undefined) {
+                const checkOutElement = this.elements.calendarGrid.querySelector(`[data-cell-index="${checkOutCellIndex}"]`);
+                if (checkOutElement) checkOutElement.classList.add('selected');
+            }
+        }
+        
+        // Apply in-range styling
+        if (this.selectedCheckIn !== null && this.selectedCheckOut !== null) {
+            const startCellIndex = this.calendarDates[this.selectedCheckIn]?.cellIndex;
+            const endCellIndex = this.calendarDates[this.selectedCheckOut]?.cellIndex;
+            
+            if (startCellIndex !== undefined && endCellIndex !== undefined) {
+                for (let i = 0; i < this.calendarDates.length; i++) {
+                    if (i > this.selectedCheckIn && i < this.selectedCheckOut) {
+                        const rangeCellIndex = this.calendarDates[i]?.cellIndex;
+                        if (rangeCellIndex !== undefined) {
+                            const rangeElement = this.elements.calendarGrid.querySelector(`[data-cell-index="${rangeCellIndex}"]`);
+                            if (rangeElement) rangeElement.classList.add('in-range');
+                        }
+                    }
+                }
+            }
+        }
         
         console.log('Calendar display updated - CheckIn:', this.selectedCheckIn, 'CheckOut:', this.selectedCheckOut);
     }
