@@ -16,7 +16,7 @@ router.get('/activities', async (req, res) => {
         console.log('Fetching all available offers from LMCurrentOffers...');
         
         // Extract query parameters or use defaults
-        const { checkinDate, checkoutDate, adults = '2', children = '0' } = req.query;
+        const { checkinDate, checkoutDate, adults = '2', children = '0', flexibility = 'exact' } = req.query;
         
         // Require both check-in and check-out dates for specific searches
         if (!checkinDate || !checkoutDate) {
@@ -34,9 +34,22 @@ router.get('/activities', async (req, res) => {
         const checkoutDateObj = new Date(checkoutDate);
         const selectedNights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
         
-        console.log(`Finding offers within date range: ${checkinDate} to ${checkoutDate} (${selectedNights} nights max)`);
+        // Apply flexibility to expand date range
+        const flexibilityDays = flexibility === 'exact' ? 0 : parseInt(flexibility);
         
-        // Query for all offers that fit completely within the selected date range
+        // Expand checkin date range (earlier possible checkin)
+        const earliestCheckinObj = new Date(checkinDateObj);
+        earliestCheckinObj.setDate(earliestCheckinObj.getDate() - flexibilityDays);
+        const earliestCheckin = earliestCheckinObj.toISOString().split('T')[0];
+        
+        // Expand checkout date range (later possible checkout)
+        const latestCheckoutObj = new Date(checkoutDateObj);
+        latestCheckoutObj.setDate(latestCheckoutObj.getDate() + flexibilityDays);
+        const latestCheckout = latestCheckoutObj.toISOString().split('T')[0];
+        
+        console.log(`Finding offers with flexibility=${flexibility}: expanded range ${earliestCheckin} to ${latestCheckout} (base: ${checkinDate} to ${checkoutDate})`);
+        
+        // Query for all offers that fit within the expanded date range
         const connection = await db.getConnection();
         
         const offersQuery = `
@@ -64,8 +77,8 @@ router.get('/activities', async (req, res) => {
         `;
         
         const [allOffers] = await connection.execute(offersQuery, [
-            checkinDate,
-            checkoutDate,
+            earliestCheckin,
+            latestCheckout,
             adultsCount,
             childrenCount
         ]);
@@ -79,7 +92,7 @@ router.get('/activities', async (req, res) => {
         
         connection.release();
         
-        console.log(`Found ${allOffers.length} offers within date range, sorted by longest stays first`);
+        console.log(`Found ${allOffers.length} offers within expanded date range (flexibility: ${flexibility}), sorted by longest stays first`);
         
         // Transform offers to match the frontend expected format
         // The frontend expects data similar to RoomAvailabilityStore format for compatibility
@@ -154,10 +167,16 @@ router.get('/activities', async (req, res) => {
             metadata: {
                 selected_checkin_date: checkinDate,
                 selected_checkout_date: checkoutDate,
+                expanded_checkin_date: earliestCheckin,
+                expanded_checkout_date: latestCheckout,
                 selected_nights: selectedNights,
                 adults: adultsCount,
                 children: childrenCount,
-                filter_type: 'date_range'
+                flexibility: {
+                    level: flexibility,
+                    days: flexibilityDays
+                },
+                filter_type: 'date_range_with_flexibility'
             }
         });
         

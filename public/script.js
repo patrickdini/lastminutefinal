@@ -148,6 +148,18 @@ class ActivitiesDashboard {
             this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
         }
         
+        // Flexibility selector event listeners
+        const flexibilityOptions = document.querySelectorAll('input[name="flexibility"]');
+        flexibilityOptions.forEach(option => {
+            option.addEventListener('change', () => {
+                console.log('Flexibility changed to:', this.getSelectedFlexibility());
+                // Only reload if we have a date range selected
+                if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {
+                    this.loadActivities();
+                }
+            });
+        });
+        
         // Auto-refresh every 5 minutes (reduced frequency)
         setInterval(() => {
             if (!this.isLoading) {
@@ -1054,7 +1066,16 @@ class ActivitiesDashboard {
         }
         // If no date range specified, API will use default (tomorrow + 7 days)
         
+        // Add flexibility parameter
+        const flexibility = this.getSelectedFlexibility();
+        params.append('flexibility', flexibility);
+        
         return params.toString();
+    }
+    
+    getSelectedFlexibility() {
+        const selectedOption = document.querySelector('input[name="flexibility"]:checked');
+        return selectedOption ? selectedOption.value : 'exact';
     }
     
     /**
