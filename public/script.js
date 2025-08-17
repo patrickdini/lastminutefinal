@@ -74,50 +74,94 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Setup calendar with next 14 days
+     * Setup calendar with proper week alignment
      */
     setupCalendar() {
         const today = new Date();
         const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000)); // Convert to Bali time (UTC+8)
-        
-        this.calendarDates = [];
-        
-        // Generate 14 days starting from today
-        for (let i = 0; i < 14; i++) {
-            const date = new Date(baliTime);
-            date.setDate(baliTime.getDate() + i);
-            this.calendarDates.push({
-                date: date,
-                day: date.getDate(),
-                isToday: i === 0,
-                isSelectable: i > 0 // Today is not selectable
-            });
-        }
         
         this.renderCalendar();
         this.setDefaultDates();
     }
     
     /**
-     * Render calendar grid
+     * Render calendar grid with proper week alignment
      */
     renderCalendar() {
-        this.elements.calendarGrid.innerHTML = '';
+        // Clear existing day cells (keep headers)
+        const existingDays = this.elements.calendarGrid.querySelectorAll('.calendar-date');
+        existingDays.forEach(day => day.remove());
+
+        const today = new Date();
+        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000));
+
+        // Create array of next 15 days (today + 14)
+        const dates = [];
+        for (let i = 0; i < 15; i++) {
+            const date = new Date(baliTime);
+            date.setDate(baliTime.getDate() + i);
+            dates.push(date);
+        }
+
+        // Find the Monday of the week containing the first date
+        const firstDate = dates[0];
+        const startOfWeek = new Date(firstDate);
+        const dayOfWeek = firstDate.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Handle Sunday (0) as end of week
+        startOfWeek.setDate(firstDate.getDate() + mondayOffset);
+
+        // Find the end of the week containing the last date
+        const lastDate = dates[dates.length - 1];
+        const endOfWeek = new Date(lastDate);
+        const lastDayOfWeek = lastDate.getDay();
+        const sundayOffset = lastDayOfWeek === 0 ? 0 : 7 - lastDayOfWeek; // Days until Sunday
+        endOfWeek.setDate(lastDate.getDate() + sundayOffset);
+
+        // Generate calendar grid starting from Monday
+        const currentDate = new Date(startOfWeek);
+        this.calendarDates = []; // Reset the dates array
+        let dateIndex = 0;
         
-        this.calendarDates.forEach((dateInfo, index) => {
-            const dateElement = document.createElement('div');
-            dateElement.className = 'calendar-date';
-            dateElement.textContent = dateInfo.day;
-            dateElement.dataset.index = index;
+        while (currentDate <= endOfWeek) {
+            const dayCell = document.createElement('div');
+            dayCell.className = 'calendar-date';
             
-            if (!dateInfo.isSelectable) {
-                dateElement.classList.add('disabled');
+            // Check if this date is in our 15-day range
+            const isInRange = dates.some(d => 
+                d.getFullYear() === currentDate.getFullYear() &&
+                d.getMonth() === currentDate.getMonth() &&
+                d.getDate() === currentDate.getDate()
+            );
+            
+            if (isInRange) {
+                dayCell.textContent = currentDate.getDate();
+                dayCell.dataset.date = currentDate.toISOString().split('T')[0];
+                dayCell.dataset.index = dateIndex;
+                
+                // Store date info for later reference
+                this.calendarDates.push({
+                    date: new Date(currentDate),
+                    day: currentDate.getDate(),
+                    isToday: currentDate.getTime() === baliTime.getTime(),
+                    isSelectable: currentDate.getTime() !== baliTime.getTime() // Today is not selectable
+                });
+                
+                // Disable today (first date) but keep it visible
+                if (currentDate.getTime() === baliTime.getTime()) {
+                    dayCell.classList.add('disabled');
+                } else {
+                    dayCell.addEventListener('click', () => this.handleDateClick(dateIndex));
+                }
+                
+                dateIndex++;
             } else {
-                dateElement.addEventListener('click', () => this.handleDateClick(index));
+                // Empty cell for dates not in our range but needed for week structure
+                dayCell.classList.add('empty');
             }
             
-            this.elements.calendarGrid.appendChild(dateElement);
-        });
+            this.elements.calendarGrid.appendChild(dayCell);
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
     }
     
     /**
@@ -125,13 +169,13 @@ class ActivitiesDashboard {
      */
     handleDateClick(index) {
         const dateInfo = this.calendarDates[index];
-        if (!dateInfo.isSelectable) return;
+        if (!dateInfo || !dateInfo.isSelectable) return;
         
-        if (!this.selectedCheckIn) {
+        if (this.selectedCheckIn === null) {
             // First click - set check-in
             this.selectedCheckIn = index;
             this.selectedCheckOut = null;
-        } else if (!this.selectedCheckOut) {
+        } else if (this.selectedCheckOut === null) {
             // Second click - set check-out
             if (index <= this.selectedCheckIn) {
                 // If clicked date is before or same as check-in, reset and make it new check-in
@@ -158,17 +202,18 @@ class ActivitiesDashboard {
      * Update calendar visual display
      */
     updateCalendarDisplay() {
-        const dateElements = this.elements.calendarGrid.querySelectorAll('.calendar-date');
+        const dateElements = this.elements.calendarGrid.querySelectorAll('.calendar-date[data-date]:not(.disabled):not(.empty)');
         
-        dateElements.forEach((element, index) => {
-            element.classList.remove('check-in', 'check-out', 'in-range', 'selected');
+        dateElements.forEach(element => {
+            const elementIndex = parseInt(element.dataset.index);
+            element.classList.remove('selected', 'in-range');
             
-            if (index === this.selectedCheckIn) {
-                element.classList.add('check-in');
-            } else if (index === this.selectedCheckOut) {
-                element.classList.add('check-out');
+            if (elementIndex === this.selectedCheckIn) {
+                element.classList.add('selected');
+            } else if (elementIndex === this.selectedCheckOut) {
+                element.classList.add('selected'); 
             } else if (this.selectedCheckIn !== null && this.selectedCheckOut !== null && 
-                      index > this.selectedCheckIn && index < this.selectedCheckOut) {
+                      elementIndex > this.selectedCheckIn && elementIndex < this.selectedCheckOut) {
                 element.classList.add('in-range');
             }
         });
@@ -178,10 +223,28 @@ class ActivitiesDashboard {
      * Set default dates (tomorrow to tomorrow + 3 days)
      */
     setDefaultDates() {
-        this.selectedCheckIn = 1; // Tomorrow (index 1)
-        this.selectedCheckOut = 4; // Tomorrow + 3 days (index 4)
-        this.updateCalendarDisplay();
-        this.applyCalendarFilter();
+        // Find the first selectable date (tomorrow)
+        let tomorrowIndex = -1;
+        let dayAfterTomorrowIndex = -1;
+        
+        for (let i = 0; i < this.calendarDates.length; i++) {
+            const dateInfo = this.calendarDates[i];
+            if (dateInfo && dateInfo.isSelectable) {
+                if (tomorrowIndex === -1) {
+                    tomorrowIndex = i; // First selectable date (tomorrow)
+                } else if (dayAfterTomorrowIndex === -1) {
+                    dayAfterTomorrowIndex = i; // Second selectable date
+                    break;
+                }
+            }
+        }
+        
+        if (tomorrowIndex !== -1 && dayAfterTomorrowIndex !== -1) {
+            this.selectedCheckIn = tomorrowIndex;
+            this.selectedCheckOut = dayAfterTomorrowIndex;
+            this.updateCalendarDisplay();
+            this.applyCalendarFilter();
+        }
     }
     
     /**

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villa Tokay - Date Picker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0F3128 0%, #1a4a3e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .picker-section {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .picker-title {
+            font-size: 1.4rem;
+            color: #0F3128;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            padding: 10px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #0F3128;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            background: rgba(15, 49, 40, 0.1);
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+            background: white;
+            position: relative;
+        }
+
+        .day-cell:hover:not(.disabled) {
+            border-color: #AA7831;
+            background: #fff8f0;
+            transform: translateY(-2px);
+        }
+
+        .day-cell.selected {
+            background: #0F3128;
+            color: white;
+            border-color: #0F3128;
+        }
+
+        .day-cell.in-range {
+            background: #AA7831;
+            color: white;
+            border-color: #AA7831;
+        }
+
+        .day-cell.disabled {
+            background: #f1f3f4;
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .day-cell.disabled:hover {
+            transform: none;
+            border-color: transparent;
+            background: #f1f3f4;
+        }
+
+        .day-cell.empty {
+            visibility: hidden;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .picker-section {
+                padding: 20px 15px;
+            }
+            
+            .day-cell {
+                font-size: 0.9rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Villa Tokay</h1>
+            <p>Select your perfect escape dates</p>
+        </div>
+
+        <div class="picker-section">
+            <div class="picker-title">Choose Your Dates</div>
+            <div class="calendar-grid" id="calendar">
+                <div class="day-header">Mon</div>
+                <div class="day-header">Tue</div>
+                <div class="day-header">Wed</div>
+                <div class="day-header">Thu</div>
+                <div class="day-header">Fri</div>
+                <div class="day-header">Sat</div>
+                <div class="day-header">Sun</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DatePicker {
+            constructor() {
+                this.grid = document.getElementById('calendar');
+                this.checkInDate = null;
+                this.checkOutDate = null;
+                this.isSelectingCheckOut = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.generateCalendar();
+                this.addEventListeners();
+            }
+
+            generateCalendar() {
+                const today = new Date();
+                
+                // Clear existing day cells (keep headers)
+                const existingDays = this.grid.querySelectorAll('.day-cell');
+                existingDays.forEach(day => day.remove());
+
+                // Create array of next 15 days (today + 14)
+                const dates = [];
+                for (let i = 0; i < 15; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    dates.push(date);
+                }
+
+                // Find the Monday of the week containing the first date
+                const firstDate = dates[0];
+                const startOfWeek = new Date(firstDate);
+                const dayOfWeek = firstDate.getDay();
+                const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Handle Sunday (0) as end of week
+                startOfWeek.setDate(firstDate.getDate() + mondayOffset);
+
+                // Find the end of the week containing the last date
+                const lastDate = dates[dates.length - 1];
+                const endOfWeek = new Date(lastDate);
+                const lastDayOfWeek = lastDate.getDay();
+                const sundayOffset = lastDayOfWeek === 0 ? 0 : 7 - lastDayOfWeek; // Days until Sunday
+                endOfWeek.setDate(lastDate.getDate() + sundayOffset);
+
+                // Generate calendar grid starting from Monday
+                const currentDate = new Date(startOfWeek);
+                
+                while (currentDate <= endOfWeek) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    
+                    // Check if this date is in our 15-day range
+                    const isInRange = dates.some(d => 
+                        d.getFullYear() === currentDate.getFullYear() &&
+                        d.getMonth() === currentDate.getMonth() &&
+                        d.getDate() === currentDate.getDate()
+                    );
+                    
+                    if (isInRange) {
+                        dayCell.textContent = currentDate.getDate();
+                        dayCell.dataset.date = currentDate.toISOString().split('T')[0];
+                        
+                        // Disable today (first date) but keep it visible
+                        if (currentDate.getTime() === today.getTime()) {
+                            dayCell.classList.add('disabled');
+                        }
+                    } else {
+                        // Empty cell for dates not in our range but needed for week structure
+                        dayCell.classList.add('empty');
+                    }
+                    
+                    this.grid.appendChild(dayCell);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            }
+
+            addEventListeners() {
+                this.grid.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('day-cell') && 
+                        e.target.dataset.date && 
+                        !e.target.classList.contains('disabled') &&
+                        !e.target.classList.contains('empty')) {
+                        this.handleDateClick(e.target);
+                    }
+                });
+            }
+
+            handleDateClick(dayCell) {
+                const clickedDate = new Date(dayCell.dataset.date);
+
+                if (!this.isSelectingCheckOut) {
+                    // Selecting check-in date
+                    this.checkInDate = clickedDate;
+                    this.checkOutDate = null;
+                    this.isSelectingCheckOut = true;
+                    this.updateCalendarDisplay();
+                } else {
+                    // Selecting check-out date
+                    if (clickedDate <= this.checkInDate) {
+                        // If clicked date is before or same as check-in, restart selection
+                        this.checkInDate = clickedDate;
+                        this.checkOutDate = null;
+                        this.isSelectingCheckOut = true;
+                    } else {
+                        // Valid check-out date
+                        this.checkOutDate = clickedDate;
+                        this.isSelectingCheckOut = false;
+                        
+                        // Optional: You can add callback here when both dates are selected
+                        this.onDatesSelected();
+                    }
+                    this.updateCalendarDisplay();
+                }
+            }
+
+            updateCalendarDisplay() {
+                const dayCells = this.grid.querySelectorAll('.day-cell[data-date]:not(.disabled):not(.empty)');
+                
+                dayCells.forEach(cell => {
+                    const cellDate = new Date(cell.dataset.date);
+                    cell.classList.remove('selected', 'in-range');
+                    
+                    if (this.checkInDate && cellDate.getTime() === this.checkInDate.getTime()) {
+                        cell.classList.add('selected');
+                    } else if (this.checkOutDate && cellDate.getTime() === this.checkOutDate.getTime()) {
+                        cell.classList.add('selected');
+                    } else if (this.checkInDate && this.checkOutDate && 
+                               cellDate > this.checkInDate && cellDate < this.checkOutDate) {
+                        cell.classList.add('in-range');
+                    }
+                });
+            }
+
+            onDatesSelected() {
+                // This method is called when both check-in and check-out dates are selected
+                const checkInStr = this.formatDate(this.checkInDate);
+                const checkOutStr = this.formatDate(this.checkOutDate);
+                const nights = Math.ceil((this.checkOutDate - this.checkInDate) / (1000 * 60 * 60 * 24));
+                
+                console.log(`Selected: ${checkInStr} to ${checkOutStr} (${nights} nights)`);
+                
+                // You can add your booking logic here or trigger an event
+                // For example: window.dispatchEvent(new CustomEvent('datesSelected', { detail: { checkIn: this.checkInDate, checkOut: this.checkOutDate, nights } }));
+            }
+
+            formatDate(date) {
+                const options = { 
+                    month: 'short', 
+                    day: 'numeric',
+                    weekday: 'short'
+                };
+                return date.toLocaleDateString('en-US', options);
+            }
+
+            // Public methods to get selected dates
+            getCheckInDate() {
+                return this.checkInDate;
+            }
+
+            getCheckOutDate() {
+                return this.checkOutDate;
+            }
+
+            getSelectedDates() {
+                return {
+                    checkIn: this.checkInDate,
+                    checkOut: this.checkOutDate,
+                    nights: this.checkOutDate && this.checkInDate ? 
+                        Math.ceil((this.checkOutDate - this.checkInDate) / (1000 * 60 * 60 * 24)) : 0
+                };
+            }
+        }
+
+        // Initialize date picker
+        let datePicker;
+        document.addEventListener('DOMContentLoaded', () => {
+            datePicker = new DatePicker();
+        });
+
+        // Optional: Listen for date selection events
+        // window.addEventListener('datesSelected', (event) => {
+        //     console.log('Dates selected:', event.detail);
+        // });
+    </script>
+</body>
+</html>
