@@ -1772,18 +1772,63 @@ class ActivitiesDashboard {
      * Update villa card with extended offer data
      */
     async updateVillaCardWithExtendedOffer(currentCard, newOffer, villaKey, allExtendedOffers) {
-        // Filter offers for this specific villa
-        const villaOffers = allExtendedOffers.filter(offer => 
-            offer.villa_display_name === villaKey || offer.villa === villaKey
-        );
-        
-        // Generate new card HTML with updated offer
-        const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
-        
-        // Replace the current card with the new one
-        currentCard.outerHTML = newCardHtml;
-        
-        console.log('Villa card updated with extended pricing and perks');
+        // Re-query for ALL possible offers for this villa to maintain all extension options
+        try {
+            const response = await fetch('/api/activities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selected_checkin_date: newOffer.checkIn.split('T')[0],
+                    selected_checkout_date: newOffer.checkOut,
+                    selected_nights: newOffer.nights,
+                    adults: this.selectedAdults,
+                    children: this.selectedChildren,
+                    page: 1,
+                    refresh_cache: false
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Filter for this specific villa and include all available offers
+                const allVillaOffers = data.offers.filter(offer => 
+                    offer.villa_display_name === villaKey || offer.villa === villaKey
+                );
+                
+                // Generate new card HTML with updated offer and ALL available offers
+                const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, allVillaOffers);
+                
+                // Replace the current card with the new one
+                currentCard.outerHTML = newCardHtml;
+                
+                console.log('Villa card updated with extended pricing and perks');
+            } else {
+                // Fallback to original logic if re-query fails
+                const villaOffers = allExtendedOffers.filter(offer => 
+                    offer.villa_display_name === villaKey || offer.villa === villaKey
+                );
+                
+                const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
+                currentCard.outerHTML = newCardHtml;
+                
+                console.log('Villa card updated with extended pricing and perks (fallback)');
+            }
+        } catch (error) {
+            console.error('Error re-querying offers:', error);
+            
+            // Fallback to original logic
+            const villaOffers = allExtendedOffers.filter(offer => 
+                offer.villa_display_name === villaKey || offer.villa === villaKey
+            );
+            
+            const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
+            currentCard.outerHTML = newCardHtml;
+            
+            console.log('Villa card updated with extended pricing and perks (error fallback)');
+        }
     }
     
     /**
