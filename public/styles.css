@@ -1434,6 +1434,12 @@ body {
 }
 
 @media (max-width: 480px) {
+    .villa-cards-container {
+        width: 100%;
+        margin: 20px auto 0;
+        padding: 0 5px;
+    }
+    
     .villa-image-gallery {
         height: 180px;
     }
