@@ -269,6 +269,7 @@ body {
 
 .calendar-container {
     max-width: 400px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -348,15 +349,24 @@ body {
 /* Mobile optimizations */
 @media (max-width: 480px) {
     .calendar-container {
-        padding: 0 10px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 5px;
     }
     
     .calendar-section {
         padding: 20px 15px;
+        margin: 0 10px 30px 10px;
+        text-align: center;
+    }
+    
+    .calendar-grid {
+        padding: 5px;
     }
     
     .calendar-date {
         font-size: 0.9rem;
+        min-height: 36px;
     }
     
     /* Date filter grid - proper 2x2 matrix for mobile */
