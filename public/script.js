@@ -74,9 +74,6 @@ class ActivitiesDashboard {
      * Setup calendar with proper week alignment
      */
     setupCalendar() {
-        const today = new Date();
-        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000)); // Convert to Bali time (UTC+8)
-        
         this.renderCalendar();
     }
     
@@ -88,8 +85,9 @@ class ActivitiesDashboard {
         const existingDays = this.elements.calendarGrid.querySelectorAll('.calendar-date');
         existingDays.forEach(day => day.remove());
 
-        const today = new Date();
-        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000));
+        // Get current Bali time using corrected calculation
+        const baliToday = this.getBaliDate(0);
+        const baliTime = new Date(baliToday);
 
         // Create array of next 15 days (today + 14)
         const dates = [];
