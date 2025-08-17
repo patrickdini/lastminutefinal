@@ -1606,8 +1606,15 @@ class ActivitiesDashboard {
         // Get primary image
         const heroImage = imageUrls.length > 0 ? imageUrls[0] : '/api/placeholder/400/280';
         
+        // Store the current offer data on the card element for later retrieval
+        const offerData = {
+            checkIn: primaryOffer.checkIn,
+            checkOut: primaryOffer.checkOut || this.calculateCheckoutDate(primaryOffer.checkIn, primaryOffer.nights),
+            nights: primaryOffer.nights
+        };
+        
         return `
-            <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}">
+            <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}" data-current-offer='${JSON.stringify(offerData)}'>
                 <!-- Hero Image with Price Overlay -->
                 <div class="champion-hero">
                     <img src="${heroImage}" alt="${tagline}" class="champion-hero-image">
@@ -1814,49 +1821,20 @@ class ActivitiesDashboard {
      * Get current offer data from card element
      */
     getCurrentOfferFromCard(cardElement) {
-        // Extract offer data from the card's current display
-        const bookBtn = cardElement.querySelector('.champion-book-btn');
-        const nightsMatch = bookBtn ? bookBtn.textContent.match(/\((\d+) NIGHT/) : null;
-        const nights = nightsMatch ? parseInt(nightsMatch[1]) : 1;
-        
-        // Get check-in date from the timeline
-        const selectedCircles = cardElement.querySelectorAll('.date-circle.selected');
-        let checkIn = null;
-        let checkOut = null;
-        
-        if (selectedCircles.length >= 2) {
-            // First selected is check-in, last selected before extension is check-out
-            const firstSelected = selectedCircles[0];
-            const lastSelected = selectedCircles[selectedCircles.length - 1];
-            
-            // Parse dates from the date labels
-            const firstLabel = firstSelected.parentElement.querySelector('.date-label').textContent;
-            const lastLabel = lastSelected.parentElement.querySelector('.date-label').textContent;
-            
-            // Extract month and day from labels like "Aug 20\nCheck-in"
-            const parseDate = (label) => {
-                const match = label.match(/(\w+)\s+(\d+)/);
-                if (match) {
-                    const month = match[1];
-                    const day = parseInt(match[2]);
-                    const year = new Date().getFullYear();
-                    return new Date(`${month} ${day}, ${year}`).toISOString().split('T')[0];
-                }
-                return null;
-            };
-            
-            checkIn = parseDate(firstLabel);
-            checkOut = parseDate(lastLabel);
+        // Get stored offer data from the card element
+        const storedData = cardElement.dataset.currentOffer;
+        if (storedData) {
+            try {
+                return JSON.parse(storedData);
+            } catch (e) {
+                console.error('Error parsing stored offer data:', e);
+            }
         }
         
-        // Fallback to using current calendar selection if can't parse from card
-        if (!checkIn || !checkOut) {
-            checkIn = this.calendarDates[this.selectedCheckIn].date.toISOString().split('T')[0];
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkInDate);
-            checkOutDate.setDate(checkInDate.getDate() + nights);
-            checkOut = checkOutDate.toISOString().split('T')[0];
-        }
+        // Fallback: use the current calendar selection
+        const checkIn = this.calendarDates[this.selectedCheckIn].date.toISOString().split('T')[0];
+        const checkOut = this.calendarDates[this.selectedCheckOut].date.toISOString().split('T')[0];
+        const nights = this.selectedCheckOut - this.selectedCheckIn;
         
         return {
             checkIn: checkIn,
