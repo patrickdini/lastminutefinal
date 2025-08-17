@@ -98,10 +98,21 @@ async function loadAllOffersIntoCache() {
         const [offers] = await connection.execute(offersQuery);
         connection.release();
         
-        // Transform offers to add villa_display_name similar to the API
+        // Create villa name mapping to match what the working API returns
+        const villaNameMapping = {
+            'Sunset': 'The Sunset Room',
+            'Tide': 'The Tide Villa', 
+            'Wave': 'The Wave Villa',
+            'Shore': 'The Shore Villa',
+            'Swell 2BR': 'The Swell 2BR',
+            'Flow': 'The Flow Villa',
+            'Breeze': 'The Breeze Villa'
+        };
+        
+        // Transform offers to add villa_display_name matching the API format
         const transformedOffers = offers.map(offer => ({
             ...offer,
-            villa_display_name: `The ${offer.villa_id} Villa`
+            villa_display_name: villaNameMapping[offer.villa_id] || `The ${offer.villa_id} Villa`
         }));
         
         allOffersCache = transformedOffers;
