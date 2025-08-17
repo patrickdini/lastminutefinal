@@ -1831,48 +1831,48 @@ class ActivitiesDashboard {
                 })
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log(`Re-query response contains ${data.offers ? data.offers.length : 0} total offers`);
-                
-                // Filter for this specific villa and include all available offers
-                const allVillaOffers = data.offers ? data.offers.filter(offer => 
-                    offer.villa_display_name === villaKey || offer.villa === villaKey
-                ) : [];
-                
-                console.log(`Re-queried and found ${allVillaOffers.length} offers for ${villaKey}`);
-                
-                if (allVillaOffers.length > 0) {
-                    // Generate new card HTML with updated offer and ALL available offers
-                    const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, allVillaOffers);
-                    
-                    // Replace the current card with the new one
-                    currentCard.outerHTML = newCardHtml;
-                    
-                    console.log('Villa card updated with extended pricing and perks');
-                } else {
-                    console.log('No villa offers found in re-query, using fallback');
-                    // Fallback to original logic
-                    const villaOffers = allExtendedOffers.filter(offer => 
-                        offer.villa_display_name === villaKey || offer.villa === villaKey
-                    );
-                    
-                    const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
-                    currentCard.outerHTML = newCardHtml;
-                    
-                    console.log('Villa card updated with extended pricing and perks (no offers fallback)');
-                }
-            } else {
-                // Fallback to original logic if re-query fails
-                const villaOffers = allExtendedOffers.filter(offer => 
-                    offer.villa_display_name === villaKey || offer.villa === villaKey
-                );
-                
-                const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
-                currentCard.outerHTML = newCardHtml;
-                
-                console.log('Villa card updated with extended pricing and perks (fallback)');
-            }
+            // Instead of using the re-query response, always use the full cache for comprehensive extension checking
+            console.log('Ignoring re-query, using full cache to find all villa offers for extension checking');
+            
+            // Get ALL cached offers for this villa across all dates
+            const allCachedVillaOffers = this.cachedOffers.filter(offer => 
+                offer.villa_display_name === villaKey
+            );
+            
+            console.log(`Found ${allCachedVillaOffers.length} total cached offers for ${villaKey}`);
+            
+            // Convert cached offers to frontend format for timeline generation
+            const formattedOffers = allCachedVillaOffers.map(offer => ({
+                villa: offer.villa_id || offer.UserRoomDisplayName,
+                checkIn: offer.checkin_date,
+                checkOut: this.calculateCheckoutDate(offer.checkin_date, offer.nights),
+                nights: offer.nights,
+                rate: offer.price_for_guests,
+                totalRate: offer.price_for_guests,
+                faceValue: offer.total_face_value,
+                savings: offer.guest_savings_value,
+                savingsPercent: offer.guest_savings_percent,
+                villa_display_name: offer.villa_display_name,
+                tagline: offer.tagline,
+                description: offer.description,
+                square_meters: offer.square_meters,
+                bathrooms: offer.bathrooms,
+                bedrooms: offer.bedrooms,
+                view_type: offer.view_type,
+                pool_type: offer.pool_type,
+                image_urls: offer.image_urls,
+                perks_included: offer.perks_included,
+                max_adults: offer.max_adults,
+                max_children: offer.max_children
+            }));
+            
+            // Generate new card HTML with the extended offer and ALL cached offers for proper extension checking
+            const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, formattedOffers);
+            
+            // Replace the current card with the new one
+            currentCard.outerHTML = newCardHtml;
+            
+            console.log('Villa card updated with extended offer and all cached extension options');
         } catch (error) {
             console.error('Error re-querying offers:', error);
             
