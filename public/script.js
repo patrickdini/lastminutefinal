@@ -1749,8 +1749,8 @@ class ActivitiesDashboard {
             pool_type: offer.pool_type,
             image_urls: offer.image_urls,
             key_amenities: offer.key_amenities,
-            perks: offer.perks_included ? JSON.parse(offer.perks_included) : [],
-            perk_ids: offer.perk_ids ? JSON.parse(offer.perk_ids) : [],
+            perks: offer.perks_included ? (typeof offer.perks_included === 'string' ? offer.perks_included.split(', ') : offer.perks_included) : [],
+            perk_ids: offer.perk_ids ? (typeof offer.perk_ids === 'string' ? JSON.parse(offer.perk_ids) : offer.perk_ids) : [],
             offer_id: offer.offer_id,
             attractiveness_score: offer.attractiveness_score
         };
