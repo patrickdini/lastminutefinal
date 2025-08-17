@@ -1747,7 +1747,7 @@ body {
 
 .nights-overlay {
     position: absolute;
-    top: 1rem;
+    bottom: 1rem;
     left: 1rem;
     background: rgba(15, 49, 40, 0.95);
     color: #FFFFFF;
