@@ -395,8 +395,9 @@ class ActivitiesDashboard {
      */
     getBaliDate(offsetDays = 0) {
         const now = new Date();
-        // Convert to Bali time (UTC+8)
-        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        // Convert to Bali time (UTC+8) - get current UTC offset and add 8 hours
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const baliTime = new Date(utcTime + (8 * 60 * 60 * 1000));
         baliTime.setDate(baliTime.getDate() + offsetDays);
         return baliTime.toISOString().split('T')[0]; // Return YYYY-MM-DD format
     }
@@ -406,7 +407,9 @@ class ActivitiesDashboard {
      */
     getBaliDayOfWeek() {
         const now = new Date();
-        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        // Convert to Bali time (UTC+8) - get current UTC offset and add 8 hours
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const baliTime = new Date(utcTime + (8 * 60 * 60 * 1000));
         return baliTime.getDay();
     }
 
@@ -416,7 +419,9 @@ class ActivitiesDashboard {
     setupDynamicDateFilters() {
         const dayOfWeek = this.getBaliDayOfWeek(); // 0 = Sunday, 1 = Monday, etc.
         const today = new Date();
-        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000));
+        // Convert to Bali time (UTC+8) - get current UTC offset and add 8 hours
+        const utcTime = today.getTime() + (today.getTimezoneOffset() * 60000);
+        const baliTime = new Date(utcTime + (8 * 60 * 60 * 1000));
         
         // Determine filter configuration based on day of week
         let filters;
