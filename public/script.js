@@ -1286,20 +1286,28 @@ class ActivitiesDashboard {
         const checkOutDate = new Date(checkInDate);
         checkOutDate.setDate(checkInDate.getDate() + primaryOffer.nights);
         
-        // Generate timeline dates (2 days before to 2 days after)
+        // Check if check-in is tomorrow (no time for backward extension)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const isCheckInTomorrow = checkInDate.toDateString() === tomorrow.toDateString();
+        
         const timelineDates = [];
         
-        // Extension dates before check-in
-        for (let i = 2; i >= 1; i--) {
-            const extDate = new Date(checkInDate);
-            extDate.setDate(checkInDate.getDate() - i);
-            timelineDates.push({
-                date: extDate,
-                type: 'extension',
-                label: `+${i} night${i > 1 ? 's' : ''}`,
-                dayNumber: extDate.getDate(),
-                isAvailable: this.isDateAvailable(extDate, allOffers)
-            });
+        // Backward extension - only if check-in is not tomorrow AND offer exists for (check-in - 1)
+        if (!isCheckInTomorrow) {
+            const prevDate = new Date(checkInDate);
+            prevDate.setDate(checkInDate.getDate() - 1);
+            
+            if (this.hasOfferForVillaOnDate(villaKey, prevDate, allOffers)) {
+                timelineDates.push({
+                    date: prevDate,
+                    type: 'extension',
+                    label: '+1 night',
+                    dayNumber: prevDate.getDate(),
+                    isAvailable: true,
+                    extensionType: 'before'
+                });
+            }
         }
         
         // Check-in date
@@ -1333,22 +1341,24 @@ class ActivitiesDashboard {
             isSelected: true
         });
         
-        // Extension dates after check-out
-        for (let i = 1; i <= 2; i++) {
-            const extDate = new Date(checkOutDate);
-            extDate.setDate(checkOutDate.getDate() + i);
+        // Forward extension - only if offer exists for (check-out + 1)
+        const nextDate = new Date(checkOutDate);
+        nextDate.setDate(checkOutDate.getDate() + 1);
+        
+        if (this.hasOfferForVillaOnDate(villaKey, nextDate, allOffers)) {
             timelineDates.push({
-                date: extDate,
+                date: nextDate,
                 type: 'extension',
-                label: `+${i} night${i > 1 ? 's' : ''}`,
-                dayNumber: extDate.getDate(),
-                isAvailable: this.isDateAvailable(extDate, allOffers)
+                label: '+1 night',
+                dayNumber: nextDate.getDate(),
+                isAvailable: true,
+                extensionType: 'after'
             });
         }
         
         // Generate timeline HTML
         const timelineNodes = timelineDates.map((dateInfo, index) => {
-            const { date, type, label, dayNumber, isSelected, isAvailable } = dateInfo;
+            const { date, type, label, dayNumber, isSelected, isAvailable, extensionType } = dateInfo;
             const monthName = date.toLocaleDateString('en-US', { month: 'short' });
             
             let circleClass = '';
@@ -1357,7 +1367,7 @@ class ActivitiesDashboard {
             if (type === 'extension') {
                 circleClass = isAvailable ? 'extension' : 'unavailable';
                 if (isAvailable) {
-                    clickable = `onclick="app.extendStay('${primaryOffer.offer_id}', '${villaKey}', '${date.toISOString().split('T')[0]}', '${type}')"`;
+                    clickable = `onclick="app.extendStay('${primaryOffer.offer_id}', '${villaKey}', '${date.toISOString().split('T')[0]}', '${extensionType}')"`;
                 }
             } else if (isSelected) {
                 circleClass = 'selected';
@@ -1391,15 +1401,20 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Check if a date is available for extension
+     * Check if there's an actual offer for this specific villa on the given date
      */
-    isDateAvailable(date, allOffers) {
-        // Simple check - you might want to add more sophisticated logic
+    hasOfferForVillaOnDate(villaKey, date, allOffers) {
         const dateString = date.toISOString().split('T')[0];
-        return allOffers.some(offer => 
-            offer.checkIn.split('T')[0] === dateString || 
-            this.isDateInOfferRange(date, offer)
-        );
+        
+        return allOffers.some(offer => {
+            // Check if offer is for the same villa
+            const offerVillaKey = offer.villa_display_name || offer.villa;
+            if (offerVillaKey !== villaKey) return false;
+            
+            // Check if the date matches the offer's check-in date
+            const offerCheckIn = offer.checkIn.split('T')[0];
+            return offerCheckIn === dateString;
+        });
     }
     
     /**
