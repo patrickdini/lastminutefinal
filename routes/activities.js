@@ -16,15 +16,23 @@ router.get('/activities', async (req, res) => {
         console.log('Fetching champion offers from LMCurrentOffers...');
         
         // Extract query parameters or use defaults
-        const { startDate, endDate, adults = '2', children = '0', offset = '0', limit = '3' } = req.query;
+        const { startDate, endDate, checkinDate, checkoutDate, adults = '2', children = '0', offset = '0', limit = '3' } = req.query;
         
-        // Calculate default date range if not provided: today to today + 7 days in Bali time
-        let queryStartDate, queryEndDate;
+        // Handle specific check-in/check-out filtering vs general date range
+        let queryStartDate, queryEndDate, isSpecificStay = false;
         
-        if (startDate && endDate) {
+        if (checkinDate && checkoutDate) {
+            // Specific stay: filter by exact check-in date and stay length
+            queryStartDate = checkinDate;
+            queryEndDate = checkoutDate;
+            isSpecificStay = true;
+        } else if (startDate && endDate) {
+            // General date range: filter by check-in date range
             queryStartDate = startDate;
             queryEndDate = endDate;
+            isSpecificStay = false;
         } else {
+            // Default: today to today + 7 days in Bali time
             const now = new Date();
             const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
             const tomorrow = new Date(baliTime);
@@ -34,6 +42,7 @@ router.get('/activities', async (req, res) => {
             const weekLater = new Date(tomorrow);
             weekLater.setDate(tomorrow.getDate() + 7);
             queryEndDate = weekLater.toISOString().split('T')[0];
+            isSpecificStay = false;
         }
         
         const adultsCount = parseInt(adults);
@@ -41,46 +50,87 @@ router.get('/activities', async (req, res) => {
         const offsetCount = parseInt(offset);
         const limitCount = parseInt(limit);
         
-        console.log(`Querying offers: ${queryStartDate} to ${queryEndDate}, ${adultsCount} adults, ${childrenCount} children, offset: ${offsetCount}, limit: ${limitCount}`);
+        console.log(`Querying offers: ${queryStartDate} to ${queryEndDate}, ${adultsCount} adults, ${childrenCount} children, offset: ${offsetCount}, limit: ${limitCount}, isSpecificStay: ${isSpecificStay}`);
         
         // Get database connection
         const connection = await db.getConnection();
         
         // STEP A: Find Local Champions (best offer per villa_id + checkin_date combination)
         // Using window functions to get the highest attractiveness_score for each (villa_id, checkin_date) pair
-        const localChampionsQuery = `
-            SELECT 
-                co.*,
-                lrd.tagline,
-                lrd.description,
-                lrd.square_meters,
-                lrd.bathrooms,
-                lrd.view_type,
-                lrd.pool_type,
-                lrd.image_urls,
-                lrd.key_amenities,
-                lrd.webpage_url
-            FROM (
-                SELECT *,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY villa_id, checkin_date 
-                        ORDER BY attractiveness_score DESC
-                    ) as rn
-                FROM LMCurrentOffers 
-                WHERE checkin_date >= ? 
-                    AND checkin_date <= ?
-                    AND adults = ?
-                    AND children = ?
-                    AND offer_status IN ('Target Met', 'Best Effort')
-            ) co
-            LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
-            WHERE co.rn = 1
-            ORDER BY co.attractiveness_score DESC
-        `;
+        let localChampionsQuery, queryParams;
         
-        const [localChampions] = await connection.execute(localChampionsQuery, [
-            queryStartDate, queryEndDate, adultsCount, childrenCount
-        ]);
+        if (isSpecificStay) {
+            // Calculate number of nights for specific stay
+            const checkinDateObj = new Date(queryStartDate);
+            const checkoutDateObj = new Date(queryEndDate);
+            const nights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
+            
+            // Filter by exact check-in date and number of nights
+            localChampionsQuery = `
+                SELECT 
+                    co.*,
+                    lrd.tagline,
+                    lrd.description,
+                    lrd.square_meters,
+                    lrd.bathrooms,
+                    lrd.view_type,
+                    lrd.pool_type,
+                    lrd.image_urls,
+                    lrd.key_amenities,
+                    lrd.webpage_url
+                FROM (
+                    SELECT *,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY villa_id, checkin_date 
+                            ORDER BY attractiveness_score DESC
+                        ) as rn
+                    FROM LMCurrentOffers 
+                    WHERE checkin_date = ? 
+                        AND nights = ?
+                        AND adults = ?
+                        AND children = ?
+                        AND offer_status IN ('Target Met', 'Best Effort')
+                ) co
+                LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+                WHERE co.rn = 1
+                ORDER BY co.attractiveness_score DESC
+            `;
+            queryParams = [queryStartDate, nights, adultsCount, childrenCount];
+        } else {
+            // General date range filtering (original logic)
+            localChampionsQuery = `
+                SELECT 
+                    co.*,
+                    lrd.tagline,
+                    lrd.description,
+                    lrd.square_meters,
+                    lrd.bathrooms,
+                    lrd.view_type,
+                    lrd.pool_type,
+                    lrd.image_urls,
+                    lrd.key_amenities,
+                    lrd.webpage_url
+                FROM (
+                    SELECT *,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY villa_id, checkin_date 
+                            ORDER BY attractiveness_score DESC
+                        ) as rn
+                    FROM LMCurrentOffers 
+                    WHERE checkin_date >= ? 
+                        AND checkin_date <= ?
+                        AND adults = ?
+                        AND children = ?
+                        AND offer_status IN ('Target Met', 'Best Effort')
+                ) co
+                LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+                WHERE co.rn = 1
+                ORDER BY co.attractiveness_score DESC
+            `;
+            queryParams = [queryStartDate, queryEndDate, adultsCount, childrenCount];
+        }
+        
+        const [localChampions] = await connection.execute(localChampionsQuery, queryParams);
         
         console.log(`Found ${localChampions.length} local champions`);
         

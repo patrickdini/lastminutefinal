@@ -1001,13 +1001,9 @@ class ActivitiesDashboard {
         params.append('children', this.selectedChildren.toString());
         
         // Add date range if available
-        if (this.currentDateRange && Array.isArray(this.currentDateRange)) {
-            const [startDate, endDate] = this.currentDateRange;
-            const startStr = startDate instanceof Date ? startDate.toISOString().split('T')[0] : startDate;
-            const endStr = endDate instanceof Date ? endDate.toISOString().split('T')[0] : endDate;
-            
-            params.append('startDate', startStr);
-            params.append('endDate', endStr);
+        if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {
+            params.append('checkinDate', this.currentDateRange.startDate);
+            params.append('checkoutDate', this.currentDateRange.endDate);
         }
         // If no date range specified, API will use default (tomorrow + 7 days)
         
