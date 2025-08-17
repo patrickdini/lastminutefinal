@@ -1571,3 +1571,270 @@ body {
 .match-badge.mixed {
     background: rgba(168, 85, 247, 0.9); /* Purple for mixed matches */
 }
+
+/* Champion Offers Layout */
+.champion-offers {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.champion-offer-card {
+    background: #1a4a3b;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Hero Image Section */
+.champion-hero {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+}
+
+.champion-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champion-price-tag {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(170, 120, 49, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Savings Banner */
+.champion-savings {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    padding: 12px 20px;
+    margin: 0;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    position: relative;
+}
+
+.champion-savings i {
+    margin-right: 8px;
+    color: #dcfce7;
+}
+
+/* Content Section */
+.champion-content {
+    padding: 24px;
+}
+
+.champion-title {
+    font-family: 'Crimson Text', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #AA7831;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.champion-checkin {
+    color: #FFFFFF;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+/* Included Perks Section */
+.champion-perks {
+    margin-bottom: 24px;
+}
+
+.champion-perks-title {
+    color: #AA7831;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.champion-perks-title i {
+    margin-right: 8px;
+    color: #AA7831;
+}
+
+.champion-perks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.champion-perk-item {
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+}
+
+.champion-perk-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    color: #AA7831;
+    flex-shrink: 0;
+}
+
+/* Night Selector Section */
+.champion-nights {
+    margin-bottom: 24px;
+}
+
+.champion-nights-title {
+    color: #AA7831;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.champion-nights-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.champion-night-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #AA7831;
+    background: transparent;
+    color: #AA7831;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.champion-night-btn.active {
+    background: #AA7831;
+    color: #0F3128;
+}
+
+.champion-night-btn.available {
+    border-style: solid;
+}
+
+.champion-night-btn.unavailable {
+    border-style: dashed;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.champion-night-btn:hover:not(.unavailable) {
+    background: #AA7831;
+    color: #0F3128;
+    transform: scale(1.05);
+}
+
+.champion-nights-dates {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #FFFFFF;
+    opacity: 0.7;
+}
+
+.champion-night-date {
+    width: 45px;
+    text-align: center;
+}
+
+.champion-nights-help {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #FFFFFF;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+/* Book Button */
+.champion-book-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #AA7831, #D4AF37);
+    color: #0F3128;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(170, 120, 49, 0.3);
+}
+
+.champion-book-btn:hover {
+    background: linear-gradient(135deg, #D4AF37, #AA7831);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(170, 120, 49, 0.4);
+}
+
+.champion-book-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(170, 120, 49, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .champion-offer-card {
+        max-width: 100%;
+        margin: 0 10px;
+    }
+    
+    .champion-hero {
+        height: 220px;
+    }
+    
+    .champion-price-tag {
+        font-size: 1.2rem;
+        padding: 10px 16px;
+    }
+    
+    .champion-content {
+        padding: 20px;
+    }
+    
+    .champion-title {
+        font-size: 1.5rem;
+    }
+    
+    .champion-night-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .champion-night-date {
+        width: 40px;
+        font-size: 0.75rem;
+    }
+}
