@@ -1655,8 +1655,10 @@ class ActivitiesDashboard {
                         ${primaryOffer.pool_type || 'Pool'}
                     </div>
                     <div class="champion-price-overlay">
-                        <span class="currency">Rp</span>
-                        <span class="amount">${priceInMillions}M</span>
+                        <div class="price-line">
+                            <span class="currency">Rp</span>
+                            <span class="amount">${priceInMillions}M</span>
+                        </div>
                         <span class="nights-text">(${primaryOffer.nights} night${primaryOffer.nights > 1 ? 's' : ''})</span>
                     </div>
                 </div>
