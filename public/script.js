@@ -1224,20 +1224,22 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Generate special offer villa cards with night selectors (grouped by villa/date)
+     * Generate special offer villa cards with timeline extensions (grouped by villa only)
      */
     async generateChampionCards(offers) {
         console.log('Generating villa cards for', offers.length, 'offers');
         
-        // Group offers by villa and checkin date
-        const villaDateGroups = this.groupChampionOffersByVillaAndDate(offers);
+        // Group offers by villa only (not by date)
+        const villaGroups = this.groupChampionOffersByVilla(offers);
         
         const villaCardsHtml = await Promise.all(
-            Object.keys(villaDateGroups).map(async villaKey => {
-                const dateGroups = villaDateGroups[villaKey];
-                const firstOffer = Object.values(dateGroups)[0][0]; // Get first offer for villa details
+            Object.keys(villaGroups).map(async villaKey => {
+                const villaOffers = villaGroups[villaKey];
+                // Sort by check-in date to get earliest as primary
+                villaOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+                const primaryOffer = villaOffers[0];
                 
-                return await this.generateChampionVillaCardWithNights(villaKey, firstOffer, dateGroups);
+                return await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, villaOffers);
             })
         );
         
@@ -1248,31 +1250,24 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Group special offers by villa name and checkin date
+     * Group special offers by villa name only (not by date)
      */
-    groupChampionOffersByVillaAndDate(offers) {
+    groupChampionOffersByVilla(offers) {
         const groups = {};
         
         offers.forEach(offer => {
             const villaKey = offer.villa_display_name || offer.villa;
-            const checkinDate = offer.checkIn.split('T')[0]; // Normalize date format
             
             if (!groups[villaKey]) {
-                groups[villaKey] = {};
+                groups[villaKey] = [];
             }
             
-            if (!groups[villaKey][checkinDate]) {
-                groups[villaKey][checkinDate] = [];
-            }
-            
-            groups[villaKey][checkinDate].push(offer);
+            groups[villaKey].push(offer);
         });
         
-        // Sort offers within each checkin date by nights ascending and store best attractiveness_score
+        // Sort offers within each villa by check-in date
         Object.keys(groups).forEach(villa => {
-            Object.keys(groups[villa]).forEach(checkinDate => {
-                groups[villa][checkinDate].sort((a, b) => a.nights - b.nights);
-            });
+            groups[villa].sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
         });
         
         return groups;
@@ -1403,14 +1398,10 @@ class ActivitiesDashboard {
     /**
      * Check if there's an actual offer for this specific villa on the given date
      */
-    hasOfferForVillaOnDate(villaKey, date, allOffers) {
+    hasOfferForVillaOnDate(villaKey, date, villaOffers) {
         const dateString = date.toISOString().split('T')[0];
         
-        return allOffers.some(offer => {
-            // Check if offer is for the same villa
-            const offerVillaKey = offer.villa_display_name || offer.villa;
-            if (offerVillaKey !== villaKey) return false;
-            
+        return villaOffers.some(offer => {
             // Check if the date matches the offer's check-in date
             const offerCheckIn = offer.checkIn.split('T')[0];
             return offerCheckIn === dateString;
@@ -1429,23 +1420,11 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Generate special offer villa card with night selectors (new design)
+     * Generate special offer villa card with timeline (new design)
      */
-    async generateChampionVillaCardWithNights(villaKey, villaDetails, dateGroups) {
-        const tagline = villaDetails.tagline || villaDetails.villa_display_name || villaKey;
-        const imageUrls = this.parseImageUrls(villaDetails.image_urls);
-        
-        // Get all offers for this villa sorted by check-in date
-        const allOffers = [];
-        Object.keys(dateGroups).forEach(date => {
-            dateGroups[date].forEach(offer => {
-                allOffers.push(offer);
-            });
-        });
-        allOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
-        
-        // Get the primary offer (first one)
-        const primaryOffer = allOffers[0];
+    async generateChampionVillaCardWithTimeline(villaKey, primaryOffer, allVillaOffers) {
+        const tagline = primaryOffer.tagline || primaryOffer.villa_display_name || villaKey;
+        const imageUrls = this.parseImageUrls(primaryOffer.image_urls);
         
         // Format price (in millions)
         const priceInMillions = (primaryOffer.totalRate / 1000000).toFixed(1);
@@ -1499,8 +1478,8 @@ class ActivitiesDashboard {
             `;
         }
         
-        // Generate timeline dates
-        const timelineHtml = this.generateTimelineForOffer(primaryOffer, allOffers, villaKey);
+        // Generate timeline dates using all villa offers
+        const timelineHtml = this.generateTimelineForOffer(primaryOffer, allVillaOffers, villaKey);
         
         // Get primary image
         const heroImage = imageUrls.length > 0 ? imageUrls[0] : '/api/placeholder/400/280';
