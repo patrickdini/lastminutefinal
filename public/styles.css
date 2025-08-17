@@ -1542,3 +1542,32 @@ body {
 .load-more-btn i {
     font-size: 1.2rem;
 }
+
+/* Match type badge styling */
+.match-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    color: white;
+}
+
+.match-badge.exact {
+    background: rgba(34, 197, 94, 0.9); /* Green for exact matches */
+}
+
+.match-badge.nearby {
+    background: rgba(59, 130, 246, 0.9); /* Blue for nearby matches */
+}
+
+.match-badge.mixed {
+    background: rgba(168, 85, 247, 0.9); /* Purple for mixed matches */
+}

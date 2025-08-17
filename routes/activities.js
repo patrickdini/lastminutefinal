@@ -29,45 +29,115 @@ router.get('/activities', async (req, res) => {
         const adultsCount = parseInt(adults);
         const childrenCount = parseInt(children);
         
-        // Calculate number of nights for the specific stay
+        // Calculate number of nights for the selected dates
         const checkinDateObj = new Date(checkinDate);
         const checkoutDateObj = new Date(checkoutDate);
-        const nights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
+        const selectedNights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
         
-        console.log(`Querying ALL offers for: ${checkinDate} (${nights} nights), ${adultsCount} adults, ${childrenCount} children`);
+        // Generate date scenarios for flexible matching
+        const dateScenarios = [];
+        
+        // Check if checkin is tomorrow (don't go earlier than tomorrow)
+        const now = new Date();
+        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+        const tomorrow = new Date(baliTime);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        
+        const canMoveCheckinEarlier = checkinDate > tomorrowStr;
+        
+        // 1. Exact Match: selected check-in, selected check-out
+        dateScenarios.push({
+            checkinDate,
+            nights: selectedNights,
+            matchType: 'exact'
+        });
+        
+        // 2. Nearby Match: check-in - 1 day, selected check-out (if possible)
+        if (canMoveCheckinEarlier) {
+            const earlierCheckin = new Date(checkinDateObj);
+            earlierCheckin.setDate(earlierCheckin.getDate() - 1);
+            const earlierCheckinStr = earlierCheckin.toISOString().split('T')[0];
+            
+            dateScenarios.push({
+                checkinDate: earlierCheckinStr,
+                nights: selectedNights + 1,
+                matchType: 'nearby'
+            });
+        }
+        
+        // 3. Nearby Match: check-in - 1 day, check-out - 1 day (if possible)
+        if (canMoveCheckinEarlier) {
+            const earlierCheckin = new Date(checkinDateObj);
+            earlierCheckin.setDate(earlierCheckin.getDate() - 1);
+            const earlierCheckinStr = earlierCheckin.toISOString().split('T')[0];
+            
+            dateScenarios.push({
+                checkinDate: earlierCheckinStr,
+                nights: selectedNights,
+                matchType: 'nearby'
+            });
+        }
+        
+        // 4. Nearby Match: selected check-in, check-out - 1 day
+        if (selectedNights > 1) { // Only if we have more than 1 night
+            dateScenarios.push({
+                checkinDate,
+                nights: selectedNights - 1,
+                matchType: 'nearby'
+            });
+        }
+        
+        console.log(`Querying offers for ${dateScenarios.length} date scenarios:`, dateScenarios.map(s => `${s.checkinDate} (${s.nights}n, ${s.matchType})`).join(', '));
         
         // Get database connection
         const connection = await db.getConnection();
         
-        // Simple query: Get ALL offers for the exact check-in date, nights, and guest count
-        const offersQuery = `
-            SELECT 
-                co.*,
-                lrd.tagline,
-                lrd.description,
-                lrd.square_meters,
-                lrd.bathrooms,
-                lrd.bedrooms,
-                lrd.view_type,
-                lrd.pool_type,
-                lrd.image_urls,
-                lrd.key_amenities,
-                lrd.webpage_url
-            FROM LMCurrentOffers co
-            LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
-            WHERE co.checkin_date = ? 
-                AND co.nights = ?
-                AND co.adults = ?
-                AND co.children = ?
-                AND co.offer_status IN ('Target Met', 'Best Effort')
-            ORDER BY co.villa_id, co.offer_id
-        `;
+        // Query for all date scenarios
+        let allOffers = [];
         
-        const [allOffers] = await connection.execute(offersQuery, [
-            checkinDate, nights, adultsCount, childrenCount
-        ]);
+        for (const scenario of dateScenarios) {
+            const offersQuery = `
+                SELECT 
+                    co.*,
+                    lrd.tagline,
+                    lrd.description,
+                    lrd.square_meters,
+                    lrd.bathrooms,
+                    lrd.bedrooms,
+                    lrd.view_type,
+                    lrd.pool_type,
+                    lrd.image_urls,
+                    lrd.key_amenities,
+                    lrd.webpage_url
+                FROM LMCurrentOffers co
+                LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+                WHERE co.checkin_date = ? 
+                    AND co.nights = ?
+                    AND co.adults = ?
+                    AND co.children = ?
+                    AND co.offer_status IN ('Target Met', 'Best Effort')
+                ORDER BY co.villa_id, co.offer_id
+            `;
+            
+            const [scenarioOffers] = await connection.execute(offersQuery, [
+                scenario.checkinDate, scenario.nights, adultsCount, childrenCount
+            ]);
+            
+            // Add match type to each offer
+            const enrichedOffers = scenarioOffers.map(offer => ({
+                ...offer,
+                match_type: scenario.matchType,
+                original_checkin_date: checkinDate,
+                original_checkout_date: checkoutDate
+            }));
+            
+            allOffers = [...allOffers, ...enrichedOffers];
+            
+            console.log(`Found ${scenarioOffers.length} offers for ${scenario.checkinDate} (${scenario.nights}n, ${scenario.matchType})`);
+        }
         
-        console.log(`Found ${allOffers.length} total offers for ${checkinDate} (${nights} nights)`)
+        console.log(`Found ${allOffers.length} total offers across all scenarios`)
         
         // Release the connection back to the pool
         connection.release();
@@ -128,21 +198,27 @@ router.get('/activities', async (req, res) => {
                 has_wow_factor_perk: offer.has_wow_factor_perk,
                 perk_ids: perkIds,
                 perks_included: offer.perks_included,
-                last_calculated_at: offer.last_calculated_at
+                last_calculated_at: offer.last_calculated_at,
+                
+                // Enhanced filtering fields
+                match_type: offer.match_type,
+                original_checkin_date: offer.original_checkin_date,
+                original_checkout_date: offer.original_checkout_date
             };
         });
         
-        // Return response with all available offers
+        // Return response with all available offers (exact and nearby matches)
         res.json({
             success: true,
-            message: `Found ${transformedOffers.length} available offers`,
+            message: `Found ${transformedOffers.length} available offers (exact and nearby matches)`,
             data: transformedOffers,
             metadata: {
-                checkin_date: checkinDate,
-                checkout_date: checkoutDate,
-                nights: nights,
+                selected_checkin_date: checkinDate,
+                selected_checkout_date: checkoutDate,
+                selected_nights: selectedNights,
                 adults: adultsCount,
-                children: childrenCount
+                children: childrenCount,
+                scenarios_queried: dateScenarios.length
             }
         });
         

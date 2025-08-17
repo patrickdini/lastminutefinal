@@ -1205,7 +1205,12 @@ class ActivitiesDashboard {
                 attractiveness_score: championOffer.attractiveness_score,
                 perks_included: championOffer.perks_included,
                 perk_ids: championOffer.perk_ids || [],
-                has_wow_factor: championOffer.has_wow_factor_perk
+                has_wow_factor: championOffer.has_wow_factor_perk,
+                
+                // Enhanced filtering fields
+                match_type: championOffer.match_type,
+                original_checkin_date: championOffer.original_checkin_date,
+                original_checkout_date: championOffer.original_checkout_date
             };
         });
     }
@@ -1274,6 +1279,20 @@ class ActivitiesDashboard {
         const description = villaDetails.description || this.getVillaDescription(villaKey);
         const imageUrls = this.parseImageUrls(villaDetails.image_urls);
         const specifications = this.formatVillaSpecs(villaDetails);
+        
+        // Determine match type badge from any offer in the card
+        let matchTypeBadge = '';
+        const allOffers = Object.values(dateGroups).flat();
+        const hasExactMatch = allOffers.some(offer => offer.match_type === 'exact');
+        const hasNearbyMatch = allOffers.some(offer => offer.match_type === 'nearby');
+        
+        if (hasExactMatch && hasNearbyMatch) {
+            matchTypeBadge = '<div class="match-badge mixed">Exact + Nearby</div>';
+        } else if (hasExactMatch) {
+            matchTypeBadge = '<div class="match-badge exact">Exact Match</div>';
+        } else if (hasNearbyMatch) {
+            matchTypeBadge = '<div class="match-badge nearby">Nearby Match</div>';
+        }
         
         // Generate booking sections for each checkin date with night selectors
         const checkinSections = await Promise.all(
@@ -1375,6 +1394,7 @@ class ActivitiesDashboard {
                             <img src="${imageUrls[0]}" alt="${tagline}" class="villa-main-image" loading="lazy">
 
                             ${villaDetails.class ? `<div class="villa-class-badge">${villaDetails.class}</div>` : ''}
+                            ${matchTypeBadge}
                         </div>
                     </div>
                 ` : ''}
