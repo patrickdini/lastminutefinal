@@ -81,7 +81,6 @@ class ActivitiesDashboard {
         const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000)); // Convert to Bali time (UTC+8)
         
         this.renderCalendar();
-        this.setDefaultDates();
     }
     
     /**
@@ -120,7 +119,6 @@ class ActivitiesDashboard {
         // Generate calendar grid starting from Monday
         const currentDate = new Date(startOfWeek);
         this.calendarDates = []; // Reset the dates array
-        let dateIndex = 0;
         let cellIndex = 0; // Track DOM cell position
         
         while (currentDate <= endOfWeek) {
@@ -136,9 +134,11 @@ class ActivitiesDashboard {
             );
             
             if (isInRange) {
+                const dateIndex = this.calendarDates.length; // Use current array length as index
+                
                 dayCell.textContent = currentDate.getDate();
                 dayCell.dataset.date = currentDate.toISOString().split('T')[0];
-                dayCell.dataset.dateIndex = dateIndex; // Separate index for calendarDates array
+                dayCell.dataset.dateIndex = dateIndex; // Store the index in the DOM
                 
                 // Store date info for later reference
                 this.calendarDates.push({
@@ -155,8 +155,6 @@ class ActivitiesDashboard {
                 } else {
                     dayCell.addEventListener('click', () => this.handleDateClick(dateIndex));
                 }
-                
-                dateIndex++;
             } else {
                 // Empty cell for dates not in our range but needed for week structure
                 dayCell.classList.add('empty');
@@ -166,14 +164,18 @@ class ActivitiesDashboard {
             currentDate.setDate(currentDate.getDate() + 1);
             cellIndex++;
         }
+        
+        console.log('Calendar generated with', this.calendarDates.length, 'selectable dates');
     }
     
     /**
      * Handle calendar date click
      */
     handleDateClick(index) {
-        console.log('Date clicked, index:', index);
+        console.log('Date clicked, index:', index, 'Total dates:', this.calendarDates.length);
         const dateInfo = this.calendarDates[index];
+        console.log('Date info:', dateInfo);
+        
         if (!dateInfo || !dateInfo.isSelectable) {
             console.log('Date not selectable:', dateInfo);
             return;
