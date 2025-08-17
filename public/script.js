@@ -1336,16 +1336,16 @@ class ActivitiesDashboard {
             isSelected: true
         });
         
-        // Forward extension - only if offer exists for (check-out + 1)
-        const nextDate = new Date(checkOutDate);
-        nextDate.setDate(checkOutDate.getDate() + 1);
-        
-        if (this.hasOfferForVillaOnDate(villaKey, nextDate, allOffers)) {
+        // Forward extension - check if offer exists starting on check-out date (extends stay by 1 night)
+        if (this.hasOfferForVillaOnDate(villaKey, checkOutDate, allOffers)) {
+            const extendedCheckOut = new Date(checkOutDate);
+            extendedCheckOut.setDate(checkOutDate.getDate() + 1);
+            
             timelineDates.push({
-                date: nextDate,
+                date: extendedCheckOut,
                 type: 'extension',
                 label: '+1 night',
-                dayNumber: nextDate.getDate(),
+                dayNumber: extendedCheckOut.getDate(),
                 isAvailable: true,
                 extensionType: 'after'
             });
