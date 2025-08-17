@@ -1589,10 +1589,22 @@ class ActivitiesDashboard {
                 const extendedOfferData = await this.fetchExtendedOfferData(newDateRange.checkinDate, newDateRange.checkoutDate, currentAdults, currentChildren);
                 
                 if (extendedOfferData && extendedOfferData.length > 0) {
+                    console.log('All extended offers received:', extendedOfferData.length);
+                    console.log('Looking for villa key:', villaKey);
+                    
+                    // Debug: log all available villas
+                    extendedOfferData.forEach((offer, index) => {
+                        console.log(`Offer ${index}: villa="${offer.villa}", villa_display_name="${offer.villa_display_name}", match_type="${offer.match_type}"`);
+                    });
+                    
                     // Find villa offers (any match type since we'll combine them)
-                    const villaOffers = extendedOfferData.filter(offer => 
-                        offer.villa_display_name === villaKey || offer.villa === villaKey
-                    );
+                    const villaOffers = extendedOfferData.filter(offer => {
+                        const matchesVilla = offer.villa_display_name === villaKey || offer.villa === villaKey;
+                        console.log(`Checking offer: villa_display_name="${offer.villa_display_name}" vs villaKey="${villaKey}" = ${matchesVilla}`);
+                        return matchesVilla;
+                    });
+                    
+                    console.log('Villa offers found after filtering:', villaOffers.length);
                     
                     if (villaOffers.length > 0) {
                         // Find the best offer (prefer exact, then nearby, then extension)
@@ -1610,6 +1622,7 @@ class ActivitiesDashboard {
                         console.log('Villa card updated with extended offer');
                     } else {
                         console.error('No matching villa offers found for extended stay');
+                        console.error('Available villas were:', extendedOfferData.map(o => o.villa_display_name).join(', '));
                         this.hideExtensionLoadingState(currentCard);
                         alert('Sorry, this villa is not available for the extended dates. Please try different dates.');
                     }
