@@ -1720,6 +1720,22 @@ body {
     font-weight: 800;
 }
 
+.nights-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(15, 49, 40, 0.95);
+    color: #FFFFFF;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 2px solid rgba(170, 120, 49, 0.8);
+    z-index: 10;
+}
+
 /* Savings Banner */
 .champion-savings-banner {
     background: linear-gradient(135deg, #2E7D32, #43A047);

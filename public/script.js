@@ -1620,12 +1620,15 @@ class ActivitiesDashboard {
         
         return `
             <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}" data-current-offer='${JSON.stringify(offerData)}' data-images='${JSON.stringify(imageUrls)}'>
-                <!-- Hero Image with Price Overlay -->
+                <!-- Hero Image with Overlays -->
                 <div class="champion-hero">
                     <div class="carousel-container">
                         <div class="carousel-slides">
                             ${carouselSlides}
                         </div>
+                    </div>
+                    <div class="nights-overlay">
+                        ${primaryOffer.nights}N
                     </div>
                     <div class="champion-price-overlay">
                         <span class="currency">Rp</span>
