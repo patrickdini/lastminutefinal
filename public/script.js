@@ -1772,17 +1772,29 @@ class ActivitiesDashboard {
      * Update villa card with extended offer data
      */
     async updateVillaCardWithExtendedOffer(currentCard, newOffer, villaKey, allExtendedOffers) {
-        // Re-query for ALL possible offers for this villa to maintain all extension options
+        // Re-query with broader date range to capture all extension possibilities
         try {
+            // Calculate extended date range to capture all possible extensions
+            const checkInDate = new Date(newOffer.checkIn);
+            const checkOutDate = new Date(newOffer.checkOut);
+            
+            // Query for 3 days before check-in and 3 days after check-out to capture all extensions
+            const queryStartDate = new Date(checkInDate);
+            queryStartDate.setDate(queryStartDate.getDate() - 3);
+            
+            const queryEndDate = new Date(checkOutDate);
+            queryEndDate.setDate(queryEndDate.getDate() + 3);
+            
+            // Query with broader range to get all possible offers
             const response = await fetch('/api/activities', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    selected_checkin_date: newOffer.checkIn.split('T')[0],
-                    selected_checkout_date: newOffer.checkOut,
-                    selected_nights: newOffer.nights,
+                    selected_checkin_date: queryStartDate.toISOString().split('T')[0],
+                    selected_checkout_date: queryEndDate.toISOString().split('T')[0],
+                    selected_nights: 1, // Use 1 night to get maximum variety of offers
                     adults: this.selectedAdults,
                     children: this.selectedChildren,
                     page: 1,
@@ -1797,6 +1809,8 @@ class ActivitiesDashboard {
                 const allVillaOffers = data.offers.filter(offer => 
                     offer.villa_display_name === villaKey || offer.villa === villaKey
                 );
+                
+                console.log(`Re-queried and found ${allVillaOffers.length} offers for ${villaKey}`);
                 
                 // Generate new card HTML with updated offer and ALL available offers
                 const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, allVillaOffers);
