@@ -244,54 +244,6 @@ body {
         font-size: 1rem;
     }
 }
-    
-    /* Date filter grid - proper 2x2 matrix for mobile */
-    .date-filter-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        grid-template-rows: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .date-filter-box {
-        padding: 14px 10px;
-        min-height: 75px;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .date-filter-box i {
-        font-size: 1.2rem;
-        margin-bottom: 3px;
-    }
-    
-    .filter-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 2px;
-        text-align: center;
-    }
-    
-    .filter-subtitle {
-        font-size: 0.7rem;
-        opacity: 0.85;
-        text-align: center;
-    }
-    
-    .filter-controls {
-        padding: 16px;
-        margin-bottom: 15px;
-    }
-    
-    .filter-label {
-        font-size: 1rem;
-        margin-bottom: 12px;
-    }
-}
 
 /* Calendar section styles - matching Villa Tokay reference */
 .calendar-section {
@@ -320,6 +272,8 @@ body {
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
     padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .day-header {
@@ -347,6 +301,8 @@ body {
     position: relative;
     min-height: 44px;
     color: #333;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .calendar-date:hover:not(.disabled):not(.empty) {
@@ -396,6 +352,53 @@ body {
     
     .calendar-date {
         font-size: 0.9rem;
+    }
+    
+    /* Date filter grid - proper 2x2 matrix for mobile */
+    .date-filter-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .date-filter-box {
+        padding: 14px 10px;
+        min-height: 75px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .date-filter-box i {
+        font-size: 1.2rem;
+        margin-bottom: 3px;
+    }
+    
+    .filter-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+        text-align: center;
+    }
+    
+    .filter-subtitle {
+        font-size: 0.7rem;
+        opacity: 0.85;
+        text-align: center;
+    }
+    
+    .filter-controls {
+        padding: 16px;
+        margin-bottom: 15px;
+    }
+    
+    .filter-label {
+        font-size: 1rem;
+        margin-bottom: 12px;
     }
 }
 
