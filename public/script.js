@@ -1694,8 +1694,8 @@ class ActivitiesDashboard {
         const data = await response.json();
         console.log('Extended offer data received:', data);
         
-        if (data.offers && data.offers.length > 0) {
-            return this.parseOffersToProcessed(data.offers);
+        if (data.data && data.data.length > 0) {
+            return this.parseOffersToProcessed(data.data);
         }
         return [];
     }
