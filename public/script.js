@@ -1379,19 +1379,29 @@ class ActivitiesDashboard {
     async generateChampionCards(offers) {
         console.log('Generating villa cards for', offers.length, 'offers');
         
-        // Sort offers by length of stay (nights) in descending order (longest stays first)
-        const sortedOffers = offers.sort((a, b) => b.nights - a.nights);
+        // Group offers by villa
+        const villaGroups = this.groupChampionOffersByVilla(offers);
+        console.log('Grouped into', Object.keys(villaGroups).length, 'villas');
         
-        console.log('Offers sorted by nights:', sortedOffers.map(o => `${o.villa_display_name}: ${o.nights}n`));
-        
+        // For each villa, select the primary offer (longest stay first, then best savings)
         const villaCardsHtml = await Promise.all(
-            sortedOffers.map(async offer => {
-                const villaKey = offer.villa_display_name || offer.villa;
+            Object.entries(villaGroups).map(async ([villaKey, villaOffers]) => {
+                // Sort villa offers: longest stay first, then by best savings
+                const sortedVillaOffers = villaOffers.sort((a, b) => {
+                    if (b.nights !== a.nights) {
+                        return b.nights - a.nights; // Longest stay first
+                    }
+                    return b.savingsPercent - a.savingsPercent; // Best savings second
+                });
                 
-                console.log('Generating card for offer:', villaKey, ':', offer.checkIn, 'nights:', offer.nights, 'match type:', offer.match_type);
+                const primaryOffer = sortedVillaOffers[0];
                 
-                // For individual offers, we still generate timeline but only show this specific offer
-                return await this.generateChampionVillaCardWithTimeline(villaKey, offer, [offer]);
+                console.log('Generating card for villa:', villaKey, 'with', villaOffers.length, 'booking options');
+                console.log('Primary offer:', primaryOffer.checkIn, 'nights:', primaryOffer.nights);
+                console.log('All options:', villaOffers.map(o => `${o.checkIn.split('T')[0]} (${o.nights}n)`));
+                
+                // Generate single card with all booking options for this villa
+                return await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, sortedVillaOffers);
             })
         );
         
