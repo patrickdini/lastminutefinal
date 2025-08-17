@@ -56,6 +56,8 @@ class ActivitiesDashboard {
         this.setupCalendar();
         this.setupGuestPicker();
         this.setDefaultDateSelection();
+        this.initializeImageCarousels();
+        this.initializeGalleryModal();
         this.loadOffersCache();
     }
     
@@ -1341,6 +1343,11 @@ class ActivitiesDashboard {
         // Replace all content (no pagination needed)
         document.getElementById('championOffers').innerHTML = villaCardsHtml.join('');
         
+        // Start carousels for all villa cards
+        document.querySelectorAll('.champion-offer-card').forEach(card => {
+            this.startCarousel(card);
+        });
+        
         // No load more button needed for special offers (all loaded at once)
     }
     
@@ -1603,8 +1610,12 @@ class ActivitiesDashboard {
         // Generate timeline dates using all villa offers
         const timelineHtml = this.generateTimelineForOffer(primaryOffer, allVillaOffers, villaKey);
         
-        // Get primary image
-        const heroImage = imageUrls.length > 0 ? imageUrls[0] : '/api/placeholder/400/280';
+        // Generate carousel slides HTML
+        const carouselSlides = imageUrls.map((url, index) => `
+            <div class="carousel-slide">
+                <img src="${url}" alt="${tagline} - Image ${index + 1}" class="champion-hero-image" data-villa="${villaKey}" data-index="${index}">
+            </div>
+        `).join('');
         
         // Store the current offer data on the card element for later retrieval
         const offerData = {
@@ -1614,10 +1625,14 @@ class ActivitiesDashboard {
         };
         
         return `
-            <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}" data-current-offer='${JSON.stringify(offerData)}'>
+            <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}" data-current-offer='${JSON.stringify(offerData)}' data-images='${JSON.stringify(imageUrls)}'>
                 <!-- Hero Image with Price Overlay -->
                 <div class="champion-hero">
-                    <img src="${heroImage}" alt="${tagline}" class="champion-hero-image">
+                    <div class="carousel-container">
+                        <div class="carousel-slides">
+                            ${carouselSlides}
+                        </div>
+                    </div>
                     <div class="champion-price-overlay">
                         <span class="currency">Rp</span>
                         <span class="amount">${priceInMillions}M</span>
@@ -1854,6 +1869,142 @@ class ActivitiesDashboard {
     }
     
     /**
+     * Initialize image carousels for all villa cards
+     */
+    initializeImageCarousels() {
+        // This will be called after villa cards are rendered
+        this.carouselIntervals = new Map();
+    }
+    
+    /**
+     * Start carousel for a specific villa card
+     */
+    startCarousel(cardElement) {
+        const slides = cardElement.querySelector('.carousel-slides');
+        const slideElements = cardElement.querySelectorAll('.carousel-slide');
+        
+        if (!slides || slideElements.length <= 1) return;
+        
+        let currentIndex = 0;
+        const slideInterval = 2000; // 2 seconds
+        
+        // Clear any existing interval for this card
+        const offerId = cardElement.dataset.offerId;
+        if (this.carouselIntervals.has(offerId)) {
+            clearInterval(this.carouselIntervals.get(offerId));
+        }
+        
+        // Start automatic sliding
+        const interval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % slideElements.length;
+            slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+        }, slideInterval);
+        
+        this.carouselIntervals.set(offerId, interval);
+    }
+    
+    /**
+     * Initialize gallery modal
+     */
+    initializeGalleryModal() {
+        // Create modal HTML if it doesn't exist
+        if (!document.getElementById('imageModal')) {
+            const modalHtml = `
+                <div id="imageModal" class="modal">
+                    <span class="close">&times;</span>
+                    <span class="prev">&#10094;</span>
+                    <span class="next">&#10095;</span>
+                    <img class="modal-content" id="modalImage">
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+        
+        // Setup modal controls
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const closeModal = document.querySelector('.modal .close');
+        const prevButton = document.querySelector('.modal .prev');
+        const nextButton = document.querySelector('.modal .next');
+        
+        this.galleryModal = {
+            modal,
+            modalImg,
+            currentImages: [],
+            currentIndex: 0
+        };
+        
+        // Close modal
+        closeModal.addEventListener('click', () => this.closeGallery());
+        
+        // Navigation
+        nextButton.addEventListener('click', () => this.showNextGalleryImage());
+        prevButton.addEventListener('click', () => this.showPrevGalleryImage());
+        
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeGallery();
+            }
+        });
+        
+        // Delegate click events for villa images
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('champion-hero-image')) {
+                const villaCard = e.target.closest('.champion-offer-card');
+                if (villaCard) {
+                    const images = JSON.parse(villaCard.dataset.images || '[]');
+                    const index = parseInt(e.target.dataset.index || '0');
+                    this.openGallery(images, index);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Open gallery modal
+     */
+    openGallery(images, startIndex = 0) {
+        this.galleryModal.currentImages = images;
+        this.galleryModal.currentIndex = startIndex;
+        this.galleryModal.modal.style.display = 'flex';
+        this.galleryModal.modalImg.src = images[startIndex];
+        
+        // Stop all carousels when modal is open
+        this.carouselIntervals.forEach(interval => clearInterval(interval));
+    }
+    
+    /**
+     * Close gallery modal
+     */
+    closeGallery() {
+        this.galleryModal.modal.style.display = 'none';
+        
+        // Restart carousels
+        document.querySelectorAll('.champion-offer-card').forEach(card => {
+            this.startCarousel(card);
+        });
+    }
+    
+    /**
+     * Show next image in gallery
+     */
+    showNextGalleryImage() {
+        const { currentImages } = this.galleryModal;
+        this.galleryModal.currentIndex = (this.galleryModal.currentIndex + 1) % currentImages.length;
+        this.galleryModal.modalImg.src = currentImages[this.galleryModal.currentIndex];
+    }
+    
+    /**
+     * Show previous image in gallery
+     */
+    showPrevGalleryImage() {
+        const { currentImages } = this.galleryModal;
+        this.galleryModal.currentIndex = (this.galleryModal.currentIndex - 1 + currentImages.length) % currentImages.length;
+        this.galleryModal.modalImg.src = currentImages[this.galleryModal.currentIndex];
+    }
+    
+    /**
      * Update villa card with extended offer data
      */
     async updateVillaCardWithExtendedOffer(currentCard, newOffer, villaKey, allExtendedOffers) {
@@ -1929,6 +2080,12 @@ class ActivitiesDashboard {
             
             // Replace the current card with the new one
             currentCard.outerHTML = newCardHtml;
+            
+            // Start carousel for the new card
+            const newCard = document.querySelector(`[data-offer-id="${newOffer.offer_id}"]`);
+            if (newCard) {
+                this.startCarousel(newCard);
+            }
             
             console.log('Villa card updated with extended offer and all cached extension options');
         } catch (error) {

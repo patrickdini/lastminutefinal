@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Carousel</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            width: 90%;
+            max-width: 600px;
+            overflow: hidden; /* Hides the images that are not in view */
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Slides Wrapper */
+        .carousel-slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out; /* Smooth slide animation */
+        }
+
+        /* Individual Slide */
+        .carousel-slide {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            display: block; /* Removes bottom space under the image */
+            cursor: pointer; /* Indicates the image is clickable */
+        }
+
+        /* Modal (Lightbox) Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Image */
+        .modal-content {
+            max-width: 90%;
+            max-height: 80%;
+        }
+
+        /* Navigation Arrows */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: auto;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 30px;
+            user-select: none; /* Prevents text selection */
+        }
+
+        .prev {
+            left: 10px;
+        }
+
+        .next {
+            right: 10px;
+        }
+
+        /* Close Button */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="carousel-container">
+        <div class="carousel-slides">
+            <div class="carousel-slide">
+                <img src="https://picsum.photos/id/10/800/600" alt="Image 1">
+            </div>
+            <div class="carousel-slide">
+                <img src="https://picsum.photos/id/20/800/600" alt="Image 2">
+            </div>
+            <div class="carousel-slide">
+                <img src="https://picsum.photos/id/30/800/600" alt="Image 3">
+            </div>
+            <div class="carousel-slide">
+                <img src="https://picsum.photos/id/40/800/600" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <span class="prev">&#10094;</span>
+        <span class="next">&#10095;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Carousel Logic ---
+            const slidesContainer = document.querySelector('.carousel-slides');
+            const slides = document.querySelectorAll('.carousel-slide');
+            let currentIndex = 0;
+            const slideInterval = 2000; // 2 seconds
+
+            function showNextSlide() {
+                currentIndex = (currentIndex + 1) % slides.length; // Loop back to the start
+                slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            // Start automatic sliding
+            let autoSlide = setInterval(showNextSlide, slideInterval);
+
+            // --- Modal (Lightbox) Logic ---
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const closeModal = document.querySelector('.close');
+            const prevButton = document.querySelector('.prev');
+            const nextButton = document.querySelector('.next');
+            const images = document.querySelectorAll('.carousel-slide img');
+            let currentModalIndex = 0;
+
+            // Function to open the modal
+            function openModal(index) {
+                currentModalIndex = index;
+                modal.style.display = 'flex'; // Use flex to center the content
+                modalImg.src = images[currentModalIndex].src;
+                clearInterval(autoSlide); // Stop carousel when modal is open
+            }
+
+            // Function to close the modal
+            function closeTheModal() {
+                modal.style.display = 'none';
+                autoSlide = setInterval(showNextSlide, slideInterval); // Restart carousel
+            }
+
+            // Function to show the next image in the modal
+            function showNextModalImage() {
+                currentModalIndex = (currentModalIndex + 1) % images.length;
+                modalImg.src = images[currentModalIndex].src;
+            }
+
+            // Function to show the previous image in the modal
+            function showPrevModalImage() {
+                currentModalIndex = (currentModalIndex - 1 + images.length) % images.length;
+                modalImg.src = images[currentModalIndex].src;
+            }
+
+            // Add click event listeners to each image
+            images.forEach((img, index) => {
+                img.addEventListener('click', () => {
+                    openModal(index);
+                });
+            });
+
+            // Event listeners for modal controls
+            closeModal.addEventListener('click', closeTheModal);
+            nextButton.addEventListener('click', showNextModalImage);
+            prevButton.addEventListener('click', showPrevModalImage);
+            
+            // Close modal by clicking outside the image
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeTheModal();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
