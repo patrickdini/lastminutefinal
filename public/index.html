@@ -67,56 +67,20 @@
                 </div>
             </div>
 
-            <div class="filter-controls">
-                <div class="filter-label">When do you need to escape?</div>
-                <div class="date-filter-grid">
-                    <button id="dateFilter1" class="date-filter-box active" data-filter="">
-                        <i class="fas fa-calendar-week"></i>
-                        <span class="filter-title">This Week</span>
-                        <span class="filter-subtitle">Tue - Sun</span>
-                    </button>
-                    <button id="dateFilter2" class="date-filter-box" data-filter="">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span class="filter-title">This Weekend</span>
-                        <span class="filter-subtitle">Sat - Sun</span>
-                    </button>
-                    <button id="dateFilter3" class="date-filter-box" data-filter="">
-                        <i class="fas fa-calendar-plus"></i>
-                        <span class="filter-title">Next Week</span>
-                        <span class="filter-subtitle">Aug 19 - 25</span>
-                    </button>
-                    <button id="dateFilter4" class="date-filter-box" data-filter="custom">
-                        <i class="fas fa-calendar-check"></i>
-                        <span class="filter-title">Pick Your Date</span>
-                        <span class="filter-subtitle">Choose any date</span>
-                    </button>
-                </div>
-                
-                <!-- Custom date slider (hidden by default) -->
-                <div id="customDateSlider" class="custom-date-slider" style="display: none;">
-                    <div class="slider-container">
-                        <label>Select Date Range:</label>
-                        <div class="dual-slider-container">
-                            <div class="slider-track">
-                                <div id="sliderRange" class="slider-range"></div>
-                                <input type="range" id="startDateRange" min="1" max="60" value="1" class="date-slider start-slider">
-                                <input type="range" id="endDateRange" min="1" max="60" value="7" class="date-slider end-slider">
-                            </div>
-                        </div>
-                        <div class="slider-display">
-                            <div class="date-range-display">
-                                <div class="start-date">
-                                    <span class="date-label">From:</span>
-                                    <span id="selectedStartDate">Tomorrow</span>
-                                    <span id="startDayOfWeek">Wednesday</span>
-                                </div>
-                                <div class="end-date">
-                                    <span class="date-label">To:</span>
-                                    <span id="selectedEndDate">Next Tuesday</span>
-                                    <span id="endDayOfWeek">Tuesday</span>
-                                </div>
-                            </div>
-                        </div>
+            <div class="calendar-section">
+                <div class="calendar-label">Choose Your Dates</div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="weekday">Mon</div>
+                        <div class="weekday">Tue</div>
+                        <div class="weekday">Wed</div>
+                        <div class="weekday">Thu</div>
+                        <div class="weekday">Fri</div>
+                        <div class="weekday">Sat</div>
+                        <div class="weekday">Sun</div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid">
+                        <!-- Calendar dates will be populated by JavaScript -->
                     </div>
                 </div>
             </div>

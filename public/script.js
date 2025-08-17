@@ -15,31 +15,24 @@ class ActivitiesDashboard {
         // DOM elements
         this.elements = {
             retryBtn: document.getElementById('retryBtn'),
-
             loadingSpinner: document.getElementById('loadingSpinner'),
             errorMessage: document.getElementById('errorMessage'),
             errorText: document.getElementById('errorText'),
             offersContainer: document.getElementById('offersContainer'),
             offersCount: document.getElementById('offersCount'),
             villaCards: document.getElementById('villaCards'),
-            dateFilter1: document.getElementById('dateFilter1'),
-            dateFilter2: document.getElementById('dateFilter2'),
-            dateFilter3: document.getElementById('dateFilter3'),
-            dateFilter4: document.getElementById('dateFilter4'),
-            customDateSlider: document.getElementById('customDateSlider'),
-            startDateRange: document.getElementById('startDateRange'),
-            endDateRange: document.getElementById('endDateRange'),
-            sliderRange: document.getElementById('sliderRange'),
-            selectedStartDate: document.getElementById('selectedStartDate'),
-            startDayOfWeek: document.getElementById('startDayOfWeek'),
-            selectedEndDate: document.getElementById('selectedEndDate'),
-            endDayOfWeek: document.getElementById('endDayOfWeek'),
+            calendarGrid: document.getElementById('calendarGrid'),
             adultsCount: document.getElementById('adultsCount'),
             childrenCount: document.getElementById('childrenCount'),
             loadMoreBtn: document.getElementById('loadMoreBtn'),
             loadMoreContainer: document.getElementById('loadMoreContainer'),
             loadMoreCount: document.getElementById('loadMoreCount')
         };
+        
+        // Calendar properties
+        this.selectedCheckIn = null;
+        this.selectedCheckOut = null;
+        this.calendarDates = [];
         
         // Guest count properties
         this.selectedAdults = 2; // Default to 2 adults
@@ -50,7 +43,7 @@ class ActivitiesDashboard {
         this.hasMoreOffers = false;
         
         this.initializeEventListeners();
-        this.setupDynamicDateFilters();
+        this.setupCalendar();
         this.setupMobileGuestSelectors();
         this.loadActivities();
     }
@@ -60,16 +53,6 @@ class ActivitiesDashboard {
      */
     initializeEventListeners() {
         this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
-        
-        // Date filter listeners
-        this.elements.dateFilter1.addEventListener('click', () => this.handleDateFilterClick('filter1'));
-        this.elements.dateFilter2.addEventListener('click', () => this.handleDateFilterClick('filter2'));
-        this.elements.dateFilter3.addEventListener('click', () => this.handleDateFilterClick('filter3'));
-        this.elements.dateFilter4.addEventListener('click', () => this.handleDateFilterClick('filter4'));
-        
-        // Custom date slider listeners
-        this.elements.startDateRange.addEventListener('input', () => this.handleDualSliderChange());
-        this.elements.endDateRange.addEventListener('input', () => this.handleDualSliderChange());
         
         // Guest count listeners
         this.elements.adultsCount.addEventListener('change', () => this.handleGuestCountChange());
@@ -88,6 +71,137 @@ class ActivitiesDashboard {
                 this.loadActivities(true); // Silent refresh
             }
         }, 300000);
+    }
+    
+    /**
+     * Setup calendar with next 14 days
+     */
+    setupCalendar() {
+        const today = new Date();
+        const baliTime = new Date(today.getTime() + (8 * 60 * 60 * 1000)); // Convert to Bali time (UTC+8)
+        
+        this.calendarDates = [];
+        
+        // Generate 14 days starting from today
+        for (let i = 0; i < 14; i++) {
+            const date = new Date(baliTime);
+            date.setDate(baliTime.getDate() + i);
+            this.calendarDates.push({
+                date: date,
+                day: date.getDate(),
+                isToday: i === 0,
+                isSelectable: i > 0 // Today is not selectable
+            });
+        }
+        
+        this.renderCalendar();
+        this.setDefaultDates();
+    }
+    
+    /**
+     * Render calendar grid
+     */
+    renderCalendar() {
+        this.elements.calendarGrid.innerHTML = '';
+        
+        this.calendarDates.forEach((dateInfo, index) => {
+            const dateElement = document.createElement('div');
+            dateElement.className = 'calendar-date';
+            dateElement.textContent = dateInfo.day;
+            dateElement.dataset.index = index;
+            
+            if (!dateInfo.isSelectable) {
+                dateElement.classList.add('disabled');
+            } else {
+                dateElement.addEventListener('click', () => this.handleDateClick(index));
+            }
+            
+            this.elements.calendarGrid.appendChild(dateElement);
+        });
+    }
+    
+    /**
+     * Handle calendar date click
+     */
+    handleDateClick(index) {
+        const dateInfo = this.calendarDates[index];
+        if (!dateInfo.isSelectable) return;
+        
+        if (!this.selectedCheckIn) {
+            // First click - set check-in
+            this.selectedCheckIn = index;
+            this.selectedCheckOut = null;
+        } else if (!this.selectedCheckOut) {
+            // Second click - set check-out
+            if (index <= this.selectedCheckIn) {
+                // If clicked date is before or same as check-in, reset and make it new check-in
+                this.selectedCheckIn = index;
+                this.selectedCheckOut = null;
+            } else {
+                this.selectedCheckOut = index;
+            }
+        } else {
+            // Both dates selected - start over with new check-in
+            this.selectedCheckIn = index;
+            this.selectedCheckOut = null;
+        }
+        
+        this.updateCalendarDisplay();
+        
+        // If both dates are selected, trigger filtering
+        if (this.selectedCheckIn !== null && this.selectedCheckOut !== null) {
+            this.applyCalendarFilter();
+        }
+    }
+    
+    /**
+     * Update calendar visual display
+     */
+    updateCalendarDisplay() {
+        const dateElements = this.elements.calendarGrid.querySelectorAll('.calendar-date');
+        
+        dateElements.forEach((element, index) => {
+            element.classList.remove('check-in', 'check-out', 'in-range', 'selected');
+            
+            if (index === this.selectedCheckIn) {
+                element.classList.add('check-in');
+            } else if (index === this.selectedCheckOut) {
+                element.classList.add('check-out');
+            } else if (this.selectedCheckIn !== null && this.selectedCheckOut !== null && 
+                      index > this.selectedCheckIn && index < this.selectedCheckOut) {
+                element.classList.add('in-range');
+            }
+        });
+    }
+    
+    /**
+     * Set default dates (tomorrow to tomorrow + 3 days)
+     */
+    setDefaultDates() {
+        this.selectedCheckIn = 1; // Tomorrow (index 1)
+        this.selectedCheckOut = 4; // Tomorrow + 3 days (index 4)
+        this.updateCalendarDisplay();
+        this.applyCalendarFilter();
+    }
+    
+    /**
+     * Apply calendar date filter
+     */
+    applyCalendarFilter() {
+        if (this.selectedCheckIn === null || this.selectedCheckOut === null) return;
+        
+        const checkInDate = this.calendarDates[this.selectedCheckIn].date;
+        const checkOutDate = this.calendarDates[this.selectedCheckOut].date;
+        
+        const startDate = checkInDate.toISOString().split('T')[0];
+        const endDate = checkOutDate.toISOString().split('T')[0];
+        
+        console.log('Calendar filter applied:', startDate, 'to', endDate);
+        
+        this.currentDateRange = { startDate, endDate };
+        this.currentOffset = 0; // Reset pagination
+        this.hasMoreOffers = false;
+        this.loadActivities();
     }
     
     /**
