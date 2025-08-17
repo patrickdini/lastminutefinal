@@ -93,8 +93,8 @@ class ActivitiesDashboard {
 
         console.log('Searching cache for:', villaDisplayName, checkinDate, nights, 'nights');
         
-        // Find offers matching villa, date, nights, and guest count
-        const matchingOffers = this.cachedOffers.filter(offer => {
+        // First try exact match
+        let matchingOffers = this.cachedOffers.filter(offer => {
             const offerCheckin = offer.checkin_date ? new Date(offer.checkin_date).toISOString().split('T')[0] : null;
             const matchesVilla = offer.villa_display_name === villaDisplayName;
             const matchesDate = offerCheckin === checkinDate;
@@ -102,10 +102,37 @@ class ActivitiesDashboard {
             const matchesAdults = offer.adults >= parseInt(adults);
             const matchesChildren = offer.children >= parseInt(children);
             
-            console.log(`Checking offer: villa="${offer.villa_display_name}" vs "${villaDisplayName}", date="${offerCheckin}" vs "${checkinDate}", nights=${offer.nights} vs ${nights}, adults=${offer.adults} vs ${adults}, children=${offer.children} vs ${children}`);
-            
             return matchesVilla && matchesDate && matchesNights && matchesAdults && matchesChildren;
         });
+
+        // If no exact match, try to find offers for the same villa with compatible nights
+        if (matchingOffers.length === 0) {
+            console.log('No exact match found, searching for compatible offers...');
+            
+            matchingOffers = this.cachedOffers.filter(offer => {
+                const offerCheckin = offer.checkin_date ? new Date(offer.checkin_date).toISOString().split('T')[0] : null;
+                const matchesVilla = offer.villa_display_name === villaDisplayName;
+                const matchesDate = offerCheckin === checkinDate;
+                const matchesAdults = offer.adults >= parseInt(adults);
+                const matchesChildren = offer.children >= parseInt(children);
+                
+                // Accept any night count for now - we'll use the pricing as base
+                return matchesVilla && matchesDate && matchesAdults && matchesChildren;
+            });
+            
+            if (matchingOffers.length > 0) {
+                console.log(`Found ${matchingOffers.length} compatible offers with different night counts`);
+                
+                // Adjust the pricing for the requested night count
+                matchingOffers = matchingOffers.map(offer => ({
+                    ...offer,
+                    nights: parseInt(nights),
+                    price_for_guests: (parseFloat(offer.price_for_guests) / offer.nights * parseInt(nights)).toFixed(2),
+                    total_face_value: (parseFloat(offer.total_face_value) / offer.nights * parseInt(nights)).toFixed(2),
+                    guest_savings_value: (parseFloat(offer.guest_savings_value) / offer.nights * parseInt(nights)).toFixed(2)
+                }));
+            }
+        }
 
         console.log('Found', matchingOffers.length, 'matching offers in cache');
         return matchingOffers;
