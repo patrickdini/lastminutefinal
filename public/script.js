@@ -148,10 +148,15 @@ class ActivitiesDashboard {
             this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
         }
         
-        // Flexibility selector event listeners
-        const flexibilityOptions = document.querySelectorAll('input[name="flexibility"]');
-        flexibilityOptions.forEach(option => {
-            option.addEventListener('change', () => {
+        // Flexibility pills event listeners
+        const flexibilityPills = document.querySelectorAll('.flexibility-pill');
+        flexibilityPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                // Remove selected class from all pills
+                flexibilityPills.forEach(p => p.classList.remove('selected'));
+                // Add selected class to clicked pill
+                pill.classList.add('selected');
+                
                 console.log('Flexibility changed to:', this.getSelectedFlexibility());
                 // Only reload if we have a date range selected
                 if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {
@@ -1074,8 +1079,8 @@ class ActivitiesDashboard {
     }
     
     getSelectedFlexibility() {
-        const selectedOption = document.querySelector('input[name="flexibility"]:checked');
-        return selectedOption ? selectedOption.value : 'exact';
+        const selectedPill = document.querySelector('.flexibility-pill.selected');
+        return selectedPill ? selectedPill.dataset.tolerance : 'exact';
     }
     
     /**

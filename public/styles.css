@@ -1736,98 +1736,74 @@ body {
     z-index: 10;
 }
 
-/* Date Flexibility Selector */
-.flexibility-section {
+/* Date Flexibility Pills */
+.flexibility-pills-container {
     margin: 20px 0;
-    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.flexibility-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px;
     background: rgba(38, 38, 38, 0.6);
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid rgba(170, 120, 49, 0.3);
 }
 
-.flexibility-label {
-    color: #AA7831;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 15px;
-    font-family: 'Crimson Text', serif;
-}
-
-.flexibility-options {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.flexibility-option {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-    padding: 10px 15px;
+.flexibility-pill {
+    flex: 0 0 auto;
+    min-width: 80px;
+    padding: 12px 16px;
+    border: 2px solid rgba(74, 74, 71, 0.5);
     border-radius: 8px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.flexibility-option:hover {
-    background: rgba(170, 120, 49, 0.1);
-    border-color: rgba(170, 120, 49, 0.3);
-}
-
-.flexibility-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
+    background: rgba(74, 74, 71, 0.8);
     cursor: pointer;
-}
-
-.checkmark {
-    height: 20px;
-    width: 20px;
-    background-color: rgba(74, 74, 71, 0.8);
-    border: 2px solid #4A4A47;
-    border-radius: 50%;
-    margin-right: 10px;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.flexibility-option input:checked ~ .checkmark {
-    background-color: #AA7831;
-    border-color: #AA7831;
-}
-
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 50%;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: white;
-    transform: translate(-50%, -50%);
-}
-
-.flexibility-option input:checked ~ .checkmark:after {
-    display: block;
-}
-
-.option-text {
-    color: #E0E0E0;
-    font-size: 1rem;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-size: 14px;
     font-weight: 500;
-    transition: color 0.3s ease;
+    color: #E0E0E0;
+    white-space: nowrap;
 }
 
-.flexibility-option input:checked ~ .option-text {
+.flexibility-pill:hover {
+    background: rgba(170, 120, 49, 0.1);
+    border-color: #0F3128;
     color: #AA7831;
+}
+
+.flexibility-pill.selected {
+    background: #0F3128;
+    color: white;
+    border-color: #0F3128;
     font-weight: 600;
 }
 
-.flexibility-option:hover .option-text {
-    color: #AA7831;
+/* Mobile optimizations for pills */
+@media (max-width: 480px) {
+    .flexibility-pill {
+        min-width: 70px;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Scrollbar styling for horizontal scroll */
+.flexibility-pills::-webkit-scrollbar {
+    height: 4px;
+}
+
+.flexibility-pills::-webkit-scrollbar-track {
+    background: rgba(74, 74, 71, 0.3);
+    border-radius: 2px;
+}
+
+.flexibility-pills::-webkit-scrollbar-thumb {
+    background: #0F3128;
+    border-radius: 2px;
 }
 
 /* Booking Options Selector */
