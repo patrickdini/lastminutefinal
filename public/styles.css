@@ -1440,6 +1440,10 @@ body {
         padding: 0 5px;
     }
     
+    .villa-card {
+        margin: 0;
+    }
+    
     .villa-image-gallery {
         height: 180px;
     }
@@ -1750,7 +1754,7 @@ body {
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     font-weight: 800;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     border: 2px solid rgba(170, 120, 49, 0.8);
