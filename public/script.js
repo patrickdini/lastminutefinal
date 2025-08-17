@@ -1681,6 +1681,9 @@ class ActivitiesDashboard {
                 if (extendedOffer) {
                     console.log('Found extended offer in cache:', extendedOffer);
                     
+                    // Update the calendar selection to reflect the extended dates
+                    this.updateCalendarSelection(newDateRange.checkinDate, newDateRange.checkoutDate);
+                    
                     // Replace the current card with updated offer data
                     await this.updateVillaCardWithExtendedOffer(currentCard, extendedOffer, villaKey, [extendedOffer]);
                     console.log('Villa card updated with extended offer');
@@ -1698,16 +1701,38 @@ class ActivitiesDashboard {
     }
     
     /**
+     * Update calendar selection to reflect extended dates
+     */
+    updateCalendarSelection(newCheckinDate, newCheckoutDate) {
+        // Find the calendar indices for the new dates
+        const checkinDateStr = newCheckinDate;
+        const checkoutDateStr = newCheckoutDate;
+        
+        for (let i = 0; i < this.calendarDates.length; i++) {
+            const calDate = this.calendarDates[i].date.toISOString().split('T')[0];
+            if (calDate === checkinDateStr) {
+                this.selectedCheckIn = i;
+            }
+            if (calDate === checkoutDateStr) {
+                this.selectedCheckOut = i;
+            }
+        }
+        
+        console.log('Updated calendar selection: check-in index', this.selectedCheckIn, 'check-out index', this.selectedCheckOut);
+    }
+    
+    /**
      * Calculate new date range based on extension
      */
     calculateExtendedDateRange(currentCard, extensionDate, extensionType) {
         console.log('Calculating extended date range for extension:', extensionDate, 'type:', extensionType);
         
-        // Use the current selected dates from the calendar as the source of truth
-        const currentCheckinDate = this.calendarDates[this.selectedCheckIn].date;
-        const currentCheckoutDate = this.calendarDates[this.selectedCheckOut].date;
+        // Get the current dates from the card's actual displayed offer
+        const currentOffer = this.getCurrentOfferFromCard(currentCard);
+        const currentCheckinDate = new Date(currentOffer.checkIn);
+        const currentCheckoutDate = new Date(currentOffer.checkOut);
         
-        console.log('Current booking: check-in', currentCheckinDate.toISOString().split('T')[0], 
+        console.log('Current booking from card: check-in', currentCheckinDate.toISOString().split('T')[0], 
                    'check-out', currentCheckoutDate.toISOString().split('T')[0]);
         
         let newCheckinDate, newCheckoutDate;
@@ -1783,6 +1808,61 @@ class ActivitiesDashboard {
         };
         
         return processedOffer;
+    }
+    
+    /**
+     * Get current offer data from card element
+     */
+    getCurrentOfferFromCard(cardElement) {
+        // Extract offer data from the card's current display
+        const bookBtn = cardElement.querySelector('.champion-book-btn');
+        const nightsMatch = bookBtn ? bookBtn.textContent.match(/\((\d+) NIGHT/) : null;
+        const nights = nightsMatch ? parseInt(nightsMatch[1]) : 1;
+        
+        // Get check-in date from the timeline
+        const selectedCircles = cardElement.querySelectorAll('.date-circle.selected');
+        let checkIn = null;
+        let checkOut = null;
+        
+        if (selectedCircles.length >= 2) {
+            // First selected is check-in, last selected before extension is check-out
+            const firstSelected = selectedCircles[0];
+            const lastSelected = selectedCircles[selectedCircles.length - 1];
+            
+            // Parse dates from the date labels
+            const firstLabel = firstSelected.parentElement.querySelector('.date-label').textContent;
+            const lastLabel = lastSelected.parentElement.querySelector('.date-label').textContent;
+            
+            // Extract month and day from labels like "Aug 20\nCheck-in"
+            const parseDate = (label) => {
+                const match = label.match(/(\w+)\s+(\d+)/);
+                if (match) {
+                    const month = match[1];
+                    const day = parseInt(match[2]);
+                    const year = new Date().getFullYear();
+                    return new Date(`${month} ${day}, ${year}`).toISOString().split('T')[0];
+                }
+                return null;
+            };
+            
+            checkIn = parseDate(firstLabel);
+            checkOut = parseDate(lastLabel);
+        }
+        
+        // Fallback to using current calendar selection if can't parse from card
+        if (!checkIn || !checkOut) {
+            checkIn = this.calendarDates[this.selectedCheckIn].date.toISOString().split('T')[0];
+            const checkInDate = new Date(checkIn);
+            const checkOutDate = new Date(checkInDate);
+            checkOutDate.setDate(checkInDate.getDate() + nights);
+            checkOut = checkOutDate.toISOString().split('T')[0];
+        }
+        
+        return {
+            checkIn: checkIn,
+            checkOut: checkOut,
+            nights: nights
+        };
     }
     
     /**
