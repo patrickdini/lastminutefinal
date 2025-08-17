@@ -2017,22 +2017,15 @@ class ActivitiesDashboard {
             
             console.log(`Re-querying for ${villaKey} from ${queryStartDate.toISOString().split('T')[0]} to ${queryEndDate.toISOString().split('T')[0]}`);
             
-            // Query with broader range to get all possible offers
-            const response = await fetch('/api/activities', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    selected_checkin_date: queryStartDate.toISOString().split('T')[0],
-                    selected_checkout_date: queryEndDate.toISOString().split('T')[0],
-                    selected_nights: 1, // Use 1 night to get maximum variety of offers
-                    adults: this.selectedAdults,
-                    children: this.selectedChildren,
-                    page: 1,
-                    refresh_cache: false
-                })
+            // Query with broader range to get all possible offers using GET parameters
+            const queryParams = new URLSearchParams({
+                checkinDate: queryStartDate.toISOString().split('T')[0],
+                checkoutDate: queryEndDate.toISOString().split('T')[0], 
+                adults: this.selectedAdults,
+                children: this.selectedChildren
             });
+            
+            const response = await fetch(`/api/activities?${queryParams}`);
 
             // Instead of using the re-query response, always use the full cache for comprehensive extension checking
             console.log('Ignoring re-query, using full cache to find all villa offers for extension checking');
