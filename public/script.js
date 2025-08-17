@@ -1652,7 +1652,7 @@ class ActivitiesDashboard {
                         </div>
                     </div>
                     <div class="nights-overlay">
-                        ${primaryOffer.nights}N
+                        ${primaryOffer.pool_type || 'Pool'}
                     </div>
                     <div class="champion-price-overlay">
                         <span class="currency">Rp</span>
