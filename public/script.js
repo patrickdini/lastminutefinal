@@ -1730,15 +1730,15 @@ class ActivitiesDashboard {
         
         // Convert cached offer to the format expected by the frontend
         const processedOffer = {
-            villa: offer.UserRoomDisplayName || offer.villa_display_name,
+            villa: offer.villa_id || offer.UserRoomDisplayName,
             checkIn: offer.checkin_date,
             checkOut: this.calculateCheckoutDate(offer.checkin_date, offer.nights),
             nights: offer.nights,
-            rate: offer.rate || offer.LowestRateAmount,
-            totalRate: offer.total_rate || offer.LowestRateAmount,
-            faceValue: offer.face_value || (offer.LowestRateAmount * 1.5), // fallback calculation
-            savings: offer.savings || 0,
-            savingsPercent: offer.savings_percent || 0,
+            rate: offer.price_for_guests,
+            totalRate: offer.price_for_guests,
+            faceValue: offer.total_face_value,
+            savings: offer.guest_savings_value,
+            savingsPercent: offer.guest_savings_percent,
             villa_display_name: offer.villa_display_name,
             tagline: offer.tagline,
             description: offer.description,
@@ -1749,7 +1749,10 @@ class ActivitiesDashboard {
             pool_type: offer.pool_type,
             image_urls: offer.image_urls,
             key_amenities: offer.key_amenities,
-            perks: offer.perks || []
+            perks: offer.perks_included ? JSON.parse(offer.perks_included) : [],
+            perk_ids: offer.perk_ids ? JSON.parse(offer.perk_ids) : [],
+            offer_id: offer.offer_id,
+            attractiveness_score: offer.attractiveness_score
         };
         
         return processedOffer;
