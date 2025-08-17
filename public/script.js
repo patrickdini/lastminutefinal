@@ -1663,21 +1663,34 @@ class ActivitiesDashboard {
                 <!-- Savings Banner -->
                 ${savingsBanner}
                 
+                <!-- Show Details Button -->
+                ${savingsBanner ? `
+                    <div class="show-details-container">
+                        <button class="show-details-btn" onclick="app.toggleVillaDetails(this)">
+                            <i class="fas fa-chevron-down"></i>
+                            Show Detailed Offer
+                        </button>
+                    </div>
+                ` : ''}
+                
                 <!-- Content Section -->
                 <div class="champion-content">
-                    <h3 class="champion-title">${tagline}</h3>
-                    <div class="champion-checkin">${checkInText}</div>
-                    
-                    <!-- Included Perks -->
-                    ${perksHtml}
-                    
-                    <!-- Booking Options -->
-                    ${bookingOptionsHtml}
-                    
-                    <!-- Book Button -->
-                    <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
-                        BOOK SPECIAL OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
-                    </button>
+                    <!-- Collapsible Details -->
+                    <div class="villa-details-collapsible" style="display: none;">
+                        <h3 class="champion-title">${tagline}</h3>
+                        <div class="champion-checkin">${checkInText}</div>
+                        
+                        <!-- Included Perks -->
+                        ${perksHtml}
+                        
+                        <!-- Booking Options -->
+                        ${bookingOptionsHtml}
+                        
+                        <!-- Book Button -->
+                        <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
+                            BOOK SPECIAL OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -3167,6 +3180,27 @@ class ActivitiesDashboard {
     handleChampionBooking(offerId, villaName, checkInDate, nights) {
         console.log(`Champion booking action: Offer ID ${offerId}, ${villaName}: ${nights} nights starting ${checkInDate}`);
         this.showNotification(`Champion Offer Booking! Offer ID: ${offerId}, Villa: ${villaName}, ${nights} nights starting ${this.formatDateForDisplay(checkInDate)}`, 'success');
+    }
+    
+    /**
+     * Toggle villa details visibility
+     */
+    toggleVillaDetails(button) {
+        const card = button.closest('.champion-offer-card');
+        const collapsibleSection = card.querySelector('.villa-details-collapsible');
+        const isExpanded = button.classList.contains('expanded');
+        
+        if (isExpanded) {
+            // Collapse
+            button.classList.remove('expanded');
+            button.innerHTML = '<i class="fas fa-chevron-down"></i> Show Detailed Offer';
+            collapsibleSection.style.display = 'none';
+        } else {
+            // Expand
+            button.classList.add('expanded');
+            button.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Details';
+            collapsibleSection.style.display = 'block';
+        }
     }
     
     /**

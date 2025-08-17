@@ -1803,6 +1803,84 @@ body {
     border-radius: 2px;
 }
 
+/* Villa Details Collapsible Functionality */
+.show-details-container {
+    padding: 15px 20px 10px 20px;
+    text-align: center;
+}
+
+.show-details-btn {
+    background: rgba(15, 49, 40, 0.8);
+    color: white;
+    border: 2px solid rgba(170, 120, 49, 0.5);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto;
+    min-width: 180px;
+}
+
+.show-details-btn:hover {
+    background: rgba(170, 120, 49, 0.2);
+    border-color: #AA7831;
+    color: #AA7831;
+}
+
+.show-details-btn i {
+    transition: transform 0.3s ease;
+}
+
+.show-details-btn.expanded i {
+    transform: rotate(180deg);
+}
+
+.villa-details-collapsible {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.villa-details-collapsible.expanded {
+    display: block !important;
+}
+
+/* Smooth animation for collapsible content */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        max-height: 1000px;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+    }
+}
+
+.villa-details-collapsible.show {
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+.villa-details-collapsible.hide {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
 /* Booking Options Selector */
 .booking-options-container {
     margin: 20px 0;
