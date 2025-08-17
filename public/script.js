@@ -1580,24 +1580,38 @@ class ActivitiesDashboard {
                 // Show loading state
                 this.showExtensionLoadingState(currentCard);
                 
+                // Get current guest count from the application state
+                const currentAdults = this.selectedAdults || '2';
+                const currentChildren = this.selectedChildren || '0';
+                console.log('Using guest count:', currentAdults, 'adults,', currentChildren, 'children');
+                
                 // Fetch new offer data for extended stay
-                const extendedOfferData = await this.fetchExtendedOfferData(newDateRange.checkinDate, newDateRange.checkoutDate, this.adults, this.children);
+                const extendedOfferData = await this.fetchExtendedOfferData(newDateRange.checkinDate, newDateRange.checkoutDate, currentAdults, currentChildren);
                 
                 if (extendedOfferData && extendedOfferData.length > 0) {
-                    // Find the matching villa offer
-                    const matchingOffer = extendedOfferData.find(offer => 
-                        (offer.villa_display_name === villaKey || offer.villa === villaKey) && 
-                        offer.match_type === 'exact'
+                    // Find villa offers (any match type since we'll combine them)
+                    const villaOffers = extendedOfferData.filter(offer => 
+                        offer.villa_display_name === villaKey || offer.villa === villaKey
                     );
                     
-                    if (matchingOffer) {
+                    if (villaOffers.length > 0) {
+                        // Find the best offer (prefer exact, then nearby, then extension)
+                        const exactOffer = villaOffers.find(offer => offer.match_type === 'exact');
+                        const nearbyOffer = villaOffers.find(offer => offer.match_type === 'nearby');
+                        const extensionOffer = villaOffers.find(offer => offer.match_type === 'extension');
+                        
+                        const bestOffer = exactOffer || nearbyOffer || extensionOffer;
+                        
+                        console.log('Found villa offers for extension:', villaOffers.length);
+                        console.log('Using best offer:', bestOffer.match_type, 'for', bestOffer.nights, 'nights');
+                        
                         // Replace the current card with updated offer data
-                        await this.updateVillaCardWithExtendedOffer(currentCard, matchingOffer, villaKey, extendedOfferData);
+                        await this.updateVillaCardWithExtendedOffer(currentCard, bestOffer, villaKey, extendedOfferData);
                         console.log('Villa card updated with extended offer');
                     } else {
-                        console.error('No matching offer found for extended stay');
+                        console.error('No matching villa offers found for extended stay');
                         this.hideExtensionLoadingState(currentCard);
-                        alert('Sorry, this extension is no longer available. Please try different dates.');
+                        alert('Sorry, this villa is not available for the extended dates. Please try different dates.');
                     }
                 } else {
                     console.error('No offers found for extended stay');
@@ -1616,49 +1630,40 @@ class ActivitiesDashboard {
      * Calculate new date range based on extension
      */
     calculateExtendedDateRange(currentCard, extensionDate, extensionType) {
-        // Get current check-in info from the card
-        const checkInText = currentCard.querySelector('.champion-checkin').textContent;
-        const nightsMatch = currentCard.querySelector('.champion-book-btn').textContent.match(/(\d+) NIGHT/);
-        const currentNights = nightsMatch ? parseInt(nightsMatch[1]) : 1;
+        console.log('Calculating extended date range for extension:', extensionDate, 'type:', extensionType);
         
-        // Extract current check-in date from the check-in text (format: "Check-in: Wed, Aug 21 (in 2 days)")
-        const dateMatch = checkInText.match(/(\w{3}) (\d{1,2})/);
-        if (!dateMatch) {
-            console.error('Could not parse current check-in date from:', checkInText);
-            return null;
-        }
+        // Use the current selected dates from the calendar as the source of truth
+        const currentCheckinDate = this.calendarDates[this.selectedCheckIn].date;
+        const currentCheckoutDate = this.calendarDates[this.selectedCheckOut].date;
         
-        // Get current year and month context
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        
-        // Parse the day from the check-in text
-        const dayNum = parseInt(dateMatch[2]);
-        
-        // Create current check-in date (assuming current month/year context)
-        const currentCheckIn = new Date(currentYear, currentMonth, dayNum);
-        const currentCheckOut = new Date(currentCheckIn);
-        currentCheckOut.setDate(currentCheckIn.getDate() + currentNights);
+        console.log('Current booking: check-in', currentCheckinDate.toISOString().split('T')[0], 
+                   'check-out', currentCheckoutDate.toISOString().split('T')[0]);
         
         let newCheckinDate, newCheckoutDate;
         
         if (extensionType === 'before') {
             // Extending backward: new check-in is extension date, check-out stays the same
             newCheckinDate = new Date(extensionDate);
-            newCheckoutDate = new Date(currentCheckOut);
+            newCheckoutDate = new Date(currentCheckoutDate);
+            console.log('Backward extension: moving check-in to', extensionDate);
         } else {
-            // Extending forward: check-in stays the same, new check-out is day after extension date
-            newCheckinDate = new Date(currentCheckIn);
-            newCheckoutDate = new Date(extensionDate);
-            newCheckoutDate.setDate(newCheckoutDate.getDate() + 1);
+            // Extending forward: check-in stays the same, extend check-out by 1 day
+            newCheckinDate = new Date(currentCheckinDate);
+            newCheckoutDate = new Date(currentCheckoutDate);
+            newCheckoutDate.setDate(newCheckoutDate.getDate() + 1); // Extend by 1 day
+            console.log('Forward extension: extending check-out by 1 day from', 
+                       currentCheckoutDate.toISOString().split('T')[0], 'to', 
+                       newCheckoutDate.toISOString().split('T')[0]);
         }
         
-        return {
+        const result = {
             checkinDate: newCheckinDate.toISOString().split('T')[0],
             checkoutDate: newCheckoutDate.toISOString().split('T')[0],
             nights: Math.ceil((newCheckoutDate - newCheckinDate) / (1000 * 60 * 60 * 24))
         };
+        
+        console.log('Extended date range calculated:', result);
+        return result;
     }
     
     /**
