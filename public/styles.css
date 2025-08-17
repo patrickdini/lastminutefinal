@@ -1584,7 +1584,7 @@ body {
 
 /* Special Offer Card */
 .champion-offer-card {
-    background: #0F3128;
+    background: rgba(74, 74, 71, 0.8);
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
