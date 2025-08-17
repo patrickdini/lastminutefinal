@@ -1224,7 +1224,7 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Generate champion villa cards with night selectors (grouped by villa/date)
+     * Generate special offer villa cards with night selectors (grouped by villa/date)
      */
     async generateChampionCards(offers) {
         console.log('Generating villa cards for', offers.length, 'offers');
@@ -1244,11 +1244,11 @@ class ActivitiesDashboard {
         // Replace all content (no pagination needed)
         document.getElementById('championOffers').innerHTML = villaCardsHtml.join('');
         
-        // No load more button needed for champion offers (all loaded at once)
+        // No load more button needed for special offers (all loaded at once)
     }
     
     /**
-     * Group champion offers by villa name and checkin date
+     * Group special offers by villa name and checkin date
      */
     groupChampionOffersByVillaAndDate(offers) {
         const groups = {};
@@ -1279,7 +1279,7 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Generate champion villa card with night selectors (new design)
+     * Generate special offer villa card with night selectors (new design)
      */
     async generateChampionVillaCardWithNights(villaKey, villaDetails, dateGroups) {
         const tagline = villaDetails.tagline || villaDetails.villa_display_name || villaKey;
@@ -1307,7 +1307,7 @@ class ActivitiesDashboard {
             const savingsPercent = Math.round(primaryOffer.savingsPercent * 100);
             savingsBanner = `
                 <div class="champion-savings-banner">
-                    <i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Champion Offer!
+                    <i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Special Offer!
                 </div>
             `;
         }
@@ -1420,7 +1420,7 @@ class ActivitiesDashboard {
                     
                     <!-- Book Button -->
                     <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
-                        BOOK CHAMPION OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
+                        BOOK SPECIAL OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
                     </button>
                 </div>
             </div>
@@ -1595,7 +1595,7 @@ class ActivitiesDashboard {
             if (offer.savings && offer.savings > 0) {
                 const savingsInMillions = (offer.savings / 1000000).toFixed(1);
                 const savingsPercent = Math.round(offer.savingsPercent * 100);
-                savingsBanner.innerHTML = `<i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Champion Offer!`;
+                savingsBanner.innerHTML = `<i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Special Offer!`;
                 savingsBanner.style.display = 'block';
             } else {
                 savingsBanner.style.display = 'none';
@@ -1618,7 +1618,7 @@ class ActivitiesDashboard {
         // Update book button
         const bookBtn = card.querySelector('.champion-book-btn');
         if (bookBtn) {
-            bookBtn.textContent = `BOOK CHAMPION OFFER (${offer.nights} NIGHT${offer.nights > 1 ? 'S' : ''})`;
+            bookBtn.textContent = `BOOK SPECIAL OFFER (${offer.nights} NIGHT${offer.nights > 1 ? 'S' : ''})`;
             bookBtn.onclick = () => this.handleChampionBooking(offer.offer_id, villaKey);
         }
 

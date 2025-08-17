@@ -1572,7 +1572,7 @@ body {
     background: rgba(168, 85, 247, 0.9); /* Purple for mixed matches */
 }
 
-/* Champion Offers Layout */
+/* Special Offers Layout */
 .champion-offers {
     display: flex;
     flex-direction: column;
@@ -1582,7 +1582,7 @@ body {
     padding: 0 1rem;
 }
 
-/* Champion Offer Card */
+/* Special Offer Card */
 .champion-offer-card {
     background: #0F3128;
     border-radius: 1rem;
