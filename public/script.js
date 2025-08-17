@@ -1280,9 +1280,16 @@ class ActivitiesDashboard {
      * Generate timeline for a specific offer showing extension options
      */
     generateTimelineForOffer(primaryOffer, allOffers, villaKey) {
+        console.log('Timeline generation for villa:', villaKey);
+        console.log('Primary offer:', primaryOffer);
+        console.log('All villa offers:', allOffers);
+        
         const checkInDate = new Date(primaryOffer.checkIn);
         const checkOutDate = new Date(checkInDate);
         checkOutDate.setDate(checkInDate.getDate() + primaryOffer.nights);
+        
+        console.log('Check-in date:', checkInDate.toISOString().split('T')[0]);
+        console.log('Check-out date:', checkOutDate.toISOString().split('T')[0]);
         
         // Check if check-in is tomorrow (no time for backward extension)
         const tomorrow = new Date();
@@ -1295,8 +1302,13 @@ class ActivitiesDashboard {
         if (!isCheckInTomorrow) {
             const prevDate = new Date(checkInDate);
             prevDate.setDate(checkInDate.getDate() - 1);
+            const prevDateString = prevDate.toISOString().split('T')[0];
             
-            if (this.hasOfferForVillaOnDate(villaKey, prevDate, allOffers)) {
+            console.log('Checking backward extension for date:', prevDateString);
+            const hasBackwardOffer = this.hasOfferForVillaOnDate(villaKey, prevDate, allOffers);
+            console.log('Backward extension available:', hasBackwardOffer);
+            
+            if (hasBackwardOffer) {
                 timelineDates.push({
                     date: prevDate,
                     type: 'extension',
@@ -1340,7 +1352,12 @@ class ActivitiesDashboard {
         });
         
         // Forward extension - check if offer exists starting on check-out date (extends stay by 1 night)
-        if (this.hasOfferForVillaOnDate(villaKey, checkOutDate, allOffers)) {
+        const checkOutDateString = checkOutDate.toISOString().split('T')[0];
+        console.log('Checking forward extension for date:', checkOutDateString);
+        const hasForwardOffer = this.hasOfferForVillaOnDate(villaKey, checkOutDate, allOffers);
+        console.log('Forward extension available:', hasForwardOffer);
+        
+        if (hasForwardOffer) {
             const extendedCheckOut = new Date(checkOutDate);
             extendedCheckOut.setDate(checkOutDate.getDate() + 1);
             
@@ -1404,11 +1421,21 @@ class ActivitiesDashboard {
     hasOfferForVillaOnDate(villaKey, date, villaOffers) {
         const dateString = date.toISOString().split('T')[0];
         
-        return villaOffers.some(offer => {
+        console.log('Checking offer for villa:', villaKey, 'on date:', dateString);
+        console.log('Available villa offers:');
+        villaOffers.forEach(offer => {
+            const offerCheckIn = offer.checkIn.split('T')[0];
+            console.log('  - Offer check-in:', offerCheckIn, 'Villa:', offer.villa_display_name);
+        });
+        
+        const result = villaOffers.some(offer => {
             // Check if the date matches the offer's check-in date
             const offerCheckIn = offer.checkIn.split('T')[0];
             return offerCheckIn === dateString;
         });
+        
+        console.log('Offer found for date:', dateString, '=', result);
+        return result;
     }
     
     /**
