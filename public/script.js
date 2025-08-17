@@ -1559,70 +1559,167 @@ class ActivitiesDashboard {
     /**
      * Handle stay extension from timeline
      */
-    extendStay(offerId, villaKey, extensionDate, extensionType) {
+    async extendStay(offerId, villaKey, extensionDate, extensionType) {
         console.log('Extending stay:', { offerId, villaKey, extensionDate, extensionType });
         
         // Show confirmation popup
         const confirmMessage = `Extend your stay to include ${extensionDate}?`;
         if (confirm(confirmMessage)) {
-            // Find the current offer
-            const currentCard = document.querySelector(`[data-offer-id="${offerId}"]`);
-            if (currentCard) {
-                // Update the timeline to show the extended dates
-                this.updateTimelineSelection(currentCard, extensionDate, extensionType);
+            try {
+                // Find the current offer card
+                const currentCard = document.querySelector(`[data-offer-id="${offerId}"]`);
+                if (!currentCard) {
+                    console.error('Current offer card not found');
+                    return;
+                }
                 
-                // Recalculate pricing for extended stay
-                this.recalculatePricingForExtension(currentCard, extensionDate, extensionType);
+                // Calculate new date range based on extension
+                const newDateRange = this.calculateExtendedDateRange(currentCard, extensionDate, extensionType);
+                console.log('Extended date range:', newDateRange);
+                
+                // Show loading state
+                this.showExtensionLoadingState(currentCard);
+                
+                // Fetch new offer data for extended stay
+                const extendedOfferData = await this.fetchExtendedOfferData(newDateRange.checkinDate, newDateRange.checkoutDate, this.adults, this.children);
+                
+                if (extendedOfferData && extendedOfferData.length > 0) {
+                    // Find the matching villa offer
+                    const matchingOffer = extendedOfferData.find(offer => 
+                        (offer.villa_display_name === villaKey || offer.villa === villaKey) && 
+                        offer.match_type === 'exact'
+                    );
+                    
+                    if (matchingOffer) {
+                        // Replace the current card with updated offer data
+                        await this.updateVillaCardWithExtendedOffer(currentCard, matchingOffer, villaKey, extendedOfferData);
+                        console.log('Villa card updated with extended offer');
+                    } else {
+                        console.error('No matching offer found for extended stay');
+                        this.hideExtensionLoadingState(currentCard);
+                        alert('Sorry, this extension is no longer available. Please try different dates.');
+                    }
+                } else {
+                    console.error('No offers found for extended stay');
+                    this.hideExtensionLoadingState(currentCard);
+                    alert('Sorry, no offers found for the extended stay. Please try different dates.');
+                }
+                
+            } catch (error) {
+                console.error('Error extending stay:', error);
+                alert('Sorry, there was an error extending your stay. Please try again.');
             }
         }
     }
     
     /**
-     * Update timeline selection when extending
+     * Calculate new date range based on extension
      */
-    updateTimelineSelection(card, extensionDate, extensionType) {
-        const timelineContainer = card.querySelector('.timeline-container');
-        if (timelineContainer) {
-            // Find the date node for the extension
-            const dateNodes = timelineContainer.querySelectorAll('.date-node');
-            dateNodes.forEach(node => {
-                const circle = node.querySelector('.date-circle');
-                const label = node.querySelector('.date-label small');
-                
-                if (circle.textContent.trim() === new Date(extensionDate).getDate().toString()) {
-                    // Update the circle to selected state
-                    circle.classList.remove('extension');
-                    circle.classList.add('selected');
-                    
-                    // Update the label
-                    if (label) {
-                        label.textContent = extensionType === 'before' ? 'Check-in' : 'Stay';
-                    }
-                }
-            });
+    calculateExtendedDateRange(currentCard, extensionDate, extensionType) {
+        // Get current check-in info from the card
+        const checkInText = currentCard.querySelector('.champion-checkin').textContent;
+        const nightsMatch = currentCard.querySelector('.champion-book-btn').textContent.match(/(\d+) NIGHT/);
+        const currentNights = nightsMatch ? parseInt(nightsMatch[1]) : 1;
+        
+        // Extract current check-in date from the check-in text (format: "Check-in: Wed, Aug 21 (in 2 days)")
+        const dateMatch = checkInText.match(/(\w{3}) (\d{1,2})/);
+        if (!dateMatch) {
+            console.error('Could not parse current check-in date from:', checkInText);
+            return null;
+        }
+        
+        // Get current year and month context
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        // Parse the day from the check-in text
+        const dayNum = parseInt(dateMatch[2]);
+        
+        // Create current check-in date (assuming current month/year context)
+        const currentCheckIn = new Date(currentYear, currentMonth, dayNum);
+        const currentCheckOut = new Date(currentCheckIn);
+        currentCheckOut.setDate(currentCheckIn.getDate() + currentNights);
+        
+        let newCheckinDate, newCheckoutDate;
+        
+        if (extensionType === 'before') {
+            // Extending backward: new check-in is extension date, check-out stays the same
+            newCheckinDate = new Date(extensionDate);
+            newCheckoutDate = new Date(currentCheckOut);
+        } else {
+            // Extending forward: check-in stays the same, new check-out is day after extension date
+            newCheckinDate = new Date(currentCheckIn);
+            newCheckoutDate = new Date(extensionDate);
+            newCheckoutDate.setDate(newCheckoutDate.getDate() + 1);
+        }
+        
+        return {
+            checkinDate: newCheckinDate.toISOString().split('T')[0],
+            checkoutDate: newCheckoutDate.toISOString().split('T')[0],
+            nights: Math.ceil((newCheckoutDate - newCheckinDate) / (1000 * 60 * 60 * 24))
+        };
+    }
+    
+    /**
+     * Fetch extended offer data from API
+     */
+    async fetchExtendedOfferData(checkinDate, checkoutDate, adults, children) {
+        const url = `/api/activities?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&adults=${adults}&children=${children}`;
+        console.log('Fetching extended offers from:', url);
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Extended offer data received:', data);
+        
+        if (data.offers && data.offers.length > 0) {
+            return this.parseOffersToProcessed(data.offers);
+        }
+        return [];
+    }
+    
+    /**
+     * Update villa card with extended offer data
+     */
+    async updateVillaCardWithExtendedOffer(currentCard, newOffer, villaKey, allExtendedOffers) {
+        // Filter offers for this specific villa
+        const villaOffers = allExtendedOffers.filter(offer => 
+            offer.villa_display_name === villaKey || offer.villa === villaKey
+        );
+        
+        // Generate new card HTML with updated offer
+        const newCardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, newOffer, villaOffers);
+        
+        // Replace the current card with the new one
+        currentCard.outerHTML = newCardHtml;
+        
+        console.log('Villa card updated with extended pricing and perks');
+    }
+    
+    /**
+     * Show loading state during extension
+     */
+    showExtensionLoadingState(card) {
+        const bookBtn = card.querySelector('.champion-book-btn');
+        if (bookBtn) {
+            bookBtn.textContent = 'UPDATING PRICING...';
+            bookBtn.disabled = true;
+            bookBtn.style.opacity = '0.6';
         }
     }
     
     /**
-     * Recalculate pricing for extended stay
+     * Hide loading state after extension
      */
-    recalculatePricingForExtension(card, extensionDate, extensionType) {
-        // This would normally connect to your pricing API
-        // For now, just show a visual update
-        const priceOverlay = card.querySelector('.champion-price-overlay .amount');
+    hideExtensionLoadingState(card) {
         const bookBtn = card.querySelector('.champion-book-btn');
-        
-        if (priceOverlay && bookBtn) {
-            // Simplified calculation - add ~20% for extension
-            const currentPrice = parseFloat(priceOverlay.textContent);
-            const newPrice = (currentPrice * 1.2).toFixed(1);
-            
-            priceOverlay.textContent = `${newPrice}M`;
-            
-            // Update button text
-            const currentNights = parseInt(bookBtn.textContent.match(/\d+/)[0]);
-            const newNights = currentNights + 1;
-            bookBtn.textContent = `BOOK SPECIAL OFFER (${newNights} NIGHT${newNights > 1 ? 'S' : ''})`;
+        if (bookBtn) {
+            bookBtn.disabled = false;
+            bookBtn.style.opacity = '1';
         }
     }
 
