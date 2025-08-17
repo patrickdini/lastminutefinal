@@ -29,140 +29,57 @@ router.get('/activities', async (req, res) => {
         const adultsCount = parseInt(adults);
         const childrenCount = parseInt(children);
         
-        // Calculate number of nights for the selected dates
+        // Calculate date range for filtering offers
         const checkinDateObj = new Date(checkinDate);
         const checkoutDateObj = new Date(checkoutDate);
         const selectedNights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
         
-        // Generate date scenarios for flexible matching
-        const dateScenarios = [];
+        console.log(`Finding offers within date range: ${checkinDate} to ${checkoutDate} (${selectedNights} nights max)`);
         
-        // Check if checkin is tomorrow (don't go earlier than tomorrow)
-        const now = new Date();
-        const baliTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-        const tomorrow = new Date(baliTime);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
-        
-        const canMoveCheckinEarlier = checkinDate > tomorrowStr;
-        
-        // 1. Exact Match: selected check-in, selected check-out
-        dateScenarios.push({
-            checkinDate,
-            nights: selectedNights,
-            matchType: 'exact'
-        });
-        
-        // 2. Nearby Match: check-in - 1 day, selected check-out (if possible)
-        if (canMoveCheckinEarlier) {
-            const earlierCheckin = new Date(checkinDateObj);
-            earlierCheckin.setDate(earlierCheckin.getDate() - 1);
-            const earlierCheckinStr = earlierCheckin.toISOString().split('T')[0];
-            
-            dateScenarios.push({
-                checkinDate: earlierCheckinStr,
-                nights: selectedNights + 1,
-                matchType: 'nearby'
-            });
-        }
-        
-        // 3. Nearby Match: check-in - 1 day, check-out - 1 day (if possible)
-        if (canMoveCheckinEarlier) {
-            const earlierCheckin = new Date(checkinDateObj);
-            earlierCheckin.setDate(earlierCheckin.getDate() - 1);
-            const earlierCheckinStr = earlierCheckin.toISOString().split('T')[0];
-            
-            dateScenarios.push({
-                checkinDate: earlierCheckinStr,
-                nights: selectedNights,
-                matchType: 'nearby'
-            });
-        }
-        
-        // 4. Nearby Match: selected check-in, check-out - 1 day
-        if (selectedNights > 1) { // Only if we have more than 1 night
-            dateScenarios.push({
-                checkinDate,
-                nights: selectedNights - 1,
-                matchType: 'nearby'
-            });
-        }
-        
-        // 5. Extension Support: Forward extension - offers starting on checkout date
-        // This enables frontend to show "+1 night" extensions
-        dateScenarios.push({
-            checkinDate: checkoutDate,
-            nights: 1,
-            matchType: 'extension'
-        });
-        
-        // 6. Extension Support: Backward extension - offers starting day before checkin
-        // This enables frontend to show backward "+1 night" extensions
-        if (canMoveCheckinEarlier) {
-            const dayBeforeCheckin = new Date(checkinDateObj);
-            dayBeforeCheckin.setDate(dayBeforeCheckin.getDate() - 1);
-            const dayBeforeCheckinStr = dayBeforeCheckin.toISOString().split('T')[0];
-            
-            dateScenarios.push({
-                checkinDate: dayBeforeCheckinStr,
-                nights: 1,
-                matchType: 'extension'
-            });
-        }
-        
-        console.log(`Querying offers for ${dateScenarios.length} date scenarios:`, dateScenarios.map(s => `${s.checkinDate} (${s.nights}n, ${s.matchType})`).join(', '));
-        
-        // Get database connection
+        // Query for all offers that fit completely within the selected date range
         const connection = await db.getConnection();
         
-        // Query for all date scenarios
-        let allOffers = [];
+        const offersQuery = `
+            SELECT 
+                co.*,
+                lrd.tagline,
+                lrd.description,
+                lrd.square_meters,
+                lrd.bathrooms,
+                lrd.bedrooms,
+                lrd.view_type,
+                lrd.pool_type,
+                lrd.image_urls,
+                lrd.key_amenities,
+                lrd.webpage_url,
+                DATE_ADD(co.checkin_date, INTERVAL co.nights DAY) as checkout_date
+            FROM LMCurrentOffers co
+            LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+            WHERE co.checkin_date >= ? 
+                AND DATE_ADD(co.checkin_date, INTERVAL co.nights DAY) <= ?
+                AND co.adults = ?
+                AND co.children = ?
+                AND co.offer_status IN ('Target Met', 'Best Effort')
+            ORDER BY co.nights DESC, co.checkin_date ASC, co.villa_id
+        `;
         
-        for (const scenario of dateScenarios) {
-            const offersQuery = `
-                SELECT 
-                    co.*,
-                    lrd.tagline,
-                    lrd.description,
-                    lrd.square_meters,
-                    lrd.bathrooms,
-                    lrd.bedrooms,
-                    lrd.view_type,
-                    lrd.pool_type,
-                    lrd.image_urls,
-                    lrd.key_amenities,
-                    lrd.webpage_url
-                FROM LMCurrentOffers co
-                LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
-                WHERE co.checkin_date = ? 
-                    AND co.nights = ?
-                    AND co.adults = ?
-                    AND co.children = ?
-                    AND co.offer_status IN ('Target Met', 'Best Effort')
-                ORDER BY co.villa_id, co.offer_id
-            `;
-            
-            const [scenarioOffers] = await connection.execute(offersQuery, [
-                scenario.checkinDate, scenario.nights, adultsCount, childrenCount
-            ]);
-            
-            // Add match type to each offer
-            const enrichedOffers = scenarioOffers.map(offer => ({
-                ...offer,
-                match_type: scenario.matchType,
-                original_checkin_date: checkinDate,
-                original_checkout_date: checkoutDate
-            }));
-            
-            allOffers = [...allOffers, ...enrichedOffers];
-            
-            console.log(`Found ${scenarioOffers.length} offers for ${scenario.checkinDate} (${scenario.nights}n, ${scenario.matchType})`);
-        }
+        const [allOffers] = await connection.execute(offersQuery, [
+            checkinDate,
+            checkoutDate,
+            adultsCount,
+            childrenCount
+        ]);
         
-        console.log(`Found ${allOffers.length} total offers across all scenarios`)
+        // Add match type as 'within_range' for all offers
+        allOffers.forEach(offer => {
+            offer.match_type = 'within_range';
+            offer.original_checkin_date = checkinDate;
+            offer.original_checkout_date = checkoutDate;
+        });
         
-        // Release the connection back to the pool
         connection.release();
+        
+        console.log(`Found ${allOffers.length} offers within date range, sorted by longest stays first`);
         
         // Transform offers to match the frontend expected format
         // The frontend expects data similar to RoomAvailabilityStore format for compatibility
@@ -229,10 +146,10 @@ router.get('/activities', async (req, res) => {
             };
         });
         
-        // Return response with all available offers (exact and nearby matches)
+        // Return response with all available offers within the date range
         res.json({
             success: true,
-            message: `Found ${transformedOffers.length} available offers (exact and nearby matches)`,
+            message: `Found ${transformedOffers.length} available offers within date range`,
             data: transformedOffers,
             metadata: {
                 selected_checkin_date: checkinDate,
@@ -240,7 +157,7 @@ router.get('/activities', async (req, res) => {
                 selected_nights: selectedNights,
                 adults: adultsCount,
                 children: childrenCount,
-                scenarios_queried: dateScenarios.length
+                filter_type: 'date_range'
             }
         });
         
