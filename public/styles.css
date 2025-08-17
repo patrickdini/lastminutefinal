@@ -1830,6 +1830,136 @@ body {
     color: #AA7831;
 }
 
+/* Booking Options Selector */
+.booking-options-container {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(38, 38, 38, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(170, 120, 49, 0.3);
+}
+
+.booking-options-title {
+    color: #AA7831;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-family: 'Crimson Text', serif;
+    text-align: center;
+}
+
+/* Single booking option */
+.single-booking-option {
+    text-align: center;
+}
+
+.single-booking-option .date-range {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.single-booking-option .date-labels {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+/* Multiple booking options */
+.booking-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.booking-option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: rgba(74, 74, 71, 0.8);
+    border: 2px solid rgba(170, 120, 49, 0.3);
+    border-radius: 8px;
+    color: #E0E0E0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.booking-option-btn:hover {
+    background: rgba(170, 120, 49, 0.1);
+    border-color: rgba(170, 120, 49, 0.6);
+    transform: translateY(-2px);
+}
+
+.booking-option-btn.selected {
+    background: rgba(170, 120, 49, 0.2);
+    border-color: #AA7831;
+    color: #AA7831;
+    font-weight: 600;
+}
+
+.booking-option-btn .date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.booking-option-btn .option-details {
+    text-align: right;
+    line-height: 1.4;
+}
+
+.booking-option-btn .option-details small {
+    display: block;
+    opacity: 0.8;
+    font-size: 0.9rem;
+    margin-top: 2px;
+}
+
+/* Date circles for booking options */
+.date-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: rgba(74, 74, 71, 0.8);
+    border: 2px solid #4A4A47;
+    color: #E0E0E0;
+    transition: all 0.3s ease;
+}
+
+.date-circle.selected {
+    background: #AA7831;
+    border-color: #AA7831;
+    color: #FFFFFF;
+}
+
+.date-separator {
+    color: #AA7831;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.date-label {
+    color: #E0E0E0;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.date-label small {
+    color: #AA7831;
+    font-weight: 600;
+}
+
 /* Savings Banner */
 .champion-savings-banner {
     background: linear-gradient(135deg, #2E7D32, #43A047);

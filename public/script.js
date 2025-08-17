@@ -1079,6 +1079,46 @@ class ActivitiesDashboard {
     }
     
     /**
+     * Handle booking option selection
+     */
+    selectBookingOption(offerId, villaKey, optionIndex) {
+        console.log(`Selecting booking option ${optionIndex} for villa ${villaKey}, offer ${offerId}`);
+        
+        // Find the villa card
+        const villaCard = document.querySelector(`[data-offer-id="${offerId}"]`).closest('.champion-offer-card');
+        if (!villaCard) {
+            console.error('Villa card not found');
+            return;
+        }
+        
+        // Update selected state for booking option buttons
+        const bookingButtons = villaCard.querySelectorAll('.booking-option-btn');
+        bookingButtons.forEach((btn, index) => {
+            if (index === optionIndex) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+        
+        // Update the villa card's data to reflect the selected booking option
+        const selectedButton = bookingButtons[optionIndex];
+        if (selectedButton) {
+            const newOfferId = selectedButton.getAttribute('data-offer-id');
+            villaCard.setAttribute('data-offer-id', newOfferId);
+            
+            // Update the book button to use the new offer ID
+            const bookButton = villaCard.querySelector('.champion-book-btn');
+            if (bookButton) {
+                const currentOnclick = bookButton.getAttribute('onclick');
+                const updatedOnclick = currentOnclick.replace(/handleChampionBooking\('([^']+)'/, `handleChampionBooking('${newOfferId}'`);
+                bookButton.setAttribute('onclick', updatedOnclick);
+                console.log('Updated book button for offer:', newOfferId);
+            }
+        }
+    }
+    
+    /**
      * Generate all possible booking offers from available villa data
      */
     generateOffersFromData(data) {
@@ -1391,166 +1431,114 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Generate timeline for a specific offer showing extension options
+     * Generate booking options for a specific villa showing available stay options
      */
-    generateTimelineForOffer(primaryOffer, allOffers, villaKey) {
-        console.log('Timeline generation for villa:', villaKey);
+    generateBookingOptionsForOffer(primaryOffer, allOffers, villaKey) {
+        console.log('Booking options generation for villa:', villaKey);
         console.log('Primary offer:', primaryOffer);
         console.log('All villa offers:', allOffers);
         
-        const checkInDate = new Date(primaryOffer.checkIn);
-        const checkOutDate = new Date(checkInDate);
-        checkOutDate.setDate(checkInDate.getDate() + primaryOffer.nights);
-        
-        console.log('Check-in date:', checkInDate.toISOString().split('T')[0]);
-        console.log('Check-out date:', checkOutDate.toISOString().split('T')[0]);
-        
-        // Check if check-in is tomorrow (no time for backward extension)
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const isCheckInTomorrow = checkInDate.toDateString() === tomorrow.toDateString();
-        
-        const timelineDates = [];
-        
-        // Backward extension - only if check-in is not tomorrow AND offer exists for (check-in - 1)
-        if (!isCheckInTomorrow) {
-            const prevDate = new Date(checkInDate);
-            prevDate.setDate(checkInDate.getDate() - 1);
-            const prevDateString = prevDate.toISOString().split('T')[0];
+        // Extract unique booking options for this villa
+        const bookingOptions = allOffers.map(offer => {
+            const checkInDate = new Date(offer.checkIn);
+            const checkOutDate = new Date(checkInDate);
+            checkOutDate.setDate(checkInDate.getDate() + offer.nights);
             
-            console.log('Checking backward extension for date:', prevDateString);
-            const hasBackwardOffer = this.hasOfferForVillaOnDate(villaKey, prevDate, allOffers);
-            console.log('Backward extension available:', hasBackwardOffer);
-            
-            if (hasBackwardOffer) {
-                timelineDates.push({
-                    date: prevDate,
-                    type: 'extension',
-                    label: '+1 night',
-                    dayNumber: prevDate.getDate(),
-                    isAvailable: true,
-                    extensionType: 'before'
-                });
-            }
-        }
-        
-        // Check-in date
-        timelineDates.push({
-            date: checkInDate,
-            type: 'checkin',
-            label: 'Check-in',
-            dayNumber: checkInDate.getDate(),
-            isSelected: true
+            return {
+                offerId: offer.offer_id,
+                checkIn: checkInDate,
+                checkOut: checkOutDate,
+                nights: offer.nights,
+                checkInDay: checkInDate.getDate(),
+                checkOutDay: checkOutDate.getDate(),
+                checkInMonth: checkInDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+                checkOutMonth: checkOutDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+                rate: offer.totalRate,
+                originalOffer: offer
+            };
         });
         
-        // Stay nights
-        for (let i = 1; i < primaryOffer.nights; i++) {
-            const stayDate = new Date(checkInDate);
-            stayDate.setDate(checkInDate.getDate() + i);
-            timelineDates.push({
-                date: stayDate,
-                type: 'stay',
-                label: 'Stay',
-                dayNumber: stayDate.getDate(),
-                isSelected: true
-            });
-        }
-        
-        // Check-out date
-        timelineDates.push({
-            date: checkOutDate,
-            type: 'checkout',
-            label: 'Check-out',
-            dayNumber: checkOutDate.getDate(),
-            isSelected: true
+        // Remove duplicates based on check-in and check-out dates
+        const uniqueOptions = bookingOptions.filter((option, index, array) => {
+            return array.findIndex(o => 
+                o.checkIn.getTime() === option.checkIn.getTime() && 
+                o.checkOut.getTime() === option.checkOut.getTime()
+            ) === index;
         });
         
-        // Forward extension - check if offer exists starting on check-out date (extends stay by 1 night)
-        const checkOutDateString = checkOutDate.toISOString().split('T')[0];
-        console.log('Checking forward extension for date:', checkOutDateString);
-        const hasForwardOffer = this.hasOfferForVillaOnDate(villaKey, checkOutDate, allOffers);
-        console.log('Forward extension available:', hasForwardOffer);
+        // Sort by check-in date
+        uniqueOptions.sort((a, b) => a.checkIn.getTime() - b.checkIn.getTime());
         
-        if (hasForwardOffer) {
-            const extendedCheckOut = new Date(checkOutDate);
-            extendedCheckOut.setDate(checkOutDate.getDate() + 1);
-            
-            timelineDates.push({
-                date: extendedCheckOut,
-                type: 'extension',
-                label: '+1 night',
-                dayNumber: extendedCheckOut.getDate(),
-                isAvailable: true,
-                extensionType: 'after'
-            });
-        }
+        console.log(`Found ${uniqueOptions.length} unique booking options for villa ${villaKey}`);
         
-        // Generate timeline HTML
-        const timelineNodes = timelineDates.map((dateInfo, index) => {
-            const { date, type, label, dayNumber, isSelected, isAvailable, extensionType } = dateInfo;
-            const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-            
-            let circleClass = '';
-            let clickable = '';
-            
-            if (type === 'extension') {
-                circleClass = isAvailable ? 'extension' : 'unavailable';
-                if (isAvailable) {
-                    clickable = `onclick="app.extendStay('${primaryOffer.offer_id}', '${villaKey}', '${date.toISOString().split('T')[0]}', '${extensionType}')"`;
-                }
-            } else if (isSelected) {
-                circleClass = 'selected';
-            }
-            
-            const connector = index < timelineDates.length - 1 ? '<div class="timeline-connector"></div>' : '';
+        if (uniqueOptions.length === 1) {
+            // Single option: simple display
+            const option = uniqueOptions[0];
+            return `
+                <div class="booking-options-container">
+                    <div class="booking-options-title">Your Stay</div>
+                    <div class="single-booking-option">
+                        <div class="date-range">
+                            <div class="date-circle selected">
+                                ${option.checkInDay}
+                            </div>
+                            <div class="date-separator">—</div>
+                            <div class="date-circle selected">
+                                ${option.checkOutDay}
+                            </div>
+                        </div>
+                        <div class="date-labels">
+                            <div class="date-label">
+                                ${option.checkInMonth} ${option.checkInDay}<br>
+                                <small>Check-in</small>
+                            </div>
+                            <div class="date-label">
+                                ${option.checkOutMonth} ${option.checkOutDay}<br>
+                                <small>Check-out</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Multiple options: show buttons
+            const optionButtons = uniqueOptions.map((option, index) => {
+                const isSelected = index === 0; // First option selected by default
+                const selectedClass = isSelected ? 'selected' : '';
+                
+                return `
+                    <button class="booking-option-btn ${selectedClass}" 
+                            onclick="app.selectBookingOption('${option.offerId}', '${villaKey}', ${index})"
+                            data-offer-id="${option.offerId}">
+                        <div class="date-range">
+                            <div class="date-circle">
+                                ${option.checkInDay}
+                            </div>
+                            <div class="date-separator">—</div>
+                            <div class="date-circle">
+                                ${option.checkOutDay}
+                            </div>
+                        </div>
+                        <div class="option-details">
+                            ${option.checkInMonth} ${option.checkInDay} — ${option.checkOutMonth} ${option.checkOutDay}
+                            <small>${option.nights} nights</small>
+                        </div>
+                    </button>
+                `;
+            }).join('');
             
             return `
-                <div class="date-node">
-                    <div class="date-circle ${circleClass}" ${clickable} title="${label}">
-                        ${dayNumber}
-                    </div>
-                    <div class="date-label">
-                        ${monthName} ${dayNumber}<br>
-                        <small>${label}</small>
+                <div class="booking-options-container">
+                    <div class="booking-options-title">Choose Your Stay</div>
+                    <div class="booking-options-list">
+                        ${optionButtons}
                     </div>
                 </div>
-                ${connector}
             `;
-        }).join('');
-        
-        return `
-            <div class="timeline-container">
-                <div class="timeline-title">Customize Your Stay</div>
-                <div class="timeline-dates">
-                    ${timelineNodes}
-                </div>
-                <div class="extend-hint">💡 Tap the dotted circles to extend your stay</div>
-            </div>
-        `;
+        }
     }
     
-    /**
-     * Check if there's an actual offer for this specific villa on the given date
-     */
-    hasOfferForVillaOnDate(villaKey, date, villaOffers) {
-        const dateString = date.toISOString().split('T')[0];
-        
-        console.log('Checking offer for villa:', villaKey, 'on date:', dateString);
-        console.log('Available villa offers:');
-        villaOffers.forEach(offer => {
-            const offerCheckIn = offer.checkIn.split('T')[0];
-            console.log('  - Offer check-in:', offerCheckIn, 'Villa:', offer.villa_display_name);
-        });
-        
-        const result = villaOffers.some(offer => {
-            // Check if the date matches the offer's check-in date
-            const offerCheckIn = offer.checkIn.split('T')[0];
-            return offerCheckIn === dateString;
-        });
-        
-        console.log('Offer found for date:', dateString, '=', result);
-        return result;
-    }
+
     
     /**
      * Check if date falls within an offer's range
@@ -1622,8 +1610,8 @@ class ActivitiesDashboard {
             `;
         }
         
-        // Generate timeline dates using all villa offers
-        const timelineHtml = this.generateTimelineForOffer(primaryOffer, allVillaOffers, villaKey);
+        // Generate booking options using all villa offers
+        const bookingOptionsHtml = this.generateBookingOptionsForOffer(primaryOffer, allVillaOffers, villaKey);
         
         // Generate carousel slides HTML
         const carouselSlides = imageUrls.map((url, index) => `
@@ -1668,8 +1656,8 @@ class ActivitiesDashboard {
                     <!-- Included Perks -->
                     ${perksHtml}
                     
-                    <!-- Timeline Extension -->
-                    ${timelineHtml}
+                    <!-- Booking Options -->
+                    ${bookingOptionsHtml}
                     
                     <!-- Book Button -->
                     <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
