@@ -19,8 +19,7 @@ class ActivitiesDashboard {
             errorMessage: document.getElementById('errorMessage'),
             errorText: document.getElementById('errorText'),
             offersContainer: document.getElementById('offersContainer'),
-            offersCount: document.getElementById('offersCount'),
-            villaCards: document.getElementById('villaCards'),
+            championOffers: document.getElementById('championOffers'),
             calendarGrid: document.getElementById('calendarGrid'),
             // Guest picker elements
             guestSummary: document.getElementById('guestSummary'),
@@ -31,10 +30,7 @@ class ActivitiesDashboard {
             adultsMinusBtn: document.getElementById('adultsMinusBtn'),
             adultsPlusBtn: document.getElementById('adultsPlusBtn'),
             childrenMinusBtn: document.getElementById('childrenMinusBtn'),
-            childrenPlusBtn: document.getElementById('childrenPlusBtn'),
-            loadMoreBtn: document.getElementById('loadMoreBtn'),
-            loadMoreContainer: document.getElementById('loadMoreContainer'),
-            loadMoreCount: document.getElementById('loadMoreCount')
+            childrenPlusBtn: document.getElementById('childrenPlusBtn')
         };
         
         // Calendar properties
@@ -62,14 +58,9 @@ class ActivitiesDashboard {
      * Initialize event listeners
      */
     initializeEventListeners() {
-        this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
-        
-        // Load more button listener
-        this.elements.loadMoreBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.loadMoreOffers();
-        });
+        if (this.elements.retryBtn) {
+            this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
+        }
         
         // Auto-refresh every 5 minutes (reduced frequency)
         setInterval(() => {
@@ -1253,8 +1244,7 @@ class ActivitiesDashboard {
         // Replace all content (no pagination needed)
         document.getElementById('championOffers').innerHTML = villaCardsHtml.join('');
         
-        // Hide Load More button since all offers are loaded at once
-        this.updateLoadMoreButton();
+        // No load more button needed for champion offers (all loaded at once)
     }
     
     /**
