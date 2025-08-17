@@ -1657,6 +1657,7 @@ class ActivitiesDashboard {
                     <div class="champion-price-overlay">
                         <span class="currency">Rp</span>
                         <span class="amount">${priceInMillions}M</span>
+                        <span class="nights-text">(${primaryOffer.nights} night${primaryOffer.nights > 1 ? 's' : ''})</span>
                     </div>
                 </div>
                 

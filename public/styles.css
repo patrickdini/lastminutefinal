@@ -1705,8 +1705,9 @@ body {
     border-radius: 0.5rem;
     font-weight: bold;
     display: flex;
-    align-items: baseline;
-    gap: 0.25rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
 }
 
 .champion-price-overlay .currency {
@@ -1718,6 +1719,14 @@ body {
     font-size: 1.5rem;
     color: #0F3128;
     font-weight: 800;
+    line-height: 1;
+}
+
+.champion-price-overlay .nights-text {
+    font-size: 0.8rem;
+    color: #4A4A47;
+    font-weight: 500;
+    line-height: 1;
 }
 
 .nights-overlay {
