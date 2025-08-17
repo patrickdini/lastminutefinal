@@ -1747,10 +1747,7 @@ body {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding: 4px;
-    background: rgba(38, 38, 38, 0.6);
-    border-radius: 16px;
-    border: 1px solid rgba(170, 120, 49, 0.3);
+    padding: 0;
 }
 
 .flexibility-pill {
