@@ -168,26 +168,36 @@ class ActivitiesDashboard {
      * Handle calendar date click
      */
     handleDateClick(index) {
+        console.log('Date clicked, index:', index);
         const dateInfo = this.calendarDates[index];
-        if (!dateInfo || !dateInfo.isSelectable) return;
+        if (!dateInfo || !dateInfo.isSelectable) {
+            console.log('Date not selectable:', dateInfo);
+            return;
+        }
+        
+        console.log('Before click - CheckIn:', this.selectedCheckIn, 'CheckOut:', this.selectedCheckOut);
         
         if (this.selectedCheckIn === null) {
             // First click - set check-in
             this.selectedCheckIn = index;
             this.selectedCheckOut = null;
+            console.log('Set check-in to:', index);
         } else if (this.selectedCheckOut === null) {
             // Second click - set check-out
             if (index <= this.selectedCheckIn) {
                 // If clicked date is before or same as check-in, reset and make it new check-in
                 this.selectedCheckIn = index;
                 this.selectedCheckOut = null;
+                console.log('Reset check-in to:', index);
             } else {
                 this.selectedCheckOut = index;
+                console.log('Set check-out to:', index);
             }
         } else {
             // Both dates selected - start over with new check-in
             this.selectedCheckIn = index;
             this.selectedCheckOut = null;
+            console.log('Reset selection, new check-in:', index);
         }
         
         this.updateCalendarDisplay();
@@ -202,21 +212,27 @@ class ActivitiesDashboard {
      * Update calendar visual display
      */
     updateCalendarDisplay() {
-        const dateElements = this.elements.calendarGrid.querySelectorAll('.calendar-date[data-date]:not(.disabled):not(.empty)');
-        
-        dateElements.forEach(element => {
-            const elementIndex = parseInt(element.dataset.index);
+        // Clear all styling from calendar dates
+        const allDateElements = this.elements.calendarGrid.querySelectorAll('.calendar-date');
+        allDateElements.forEach(element => {
             element.classList.remove('selected', 'in-range');
+        });
+        
+        // Apply styling to selected dates
+        const selectableDates = this.elements.calendarGrid.querySelectorAll('.calendar-date[data-index]:not(.disabled):not(.empty)');
+        
+        selectableDates.forEach(element => {
+            const elementIndex = parseInt(element.dataset.index);
             
-            if (elementIndex === this.selectedCheckIn) {
+            if (elementIndex === this.selectedCheckIn || elementIndex === this.selectedCheckOut) {
                 element.classList.add('selected');
-            } else if (elementIndex === this.selectedCheckOut) {
-                element.classList.add('selected'); 
             } else if (this.selectedCheckIn !== null && this.selectedCheckOut !== null && 
                       elementIndex > this.selectedCheckIn && elementIndex < this.selectedCheckOut) {
                 element.classList.add('in-range');
             }
         });
+        
+        console.log('Calendar display updated - CheckIn:', this.selectedCheckIn, 'CheckOut:', this.selectedCheckOut);
     }
     
     /**
