@@ -1313,30 +1313,24 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Generate special offer villa cards with timeline extensions (grouped by villa only)
+     * Generate special offer villa cards sorted by length of stay (multiple offers per villa allowed)
      */
     async generateChampionCards(offers) {
         console.log('Generating villa cards for', offers.length, 'offers');
         
-        // Group offers by villa only (not by date)
-        const villaGroups = this.groupChampionOffersByVilla(offers);
+        // Sort offers by length of stay (nights) in descending order (longest stays first)
+        const sortedOffers = offers.sort((a, b) => b.nights - a.nights);
+        
+        console.log('Offers sorted by nights:', sortedOffers.map(o => `${o.villa_display_name}: ${o.nights}n`));
         
         const villaCardsHtml = await Promise.all(
-            Object.keys(villaGroups).map(async villaKey => {
-                const villaOffers = villaGroups[villaKey];
+            sortedOffers.map(async offer => {
+                const villaKey = offer.villa_display_name || offer.villa;
                 
-                // First, try to find the exact match (user's selected dates)
-                let primaryOffer = villaOffers.find(offer => offer.match_type === 'exact');
+                console.log('Generating card for offer:', villaKey, ':', offer.checkIn, 'nights:', offer.nights, 'match type:', offer.match_type);
                 
-                // If no exact match found, fall back to earliest available offer
-                if (!primaryOffer) {
-                    villaOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
-                    primaryOffer = villaOffers[0];
-                }
-                
-                console.log('Selected primary offer for', villaKey, ':', primaryOffer.checkIn, 'match type:', primaryOffer.match_type);
-                
-                return await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, villaOffers);
+                // For individual offers, we still generate timeline but only show this specific offer
+                return await this.generateChampionVillaCardWithTimeline(villaKey, offer, [offer]);
             })
         );
         
