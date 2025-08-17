@@ -48,14 +48,14 @@ class ActivitiesDashboard {
         this.maxAdults = 12;
         this.maxChildren = 8;
         
-        // Pagination properties
-        this.currentOffset = 0;
-        this.hasMoreOffers = false;
+        // Pagination properties (removed - no longer needed)
+        // this.currentOffset = 0;
+        // this.hasMoreOffers = false;
         
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
-        this.loadActivities();
+        // No automatic loading - user must select dates first
     }
     
     /**
@@ -293,6 +293,9 @@ class ActivitiesDashboard {
             this.selectedCheckOut = dayAfterTomorrowIndex;
             this.updateCalendarDisplay();
             this.applyCalendarFilter();
+        } else {
+            // No default loading since we require specific dates
+            console.log('No default dates available - calendar dates required for search');
         }
     }
     
@@ -311,8 +314,6 @@ class ActivitiesDashboard {
         console.log('Calendar filter applied:', startDate, 'to', endDate);
         
         this.currentDateRange = { startDate, endDate };
-        this.currentOffset = 0; // Reset pagination
-        this.hasMoreOffers = false;
         this.loadActivities();
     }
     
@@ -732,9 +733,7 @@ class ActivitiesDashboard {
     handleGuestCountChange() {
         console.log(`Guest count changed: ${this.selectedAdults} adults, ${this.selectedChildren} children`);
         
-        // Reset pagination when guest count changes
-        this.currentOffset = 0;
-        this.hasMoreOffers = false;
+        // Pagination removed - no reset needed
         
         // Reload offers with new guest requirements
         this.loadActivities();
@@ -886,22 +885,15 @@ class ActivitiesDashboard {
     /**
      * Load activities from API with current filter parameters
      */
-    async loadActivities(silent = false, loadMore = false) {
+    async loadActivities(silent = false) {
         try {
-            // Reset offset if not loading more
-            if (!loadMore) {
-                this.currentOffset = 0;
-            }
-            
             this.showLoading(silent);
             
             // Build query parameters based on current selections
             const queryParams = this.buildQueryParameters();
-            // Add pagination parameters
-            const paginationParams = `&offset=${this.currentOffset}&limit=3`;
-            const url = `${this.apiBaseUrl}/activities?${queryParams}${paginationParams}`;
+            const url = `${this.apiBaseUrl}/activities?${queryParams}`;
             
-            console.log('Fetching champion offers from:', url);
+            console.log('Fetching available offers from:', url);
             const response = await fetch(url);
             console.log('Response status:', response.status, response.statusText);
             const data = await response.json();
@@ -914,78 +906,36 @@ class ActivitiesDashboard {
                 throw new Error(data.message || 'API returned unsuccessful response');
             }
             
-            // Handle pagination
-            this.hasMoreOffers = data.pagination?.hasMore || false;
+            // Store all offers (no pagination needed)
+            this.currentData = data.data;
             
-            // Update data based on whether we're loading more or starting fresh
-            if (loadMore) {
-                // Append new data to existing
-                this.currentData = [...(this.currentData || []), ...data.data];
-            } else {
-                // Replace with fresh data
-                this.currentData = data.data;
-            }
+            console.log(`Received ${data.data.length} available offers:`, data.metadata);
+            console.log('Displaying available offers:', this.currentData);
             
-            console.log(`Received ${data.count} champion offers:`, data.query_params);
-            
-            // Display the pre-calculated champion offers directly
+            // Display all available offers directly
             await this.displayActivities(this.currentData);
             
         } catch (error) {
-            console.error('Error loading champion offers:', error);
+            console.error('Error loading available offers:', error);
             this.showError(this.getErrorMessage(error));
         }
     }
     
     /**
-     * Load more offers (pagination)
+     * Load more offers (removed - no longer needed)
      */
     async loadMoreOffers() {
-        if (!this.hasMoreOffers || this.isLoading) {
-            return;
-        }
-        
-        // Store current scroll position
-        const currentScrollY = window.scrollY;
-        
-        // Show loading state on button
-        const loadMoreBtn = this.elements.loadMoreBtn;
-        const originalText = loadMoreBtn.innerHTML;
-        loadMoreBtn.disabled = true;
-        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-        
-        try {
-            // Increment offset by 3 (limit)
-            this.currentOffset += 3;
-            
-            // Load more offers without resetting existing data
-            await this.loadActivities(true, true); // Silent loading to prevent UI jump
-            
-            // Small delay to ensure content is rendered, then restore scroll
-            setTimeout(() => {
-                window.scrollTo(0, currentScrollY);
-            }, 100);
-            
-        } catch (error) {
-            console.error('Error loading more offers:', error);
-            // Reset offset on error
-            this.currentOffset -= 3;
-        } finally {
-            // Restore button state
-            loadMoreBtn.disabled = false;
-            loadMoreBtn.innerHTML = originalText;
-        }
+        // Functionality removed - all offers are now loaded at once
+        console.log('Load more functionality disabled - all offers loaded at once');
+        return;
     }
     
     /**
-     * Update Load More button visibility and state
+     * Update Load More button visibility and state (removed - no longer needed)
      */
     updateLoadMoreButton() {
-        if (this.hasMoreOffers) {
-            this.elements.loadMoreContainer.style.display = 'block';
-            this.elements.loadMoreBtn.disabled = false;
-            this.elements.loadMoreCount.textContent = '(3 more)';
-        } else {
+        // Always hide Load More button since all offers are loaded at once
+        if (this.elements.loadMoreContainer) {
             this.elements.loadMoreContainer.style.display = 'none';
         }
     }
@@ -1185,19 +1135,17 @@ class ActivitiesDashboard {
     /**
      * Display pre-calculated champion offers
      */
-    async displayActivities(championOffers) {
+    async displayActivities(availableOffers) {
         this.isLoading = false;
         this.hideAllStates();
         
-        console.log('Displaying champion offers:', championOffers);
+        console.log('Displaying available offers:', availableOffers);
         
-        // Transform champion offers to match expected format
-        const offers = this.transformChampionOffers(championOffers);
+        // Transform offers to match expected format
+        const offers = this.transformChampionOffers(availableOffers);
         
-        // Store current offers for night selection functionality
+        // Store current offers for functionality
         this.currentOffers = offers;
-        
-        // Count updated but not displayed
         
         // Generate villa cards
         if (offers.length > 0) {
@@ -1266,7 +1214,7 @@ class ActivitiesDashboard {
      * Generate champion villa cards with night selectors (grouped by villa/date)
      */
     async generateChampionCards(offers) {
-        console.log('Generating champion cards for', offers.length, 'offers');
+        console.log('Generating villa cards for', offers.length, 'offers');
         
         // Group offers by villa and checkin date
         const villaDateGroups = this.groupChampionOffersByVillaAndDate(offers);
@@ -1280,16 +1228,10 @@ class ActivitiesDashboard {
             })
         );
         
-        // For load more, append to existing content instead of replacing
-        if (this.currentOffset > 0) {
-            // Append new cards to existing ones
-            this.elements.villaCards.insertAdjacentHTML('beforeend', villaCardsHtml.join(''));
-        } else {
-            // Replace all content for fresh load
-            this.elements.villaCards.innerHTML = villaCardsHtml.join('');
-        }
+        // Replace all content (no pagination needed)
+        this.elements.villaCards.innerHTML = villaCardsHtml.join('');
         
-        // Show or hide Load More button
+        // Hide Load More button since all offers are loaded at once
         this.updateLoadMoreButton();
     }
     
