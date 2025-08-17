@@ -1283,55 +1283,144 @@ class ActivitiesDashboard {
      */
     async generateChampionVillaCardWithNights(villaKey, villaDetails, dateGroups) {
         const tagline = villaDetails.tagline || villaDetails.villa_display_name || villaKey;
-        const description = villaDetails.description || this.getVillaDescription(villaKey);
         const imageUrls = this.parseImageUrls(villaDetails.image_urls);
         
-        // Get the primary offer (usually the first/default one)
-        const primaryOffer = Object.values(dateGroups)[0][0];
+        // Get all offers for this villa sorted by check-in date
+        const allOffers = [];
+        Object.keys(dateGroups).forEach(date => {
+            dateGroups[date].forEach(offer => {
+                allOffers.push(offer);
+            });
+        });
+        allOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
         
-        // Format price
-        const formattedPrice = this.formatPrice(primaryOffer.rate);
+        // Get the primary offer (first one)
+        const primaryOffer = allOffers[0];
         
-        // Calculate savings display
-        const savingsDisplay = this.generateSavingsDisplay(primaryOffer);
+        // Format price (in millions)
+        const priceInMillions = (primaryOffer.totalRate / 1000000).toFixed(1);
         
-        // Generate perks from the offer data
-        const perksDisplay = this.generatePerksDisplay(primaryOffer);
+        // Calculate savings
+        let savingsBanner = '';
+        if (primaryOffer.savings && primaryOffer.savings > 0) {
+            const savingsInMillions = (primaryOffer.savings / 1000000).toFixed(1);
+            const savingsPercent = Math.round(primaryOffer.savingsPercent * 100);
+            savingsBanner = `
+                <div class="champion-savings-banner">
+                    <i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Champion Offer!
+                </div>
+            `;
+        }
         
-        // Generate night selector buttons
-        const nightSelectorDisplay = this.generateNightSelector(dateGroups, primaryOffer);
+        // Format check-in date
+        const checkInDate = new Date(primaryOffer.checkIn);
+        const dayName = this.getDayOfWeek(checkInDate);
+        const monthName = checkInDate.toLocaleDateString('en-US', { month: 'short' });
+        const dayNum = checkInDate.getDate();
+        const daysFromNow = this.calculateDaysFromNow(checkInDate);
+        const checkInText = `Check-in: ${dayName}, ${monthName} ${dayNum}${daysFromNow}`;
+        
+        // Generate perks display
+        let perksHtml = '';
+        if (primaryOffer.perks_included) {
+            const perks = primaryOffer.perks_included.split(',').map(p => p.trim());
+            const perkIcons = {
+                'Cocktails': 'fas fa-cocktail',
+                'Sunset Trip': 'fas fa-sun',
+                'Massage': 'fas fa-spa',
+                'Breakfast': 'fas fa-coffee',
+                'Airport Transfer': 'fas fa-plane',
+                'Snorkeling': 'fas fa-fish',
+                'Yoga': 'fas fa-heart'
+            };
+            
+            perksHtml = `
+                <div class="champion-perks-section">
+                    <div class="perks-label"><i class="fas fa-gift"></i> Included Perks</div>
+                    <div class="perks-list">
+                        ${perks.map(perk => `
+                            <div class="perk-item">
+                                <i class="${perkIcons[perk] || 'fas fa-check'}"></i>
+                                <span>${perk}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Generate date selector buttons
+        const dateButtons = allOffers.slice(0, 5).map((offer, index) => {
+            const offerDate = new Date(offer.checkIn);
+            const isSelected = offer.offer_id === primaryOffer.offer_id;
+            const monthLabel = offerDate.toLocaleDateString('en-US', { month: 'short' });
+            const dayLabel = offerDate.getDate();
+            const nightsLabel = `${offer.nights} night${offer.nights > 1 ? 's' : ''}`;
+            
+            return `
+                <div class="date-selector-item ${isSelected ? 'selected' : ''}" 
+                     onclick="app.selectChampionOffer('${offer.offer_id}', '${villaKey}')">
+                    <div class="date-circle">
+                        <span class="date-number">${dayLabel}</span>
+                    </div>
+                    <div class="date-labels">
+                        <span class="month-label">${monthLabel} ${dayLabel}</span>
+                        <span class="nights-label">${nightsLabel}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Add dotted circles for additional dates if there are more
+        let additionalDates = '';
+        if (allOffers.length > 5) {
+            additionalDates = `
+                <div class="date-selector-item dotted">
+                    <div class="date-circle dotted">
+                        <span>+${allOffers.length - 5}</span>
+                    </div>
+                </div>
+            `;
+        }
         
         // Get primary image
         const heroImage = imageUrls.length > 0 ? imageUrls[0] : '/api/placeholder/400/280';
         
-        // Format check-in date
-        const checkInDisplay = this.formatCheckInDisplay(primaryOffer);
-        
         return `
-            <div class="champion-offer-card">
-                <!-- Hero Image Section -->
+            <div class="champion-offer-card" data-offer-id="${primaryOffer.offer_id}">
+                <!-- Hero Image with Price Overlay -->
                 <div class="champion-hero">
                     <img src="${heroImage}" alt="${tagline}" class="champion-hero-image">
-                    <div class="champion-price-tag">${formattedPrice}</div>
+                    <div class="champion-price-overlay">
+                        <span class="currency">Rp</span>
+                        <span class="amount">${priceInMillions}M</span>
+                    </div>
                 </div>
                 
                 <!-- Savings Banner -->
-                ${savingsDisplay}
+                ${savingsBanner}
                 
                 <!-- Content Section -->
                 <div class="champion-content">
                     <h3 class="champion-title">${tagline}</h3>
-                    <div class="champion-checkin">${checkInDisplay}</div>
+                    <div class="champion-checkin">${checkInText}</div>
                     
                     <!-- Included Perks -->
-                    ${perksDisplay}
+                    ${perksHtml}
                     
-                    <!-- Night Selector -->
-                    ${nightSelectorDisplay}
+                    <!-- Date Selector -->
+                    <div class="champion-date-selector">
+                        <h4>Customize Your Stay</h4>
+                        <div class="date-selector-grid">
+                            ${dateButtons}
+                            ${additionalDates}
+                        </div>
+                        ${allOffers.length > 1 ? '<p class="selector-hint"><i class="fas fa-lightbulb"></i> Tap the dotted circles to extend your stay</p>' : ''}
+                    </div>
                     
                     <!-- Book Button -->
                     <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
-                        Book Champion Offer (${primaryOffer.nights} Night${primaryOffer.nights > 1 ? 's' : ''})
+                        BOOK CHAMPION OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
                     </button>
                 </div>
             </div>
@@ -1461,52 +1550,107 @@ class ActivitiesDashboard {
     }
 
     /**
-     * Select different night option for champion offer
+     * Select different offer when date selector is clicked
      */
-    selectChampionNights(offerId) {
+    selectChampionOffer(offerId, villaKey) {
         // Find the offer
         const offer = this.currentOffers.find(o => o.offer_id === offerId);
         if (!offer) return;
 
-        // Update the active button
-        document.querySelectorAll('.night-selector-btn').forEach(btn => {
-            btn.classList.remove('active');
+        // Find the card container
+        const card = document.querySelector(`[data-offer-id="${offer.offer_id}"]`).closest('.champion-offer-card');
+        if (!card) return;
+
+        // Update selected state on date selectors
+        card.querySelectorAll('.date-selector-item').forEach(item => {
+            item.classList.remove('selected');
         });
-        document.querySelector(`[data-offer-id="${offerId}"]`).classList.add('active');
+        event.currentTarget.classList.add('selected');
 
         // Update the displayed information for this offer
-        this.updateChampionOfferDisplay(offer);
+        this.updateChampionCardDisplay(card, offer, villaKey);
+    }
+    
+    /**
+     * Select different night option for champion offer (legacy method)
+     */
+    selectChampionNights(offerId) {
+        this.selectChampionOffer(offerId, null);
     }
 
     /**
-     * Update champion offer display when night selection changes
+     * Update champion card display when selection changes
      */
-    updateChampionOfferDisplay(offer) {
-        // Update price tag
-        const priceTag = document.querySelector('.champion-price-tag');
-        if (priceTag) {
-            priceTag.textContent = this.formatPrice(offer.rate);
+    updateChampionCardDisplay(card, offer, villaKey) {
+        // Update price
+        const priceInMillions = (offer.totalRate / 1000000).toFixed(1);
+        const priceAmount = card.querySelector('.champion-price-overlay .amount');
+        if (priceAmount) {
+            priceAmount.textContent = `${priceInMillions}M`;
         }
 
         // Update savings banner
-        const savingsBanner = document.querySelector('.champion-savings-banner');
-        if (savingsBanner && offer.savings > 0) {
-            const savingsPercent = Math.round(offer.savingsPercent * 100);
-            savingsBanner.textContent = `Save ${savingsPercent}% - You Save $${Math.round(offer.savings)}!`;
+        const savingsBanner = card.querySelector('.champion-savings-banner');
+        if (savingsBanner) {
+            if (offer.savings && offer.savings > 0) {
+                const savingsInMillions = (offer.savings / 1000000).toFixed(1);
+                const savingsPercent = Math.round(offer.savingsPercent * 100);
+                savingsBanner.innerHTML = `<i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Champion Offer!`;
+                savingsBanner.style.display = 'block';
+            } else {
+                savingsBanner.style.display = 'none';
+            }
+        }
+
+        // Update check-in date
+        const checkInDate = new Date(offer.checkIn);
+        const dayName = this.getDayOfWeek(checkInDate);
+        const monthName = checkInDate.toLocaleDateString('en-US', { month: 'short' });
+        const dayNum = checkInDate.getDate();
+        const daysFromNow = this.calculateDaysFromNow(checkInDate);
+        const checkInText = `Check-in: ${dayName}, ${monthName} ${dayNum}${daysFromNow}`;
+        
+        const checkinElement = card.querySelector('.champion-checkin');
+        if (checkinElement) {
+            checkinElement.textContent = checkInText;
         }
 
         // Update book button
-        const bookBtn = document.querySelector('.champion-book-btn');
+        const bookBtn = card.querySelector('.champion-book-btn');
         if (bookBtn) {
-            bookBtn.textContent = `Book Champion Offer (${offer.nights} Night${offer.nights > 1 ? 's' : ''})`;
-            bookBtn.onclick = () => this.handleChampionBooking(offer.offer_id, offer.villa);
+            bookBtn.textContent = `BOOK CHAMPION OFFER (${offer.nights} NIGHT${offer.nights > 1 ? 'S' : ''})`;
+            bookBtn.onclick = () => this.handleChampionBooking(offer.offer_id, villaKey);
         }
+
+        // Update card's data-offer-id
+        card.dataset.offerId = offer.offer_id;
 
         // Update perks if they change with different nights
         if (offer.perks_included !== this.lastDisplayedPerks) {
-            const perksContainer = document.querySelector('.champion-perks');
-            if (perksContainer) {
-                perksContainer.innerHTML = this.generatePerksDisplay(offer);
+            const perksContainer = card.querySelector('.champion-perks-section');
+            if (perksContainer && offer.perks_included) {
+                const perks = offer.perks_included.split(',').map(p => p.trim());
+                const perkIcons = {
+                    'Cocktails': 'fas fa-cocktail',
+                    'Sunset Trip': 'fas fa-sun',
+                    'Massage': 'fas fa-spa',
+                    'Breakfast': 'fas fa-coffee',
+                    'Airport Transfer': 'fas fa-plane',
+                    'Snorkeling': 'fas fa-fish',
+                    'Yoga': 'fas fa-heart'
+                };
+                
+                perksContainer.innerHTML = `
+                    <div class="perks-label"><i class="fas fa-gift"></i> Included Perks</div>
+                    <div class="perks-list">
+                        ${perks.map(perk => `
+                            <div class="perk-item">
+                                <i class="${perkIcons[perk] || 'fas fa-check'}"></i>
+                                <span>${perk}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
             this.lastDisplayedPerks = offer.perks_included;
         }
