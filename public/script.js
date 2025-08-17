@@ -48,12 +48,69 @@ class ActivitiesDashboard {
         // this.currentOffset = 0;
         // this.hasMoreOffers = false;
         
+        // Cached offers for extension functionality
+        this.cachedOffers = [];
+        this.cacheLoaded = false;
+        
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
         this.setDefaultDateSelection();
+        this.loadOffersCache();
     }
     
+    /**
+     * Load offers cache for extension functionality
+     */
+    async loadOffersCache() {
+        try {
+            console.log('Loading offers cache...');
+            const response = await fetch('/api/cached-offers');
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                this.cachedOffers = data.data;
+                this.cacheLoaded = true;
+                console.log('Loaded', this.cachedOffers.length, 'offers into cache');
+                
+                // Debug: Show unique villa names in cache
+                const uniqueVillas = [...new Set(this.cachedOffers.map(offer => offer.villa_display_name))];
+                console.log('Unique villa names in cache:', uniqueVillas);
+            }
+        } catch (error) {
+            console.error('Error loading offers cache:', error);
+        }
+    }
+
+    /**
+     * Find extension offers in cached data
+     */
+    findExtensionOffers(villaDisplayName, checkinDate, nights, adults, children) {
+        if (!this.cacheLoaded) {
+            console.error('Cache not loaded yet');
+            return [];
+        }
+
+        console.log('Searching cache for:', villaDisplayName, checkinDate, nights, 'nights');
+        
+        // Find offers matching villa, date, nights, and guest count
+        const matchingOffers = this.cachedOffers.filter(offer => {
+            const offerCheckin = offer.checkin_date ? new Date(offer.checkin_date).toISOString().split('T')[0] : null;
+            const matchesVilla = offer.villa_display_name === villaDisplayName;
+            const matchesDate = offerCheckin === checkinDate;
+            const matchesNights = offer.nights === parseInt(nights);
+            const matchesAdults = offer.adults >= parseInt(adults);
+            const matchesChildren = offer.children >= parseInt(children);
+            
+            console.log(`Checking offer: villa="${offer.villa_display_name}" vs "${villaDisplayName}", date="${offerCheckin}" vs "${checkinDate}", nights=${offer.nights} vs ${nights}, adults=${offer.adults} vs ${adults}, children=${offer.children} vs ${children}`);
+            
+            return matchesVilla && matchesDate && matchesNights && matchesAdults && matchesChildren;
+        });
+
+        console.log('Found', matchingOffers.length, 'matching offers in cache');
+        return matchingOffers;
+    }
+
     /**
      * Initialize event listeners
      */
@@ -1585,51 +1642,25 @@ class ActivitiesDashboard {
                 const currentChildren = this.selectedChildren || '0';
                 console.log('Using guest count:', currentAdults, 'adults,', currentChildren, 'children');
                 
-                // Fetch new offer data for extended stay
-                const extendedOfferData = await this.fetchExtendedOfferData(newDateRange.checkinDate, newDateRange.checkoutDate, currentAdults, currentChildren);
+                // Get extended offer from cache
+                const extendedOffer = await this.getExtendedOfferFromCache(
+                    villaKey, 
+                    newDateRange.checkinDate, 
+                    newDateRange.nights,
+                    currentAdults, 
+                    currentChildren
+                );
                 
-                if (extendedOfferData && extendedOfferData.length > 0) {
-                    console.log('All extended offers received:', extendedOfferData.length);
-                    console.log('Looking for villa key:', villaKey);
+                if (extendedOffer) {
+                    console.log('Found extended offer in cache:', extendedOffer);
                     
-                    // Debug: log all available villas
-                    extendedOfferData.forEach((offer, index) => {
-                        console.log(`Offer ${index}: villa="${offer.villa}", villa_display_name="${offer.villa_display_name}", match_type="${offer.match_type}"`);
-                    });
-                    
-                    // Find villa offers (any match type since we'll combine them)
-                    const villaOffers = extendedOfferData.filter(offer => {
-                        const matchesVilla = offer.villa_display_name === villaKey || offer.villa === villaKey;
-                        console.log(`Checking offer: villa_display_name="${offer.villa_display_name}" vs villaKey="${villaKey}" = ${matchesVilla}`);
-                        return matchesVilla;
-                    });
-                    
-                    console.log('Villa offers found after filtering:', villaOffers.length);
-                    
-                    if (villaOffers.length > 0) {
-                        // Find the best offer (prefer exact, then nearby, then extension)
-                        const exactOffer = villaOffers.find(offer => offer.match_type === 'exact');
-                        const nearbyOffer = villaOffers.find(offer => offer.match_type === 'nearby');
-                        const extensionOffer = villaOffers.find(offer => offer.match_type === 'extension');
-                        
-                        const bestOffer = exactOffer || nearbyOffer || extensionOffer;
-                        
-                        console.log('Found villa offers for extension:', villaOffers.length);
-                        console.log('Using best offer:', bestOffer.match_type, 'for', bestOffer.nights, 'nights');
-                        
-                        // Replace the current card with updated offer data
-                        await this.updateVillaCardWithExtendedOffer(currentCard, bestOffer, villaKey, extendedOfferData);
-                        console.log('Villa card updated with extended offer');
-                    } else {
-                        console.error('No matching villa offers found for extended stay');
-                        console.error('Available villas were:', extendedOfferData.map(o => o.villa_display_name).join(', '));
-                        this.hideExtensionLoadingState(currentCard);
-                        alert('Sorry, this villa is not available for the extended dates. Please try different dates.');
-                    }
+                    // Replace the current card with updated offer data
+                    await this.updateVillaCardWithExtendedOffer(currentCard, extendedOffer, villaKey, [extendedOffer]);
+                    console.log('Villa card updated with extended offer');
                 } else {
-                    console.error('No offers found for extended stay');
+                    console.log('No matching offer found in cache for extension');
                     this.hideExtensionLoadingState(currentCard);
-                    alert('Sorry, no offers found for the extended stay. Please try different dates.');
+                    alert('Sorry, this villa is not available for the extended dates. Please try different dates.');
                 }
                 
             } catch (error) {
@@ -1680,24 +1711,58 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Fetch extended offer data from API
+     * Get extended offer data from cache
      */
-    async fetchExtendedOfferData(checkinDate, checkoutDate, adults, children) {
-        const url = `/api/activities?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&adults=${adults}&children=${children}`;
-        console.log('Fetching extended offers from:', url);
+    async getExtendedOfferFromCache(villaDisplayName, checkinDate, nights, adults, children) {
+        console.log('Getting extended offer from cache for:', villaDisplayName);
         
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Find matching offers in cache
+        const cachedOffers = this.findExtensionOffers(villaDisplayName, checkinDate, nights, adults, children);
+        
+        if (cachedOffers.length === 0) {
+            console.log('No matching offers found in cache');
+            return null;
         }
         
-        const data = await response.json();
-        console.log('Extended offer data received:', data);
+        // Use the first matching offer and convert it to the expected format
+        const offer = cachedOffers[0];
+        console.log('Found cached offer:', offer);
         
-        if (data.data && data.data.length > 0) {
-            return this.parseOffersToProcessed(data.data);
-        }
-        return [];
+        // Convert cached offer to the format expected by the frontend
+        const processedOffer = {
+            villa: offer.UserRoomDisplayName || offer.villa_display_name,
+            checkIn: offer.checkin_date,
+            checkOut: this.calculateCheckoutDate(offer.checkin_date, offer.nights),
+            nights: offer.nights,
+            rate: offer.rate || offer.LowestRateAmount,
+            totalRate: offer.total_rate || offer.LowestRateAmount,
+            faceValue: offer.face_value || (offer.LowestRateAmount * 1.5), // fallback calculation
+            savings: offer.savings || 0,
+            savingsPercent: offer.savings_percent || 0,
+            villa_display_name: offer.villa_display_name,
+            tagline: offer.tagline,
+            description: offer.description,
+            square_meters: offer.square_meters,
+            bathrooms: offer.bathrooms,
+            bedrooms: offer.bedrooms,
+            view_type: offer.view_type,
+            pool_type: offer.pool_type,
+            image_urls: offer.image_urls,
+            key_amenities: offer.key_amenities,
+            perks: offer.perks || []
+        };
+        
+        return processedOffer;
+    }
+    
+    /**
+     * Calculate checkout date from checkin and nights
+     */
+    calculateCheckoutDate(checkinDate, nights) {
+        const checkin = new Date(checkinDate);
+        const checkout = new Date(checkin);
+        checkout.setDate(checkout.getDate() + nights);
+        return checkout.toISOString().split('T')[0];
     }
     
     /**

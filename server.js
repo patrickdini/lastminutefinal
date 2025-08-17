@@ -12,6 +12,10 @@ const pkg = require("./package.json");
 const app = express();
 const PORT = process.env.PORT || 5000; // Infomaniak GUI listens on 5000
 
+// Global offers cache
+let allOffersCache = [];
+let lastCacheUpdate = null;
+
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
@@ -65,6 +69,61 @@ try {
     console.error("Failed to preload index.html:", err.message);
     htmlWithVersion = "<!doctype html><html><body><h1>App</h1></body></html>";
 }
+
+// --- Cache Management ---
+async function loadAllOffersIntoCache() {
+    try {
+        console.log('Loading all offers into memory cache...');
+        const db = require('./config/database');
+        const connection = await db.getConnection();
+        
+        const offersQuery = `
+            SELECT 
+                co.*,
+                lrd.tagline,
+                lrd.description,
+                lrd.square_meters,
+                lrd.bathrooms,
+                lrd.bedrooms,
+                lrd.view_type,
+                lrd.pool_type,
+                lrd.image_urls,
+                lrd.key_amenities
+            FROM LMCurrentOffers co
+            LEFT JOIN LMRoomDescription lrd ON co.villa_id = lrd.villa_id
+            WHERE co.checkin_date >= CURDATE()
+            ORDER BY co.checkin_date, co.villa_id
+        `;
+        
+        const [offers] = await connection.execute(offersQuery);
+        connection.release();
+        
+        // Transform offers to add villa_display_name similar to the API
+        const transformedOffers = offers.map(offer => ({
+            ...offer,
+            villa_display_name: `The ${offer.villa_id} Villa`
+        }));
+        
+        allOffersCache = transformedOffers;
+        lastCacheUpdate = new Date();
+        console.log(`Loaded ${transformedOffers.length} offers into cache at ${lastCacheUpdate}`);
+        
+        return transformedOffers;
+    } catch (error) {
+        console.error('Error loading offers cache:', error);
+        return [];
+    }
+}
+
+// Expose cache endpoint
+app.get('/api/cached-offers', (req, res) => {
+    res.json({
+        success: true,
+        lastUpdated: lastCacheUpdate,
+        count: allOffersCache.length,
+        data: allOffersCache
+    });
+});
 
 // --- Routes ---
 console.log("Registering API routes...");
@@ -134,9 +193,12 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, "0.0.0.0", async () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    
+    // Load offers cache on startup
+    await loadAllOffersIntoCache();
 });
 
 // Graceful shutdown
