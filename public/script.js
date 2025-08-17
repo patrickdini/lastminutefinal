@@ -1238,9 +1238,17 @@ class ActivitiesDashboard {
         const villaCardsHtml = await Promise.all(
             Object.keys(villaGroups).map(async villaKey => {
                 const villaOffers = villaGroups[villaKey];
-                // Sort by check-in date to get earliest as primary
-                villaOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
-                const primaryOffer = villaOffers[0];
+                
+                // First, try to find the exact match (user's selected dates)
+                let primaryOffer = villaOffers.find(offer => offer.match_type === 'exact');
+                
+                // If no exact match found, fall back to earliest available offer
+                if (!primaryOffer) {
+                    villaOffers.sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
+                    primaryOffer = villaOffers[0];
+                }
+                
+                console.log('Selected primary offer for', villaKey, ':', primaryOffer.checkIn, 'match type:', primaryOffer.match_type);
                 
                 return await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, villaOffers);
             })
