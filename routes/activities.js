@@ -88,6 +88,28 @@ router.get('/activities', async (req, res) => {
             });
         }
         
+        // 5. Extension Support: Forward extension - offers starting on checkout date
+        // This enables frontend to show "+1 night" extensions
+        dateScenarios.push({
+            checkinDate: checkoutDate,
+            nights: 1,
+            matchType: 'extension'
+        });
+        
+        // 6. Extension Support: Backward extension - offers starting day before checkin
+        // This enables frontend to show backward "+1 night" extensions
+        if (canMoveCheckinEarlier) {
+            const dayBeforeCheckin = new Date(checkinDateObj);
+            dayBeforeCheckin.setDate(dayBeforeCheckin.getDate() - 1);
+            const dayBeforeCheckinStr = dayBeforeCheckin.toISOString().split('T')[0];
+            
+            dateScenarios.push({
+                checkinDate: dayBeforeCheckinStr,
+                nights: 1,
+                matchType: 'extension'
+            });
+        }
+        
         console.log(`Querying offers for ${dateScenarios.length} date scenarios:`, dateScenarios.map(s => `${s.checkinDate} (${s.nights}n, ${s.matchType})`).join(', '));
         
         // Get database connection
