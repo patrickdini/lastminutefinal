@@ -1583,7 +1583,7 @@ class ActivitiesDashboard {
             const savingsPercent = Math.round(primaryOffer.savingsPercent * 100);
             savingsBanner = `
                 <div class="champion-savings-banner">
-                    <i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) with this Special Offer!
+                    <i class="fas fa-tag"></i> You Save ${savingsInMillions}M (${savingsPercent}%) !
                 </div>
             `;
         }
@@ -1688,7 +1688,7 @@ class ActivitiesDashboard {
                         
                         <!-- Book Button -->
                         <button class="champion-book-btn" onclick="app.handleChampionBooking('${primaryOffer.offer_id}', '${villaKey}')">
-                            BOOK SPECIAL OFFER (${primaryOffer.nights} NIGHT${primaryOffer.nights > 1 ? 'S' : ''})
+                            BOOK NOW
                         </button>
                     </div>
                 </div>
