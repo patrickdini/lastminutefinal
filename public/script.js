@@ -127,9 +127,9 @@ class ActivitiesDashboard {
                 matchingOffers = matchingOffers.map(offer => ({
                     ...offer,
                     nights: parseInt(nights),
-                    price_for_guests: (parseFloat(offer.price_for_guests) / offer.nights * parseInt(nights)).toFixed(2),
-                    total_face_value: (parseFloat(offer.total_face_value) / offer.nights * parseInt(nights)).toFixed(2),
-                    guest_savings_value: (parseFloat(offer.guest_savings_value) / offer.nights * parseInt(nights)).toFixed(2)
+                    price_for_guests: parseFloat((parseFloat(offer.price_for_guests) / offer.nights * parseInt(nights)).toFixed(2)),
+                    total_face_value: parseFloat((parseFloat(offer.total_face_value) / offer.nights * parseInt(nights)).toFixed(2)),
+                    guest_savings_value: parseFloat((parseFloat(offer.guest_savings_value) / offer.nights * parseInt(nights)).toFixed(2))
                 }));
             }
         }
@@ -1760,12 +1760,12 @@ class ActivitiesDashboard {
             villa: offer.villa_id || offer.UserRoomDisplayName,
             checkIn: offer.checkin_date,
             checkOut: this.calculateCheckoutDate(offer.checkin_date, offer.nights),
-            nights: offer.nights,
-            rate: offer.price_for_guests,
-            totalRate: offer.price_for_guests,
-            faceValue: offer.total_face_value,
-            savings: offer.guest_savings_value,
-            savingsPercent: offer.guest_savings_percent,
+            nights: parseInt(offer.nights),
+            rate: parseFloat(offer.price_for_guests),
+            totalRate: parseFloat(offer.price_for_guests),
+            faceValue: parseFloat(offer.total_face_value),
+            savings: parseFloat(offer.guest_savings_value),
+            savingsPercent: parseFloat(offer.guest_savings_percent),
             villa_display_name: offer.villa_display_name,
             tagline: offer.tagline,
             description: offer.description,
@@ -1778,7 +1778,7 @@ class ActivitiesDashboard {
             key_amenities: offer.key_amenities,
             perks_included: offer.perks_included, // Keep original string format for villa card generation
             perk_ids: offer.perk_ids ? (typeof offer.perk_ids === 'string' ? JSON.parse(offer.perk_ids) : offer.perk_ids) : [],
-            offer_id: offer.offer_id,
+            offer_id: `${offer.villa_id}_${offer.checkin_date}_${offer.nights}n`, // Generate unique ID for extended offers
             attractiveness_score: offer.attractiveness_score
         };
         
