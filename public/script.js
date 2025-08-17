@@ -19,7 +19,6 @@ class ActivitiesDashboard {
             loadingSpinner: document.getElementById('loadingSpinner'),
             errorMessage: document.getElementById('errorMessage'),
             errorText: document.getElementById('errorText'),
-            emptyState: document.getElementById('emptyState'),
             offersContainer: document.getElementById('offersContainer'),
             offersCount: document.getElementById('offersCount'),
             villaCards: document.getElementById('villaCards'),
@@ -567,7 +566,6 @@ class ActivitiesDashboard {
     hideAllStates() {
         this.elements.loadingSpinner.style.display = 'none';
         this.elements.errorMessage.style.display = 'none';
-        this.elements.emptyState.style.display = 'none';
         this.elements.offersContainer.style.display = 'none';
     }
     
@@ -584,14 +582,13 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Show empty state
+     * Show empty state (removed - no longer needed)
      */
     showEmpty() {
         this.isLoading = false;
         this.hideAllStates();
-        this.elements.emptyState.style.display = 'block';
-        
-
+        // Empty state removed - show offers container with no data
+        this.elements.offersContainer.style.display = 'block';
     }
     
     /**
