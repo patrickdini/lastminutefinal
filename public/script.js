@@ -55,7 +55,7 @@ class ActivitiesDashboard {
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
-        // No automatic loading - user must select dates first
+        this.setDefaultDateSelection();
     }
     
     /**
@@ -174,6 +174,23 @@ class ActivitiesDashboard {
         console.log('Calendar generated with', this.calendarDates.length, 'selectable dates');
     }
     
+    /**
+     * Set default date selection: check-in tomorrow, check-out day after tomorrow
+     */
+    setDefaultDateSelection() {
+        // Default: check-in tomorrow (index 1), check-out day after tomorrow (index 2)
+        if (this.calendarDates.length >= 3) {
+            this.selectedCheckIn = 1;
+            this.selectedCheckOut = 2;
+            this.updateCalendarDisplay();
+            
+            console.log('Default dates selected: Check-in tomorrow, Check-out day after tomorrow');
+            
+            // Automatically load available offers for default dates
+            this.applyCalendarFilter();
+        }
+    }
+
     /**
      * Handle calendar date click
      */
