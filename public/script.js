@@ -22,8 +22,16 @@ class ActivitiesDashboard {
             offersCount: document.getElementById('offersCount'),
             villaCards: document.getElementById('villaCards'),
             calendarGrid: document.getElementById('calendarGrid'),
+            // Guest picker elements
+            guestSummary: document.getElementById('guestSummary'),
+            guestDetails: document.getElementById('guestDetails'),
+            totalGuests: document.getElementById('totalGuests'),
             adultsCount: document.getElementById('adultsCount'),
             childrenCount: document.getElementById('childrenCount'),
+            adultsMinusBtn: document.getElementById('adultsMinusBtn'),
+            adultsPlusBtn: document.getElementById('adultsPlusBtn'),
+            childrenMinusBtn: document.getElementById('childrenMinusBtn'),
+            childrenPlusBtn: document.getElementById('childrenPlusBtn'),
             loadMoreBtn: document.getElementById('loadMoreBtn'),
             loadMoreContainer: document.getElementById('loadMoreContainer'),
             loadMoreCount: document.getElementById('loadMoreCount')
@@ -37,6 +45,8 @@ class ActivitiesDashboard {
         // Guest count properties
         this.selectedAdults = 2; // Default to 2 adults
         this.selectedChildren = 0; // Default to no children
+        this.maxAdults = 12;
+        this.maxChildren = 8;
         
         // Pagination properties
         this.currentOffset = 0;
@@ -44,7 +54,7 @@ class ActivitiesDashboard {
         
         this.initializeEventListeners();
         this.setupCalendar();
-        this.setupMobileGuestSelectors();
+        this.setupGuestPicker();
         this.loadActivities();
     }
     
@@ -53,10 +63,6 @@ class ActivitiesDashboard {
      */
     initializeEventListeners() {
         this.elements.retryBtn.addEventListener('click', () => this.loadActivities());
-        
-        // Guest count listeners
-        this.elements.adultsCount.addEventListener('change', () => this.handleGuestCountChange());
-        this.elements.childrenCount.addEventListener('change', () => this.handleGuestCountChange());
         
         // Load more button listener
         this.elements.loadMoreBtn.addEventListener('click', (e) => {
@@ -310,6 +316,71 @@ class ActivitiesDashboard {
         this.loadActivities();
     }
     
+    /**
+     * Setup guest picker functionality
+     */
+    setupGuestPicker() {
+        this.updateGuestDisplay();
+        this.updateGuestButtons();
+    }
+
+    /**
+     * Toggle guest details visibility
+     */
+    toggleGuestDetails() {
+        this.elements.guestDetails.classList.toggle('open');
+        this.elements.guestSummary.classList.toggle('open');
+    }
+
+    /**
+     * Change guest count
+     */
+    changeGuestCount(type, delta) {
+        const current = type === 'adults' ? this.selectedAdults : this.selectedChildren;
+        const minValue = type === 'adults' ? 1 : 0;
+        const maxValue = type === 'adults' ? this.maxAdults : this.maxChildren;
+        
+        const newValue = Math.max(minValue, Math.min(maxValue, current + delta));
+        
+        if (newValue !== current) {
+            if (type === 'adults') {
+                this.selectedAdults = newValue;
+            } else {
+                this.selectedChildren = newValue;
+            }
+            
+            this.updateGuestDisplay();
+            this.updateGuestButtons();
+            this.handleGuestCountChange();
+        }
+    }
+
+    /**
+     * Update guest display
+     */
+    updateGuestDisplay() {
+        // Update individual counts
+        this.elements.adultsCount.textContent = this.selectedAdults;
+        this.elements.childrenCount.textContent = this.selectedChildren;
+        
+        // Update total display
+        const total = this.selectedAdults + this.selectedChildren;
+        this.elements.totalGuests.textContent = `${total} guest${total !== 1 ? 's' : ''}`;
+    }
+
+    /**
+     * Update guest buttons state
+     */
+    updateGuestButtons() {
+        // Update adults buttons
+        this.elements.adultsMinusBtn.disabled = this.selectedAdults <= 1;
+        this.elements.adultsPlusBtn.disabled = this.selectedAdults >= this.maxAdults;
+        
+        // Update children buttons
+        this.elements.childrenMinusBtn.disabled = this.selectedChildren <= 0;
+        this.elements.childrenPlusBtn.disabled = this.selectedChildren >= this.maxChildren;
+    }
+
     /**
      * Get current date in Bali time zone (UTC+8)
      */
@@ -659,10 +730,11 @@ class ActivitiesDashboard {
      * Handle guest count change
      */
     handleGuestCountChange() {
-        this.selectedAdults = parseInt(this.elements.adultsCount.value);
-        this.selectedChildren = parseInt(this.elements.childrenCount.value);
-        
         console.log(`Guest count changed: ${this.selectedAdults} adults, ${this.selectedChildren} children`);
+        
+        // Reset pagination when guest count changes
+        this.currentOffset = 0;
+        this.hasMoreOffers = false;
         
         // Reload offers with new guest requirements
         this.loadActivities();
@@ -2350,6 +2422,19 @@ function toggleDescription(button) {
     const isExpanded = descriptionContainer.getAttribute('data-expanded') === 'true';
     descriptionContainer.setAttribute('data-expanded', !isExpanded);
     button.textContent = isExpanded ? 'Show more' : 'Show less';
+}
+
+// Global functions for guest picker
+function toggleGuestDetails() {
+    if (app) {
+        app.toggleGuestDetails();
+    }
+}
+
+function changeGuestCount(type, delta) {
+    if (app) {
+        app.changeGuestCount(type, delta);
+    }
 }
 
 // Handle window errors

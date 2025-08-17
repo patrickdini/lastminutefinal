@@ -39,30 +39,39 @@
 
             <!-- Guest Selection -->
             <div class="guest-selection">
-                <div class="filter-label">Who's coming along?</div>
-                <div class="guest-inputs">
-                    <div class="guest-input-group">
-                        <label for="adultsCount">Adults:</label>
-                        <select id="adultsCount" class="guest-select">
-                            <option value="1" data-mobile="1" data-desktop="1 Adult">1 Adult</option>
-                            <option value="2" selected data-mobile="2" data-desktop="2 Adults">2 Adults</option>
-                            <option value="3" data-mobile="3" data-desktop="3 Adults">3 Adults</option>
-                            <option value="4" data-mobile="4" data-desktop="4 Adults">4 Adults</option>
-                            <option value="5" data-mobile="5" data-desktop="5 Adults">5 Adults</option>
-                            <option value="6" data-mobile="6" data-desktop="6 Adults">6 Adults</option>
-                            <option value="7" data-mobile="7" data-desktop="7 Adults">7 Adults</option>
-                            <option value="8" data-mobile="8" data-desktop="8 Adults">8 Adults</option>
-                        </select>
+                <div class="picker-title">Who's coming along?</div>
+                
+                <div class="guest-summary" onclick="toggleGuestDetails()" id="guestSummary">
+                    <span class="summary-text">Guests</span>
+                    <div>
+                        <span class="summary-count" id="totalGuests">2 guests</span>
+                        <span class="chevron">▼</span>
                     </div>
-                    <div class="guest-input-group">
-                        <label for="childrenCount">Children:</label>
-                        <select id="childrenCount" class="guest-select">
-                            <option value="0" selected data-mobile="0" data-desktop="No Children">No Children</option>
-                            <option value="1" data-mobile="1" data-desktop="1 Child">1 Child</option>
-                            <option value="2" data-mobile="2" data-desktop="2 Children">2 Children</option>
-                            <option value="3" data-mobile="3" data-desktop="3 Children">3 Children</option>
-                            <option value="4" data-mobile="4" data-desktop="4 Children">4 Children</option>
-                        </select>
+                </div>
+                
+                <div class="guest-details" id="guestDetails">
+                    <div class="detail-row">
+                        <div>
+                            <div class="detail-label">Adults</div>
+                            <div class="detail-desc">Ages 13 and above</div>
+                        </div>
+                        <div class="detail-counter">
+                            <button onclick="changeGuestCount('adults', -1)" id="adultsMinusBtn">−</button>
+                            <span class="count" id="adultsCount">2</span>
+                            <button onclick="changeGuestCount('adults', 1)" id="adultsPlusBtn">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div>
+                            <div class="detail-label">Children</div>
+                            <div class="detail-desc">Ages 0-12</div>
+                        </div>
+                        <div class="detail-counter">
+                            <button onclick="changeGuestCount('children', -1)" id="childrenMinusBtn">−</button>
+                            <span class="count" id="childrenCount">0</span>
+                            <button onclick="changeGuestCount('children', 1)" id="childrenPlusBtn">+</button>
+                        </div>
                     </div>
                 </div>
             </div>

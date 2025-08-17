@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villa Tokay - Guest Picker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0F3128 0%, #1a4a3e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .picker-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .picker-title {
+            font-size: 1.4rem;
+            color: #0F3128;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .guest-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #0F3128;
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .guest-summary:hover {
+            background: #1a4a3e;
+            transform: translateY(-2px);
+        }
+
+        .summary-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .summary-count {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #AA7831;
+        }
+
+        .chevron {
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            color: #AA7831;
+        }
+
+        .guest-summary.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .guest-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .guest-details.open {
+            padding: 20px;
+            max-height: 200px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-row:first-child {
+            padding-top: 0;
+        }
+
+        .detail-label {
+            color: #0F3128;
+            font-weight: 500;
+        }
+
+        .detail-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .detail-counter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .detail-counter button {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: 2px solid #AA7831;
+            background: white;
+            color: #AA7831;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-counter button:hover:not(:disabled) {
+            background: #AA7831;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .detail-counter button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .detail-counter .count {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0F3128;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .picker-section {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .detail-counter {
+                gap: 12px;
+            }
+
+            .detail-counter button {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+
+        <div class="picker-section">
+            <div class="picker-title">Select Guests</div>
+            
+            <div class="guest-summary" onclick="toggleDetails()" id="guestSummary">
+                <span class="summary-text">Guests</span>
+                <div>
+                    <span class="summary-count" id="totalGuests">2 guests</span>
+                    <span class="chevron">▼</span>
+                </div>
+            </div>
+            
+            <div class="guest-details" id="guestDetails">
+                <div class="detail-row">
+                    <div>
+                        <div class="detail-label">Adults</div>
+                        <div class="detail-desc">Ages 13 and above</div>
+                    </div>
+                    <div class="detail-counter">
+                        <button onclick="changeCount('adults', -1)" id="adultsMinusBtn">−</button>
+                        <span class="count" id="adultsCount">2</span>
+                        <button onclick="changeCount('adults', 1)" id="adultsPlusBtn">+</button>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div>
+                        <div class="detail-label">Children</div>
+                        <div class="detail-desc">Ages 0-12</div>
+                    </div>
+                    <div class="detail-counter">
+                        <button onclick="changeCount('children', -1)" id="childrenMinusBtn">−</button>
+                        <span class="count" id="childrenCount">0</span>
+                        <button onclick="changeCount('children', 1)" id="childrenPlusBtn">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Guest count data
+        let guestData = {
+            adults: 2,
+            children: 0
+        };
+
+        // Maximum limits
+        const MAX_ADULTS = 12;
+        const MAX_CHILDREN = 8;
+
+        function toggleDetails() {
+            const details = document.getElementById('guestDetails');
+            const summary = document.getElementById('guestSummary');
+            
+            details.classList.toggle('open');
+            summary.classList.toggle('open');
+        }
+
+        function changeCount(type, delta) {
+            const current = guestData[type];
+            const minValue = type === 'adults' ? 1 : 0;
+            const maxValue = type === 'adults' ? MAX_ADULTS : MAX_CHILDREN;
+            
+            const newValue = Math.max(minValue, Math.min(maxValue, current + delta));
+            
+            if (newValue !== current) {
+                guestData[type] = newValue;
+                updateDisplay();
+                updateButtons();
+                
+                // Optional: Trigger custom event for integration
+                dispatchGuestChangeEvent();
+            }
+        }
+
+        function updateDisplay() {
+            // Update individual counts
+            document.getElementById('adultsCount').textContent = guestData.adults;
+            document.getElementById('childrenCount').textContent = guestData.children;
+            
+            // Update total display
+            const total = guestData.adults + guestData.children;
+            const totalDisplay = document.getElementById('totalGuests');
+            totalDisplay.textContent = `${total} guest${total !== 1 ? 's' : ''}`;
+        }
+
+        function updateButtons() {
+            // Update adults buttons
+            const adultsMinusBtn = document.getElementById('adultsMinusBtn');
+            const adultsPlusBtn = document.getElementById('adultsPlusBtn');
+            adultsMinusBtn.disabled = guestData.adults <= 1;
+            adultsPlusBtn.disabled = guestData.adults >= MAX_ADULTS;
+            
+            // Update children buttons
+            const childrenMinusBtn = document.getElementById('childrenMinusBtn');
+            const childrenPlusBtn = document.getElementById('childrenPlusBtn');
+            childrenMinusBtn.disabled = guestData.children <= 0;
+            childrenPlusBtn.disabled = guestData.children >= MAX_CHILDREN;
+        }
+
+        function dispatchGuestChangeEvent() {
+            // Dispatch custom event for integration with booking system
+            const event = new CustomEvent('guestCountChanged', {
+                detail: {
+                    adults: guestData.adults,
+                    children: guestData.children,
+                    total: guestData.adults + guestData.children
+                }
+            });
+            window.dispatchEvent(event);
+        }
+
+        // Public API for getting guest data
+        function getGuestData() {
+            return {
+                adults: guestData.adults,
+                children: guestData.children,
+                total: guestData.adults + guestData.children
+            };
+        }
+
+        // Public API for setting guest data
+        function setGuestData(adults, children) {
+            if (adults >= 1 && adults <= MAX_ADULTS && children >= 0 && children <= MAX_CHILDREN) {
+                guestData.adults = adults;
+                guestData.children = children;
+                updateDisplay();
+                updateButtons();
+                dispatchGuestChangeEvent();
+                return true;
+            }
+            return false;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDisplay();
+            updateButtons();
+        });
+
+        // Optional: Listen for guest count changes
+        // window.addEventListener('guestCountChanged', (event) => {
+        //     console.log('Guest count changed:', event.detail);
+        // });
+
+        // Make functions available globally for integration
+        window.VillaTokenGuestPicker = {
+            getGuestData,
+            setGuestData,
+            toggleDetails
+        };
+    </script>
+</body>
+</html>
