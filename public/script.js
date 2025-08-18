@@ -340,10 +340,17 @@ class ActivitiesDashboard {
                 // Add selected class to clicked pill
                 pill.classList.add('selected');
                 
-                console.log('Flexibility changed to:', this.getSelectedFlexibility());
-                
-                // Save user state when flexibility changes
-                this.saveUserState();
+                // Add small delay to ensure DOM updates before checking selection
+                setTimeout(() => {
+                    const selectedFlexibility = this.getSelectedFlexibility();
+                    console.log('Flexibility changed to:', selectedFlexibility);
+                    
+                    // Save user state when flexibility changes
+                    this.saveUserState();
+                    
+                    // Apply the filter with new flexibility
+                    this.applyCalendarFilter();
+                }, 10);
                 
                 // Only reload if we have a date range selected
                 if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {

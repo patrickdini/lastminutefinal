@@ -1,0 +1,27 @@
+Found 1 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:343 Flexibility changed to: undefined
+script.js?v=__ASSET_VERSION__:131 DEBUG: Saving flexibility value: undefined
+script.js?v=__ASSET_VERSION__:145 User state saved with flexibility: undefined
+script.js?v=__ASSET_VERSION__:1270 Building query with flexibility: exact
+script.js?v=__ASSET_VERSION__:1203 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-22&checkoutDate=2025-08-24&flexibility=exact
+script.js?v=__ASSET_VERSION__:1205 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1219 Received 2 available offers: {selected_checkin_date: '2025-08-22', selected_checkout_date: '2025-08-24', desired_nights: 2, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1220 Displaying available offers: (2) [{…}, {…}]
+script.js?v=__ASSET_VERSION__:1500 Displaying available offers: (2) [{…}, {…}]
+script.js?v=__ASSET_VERSION__:1507 Stored currentOffers with offer_ids: (2) [336, 3421]
+script.js?v=__ASSET_VERSION__:1586 Generating villa cards for 2 offers
+script.js?v=__ASSET_VERSION__:1590 Grouped into 2 villas
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Shore Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-22T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-22 (2n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Shore', checkIn: '2025-08-22T00:00:00.000Z', checkOut: '2025-08-24', nights: 2, rate: 18600000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Sunset Room with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-22T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-22 (2n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Sunset', checkIn: '2025-08-22T00:00:00.000Z', checkOut: '2025-08-24', nights: 2, rate: 7600000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Sunset Room
