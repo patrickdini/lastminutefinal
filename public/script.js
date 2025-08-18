@@ -350,18 +350,15 @@ class ActivitiesDashboard {
                 
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
-                // Add small delay to ensure DOM updates before checking selection
-                setTimeout(() => {
-                    console.log('🔍 About to call getSelectedFlexibility()');
-                    const selectedFlexibility = this.getSelectedFlexibility();
-                    console.log('🔍 getSelectedFlexibility() returned:', selectedFlexibility);
-                    
-                    // Save user state when flexibility changes
-                    this.saveUserState();
-                    
-                    // Apply the filter with new flexibility
-                    this.applyCalendarFilter();
-                }, 10);
+                console.log('🔍 IMMEDIATE TEST: About to call getSelectedFlexibility()');
+                const testFlexibility = this.getSelectedFlexibility();
+                console.log('🔍 IMMEDIATE TEST: getSelectedFlexibility() returned:', testFlexibility);
+                
+                // Save user state when flexibility changes
+                this.saveUserState();
+                
+                // Apply the filter with new flexibility
+                this.applyCalendarFilter();
                 
                 // Only reload if we have a date range selected
                 if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {
