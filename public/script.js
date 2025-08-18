@@ -69,8 +69,10 @@ class ActivitiesDashboard {
             // Add a small delay to ensure all UI elements are properly restored
             setTimeout(() => {
                 console.log('Applying calendar filter with restored state...');
+                console.log('Final flexibility check before API call:');
+                this.getSelectedFlexibility(); // This will log the debug info
                 this.applyCalendarFilter();
-            }, 150);
+            }, 200);
         }
         this.initializeImageCarousels();
         this.initializeGalleryModal();
@@ -218,9 +220,21 @@ class ActivitiesDashboard {
      * Get currently selected flexibility value
      */
     getSelectedFlexibility() {
+        const allPills = document.querySelectorAll('.flexibility-pill');
         const selectedPill = document.querySelector('.flexibility-pill.selected');
+        
+        console.log('getSelectedFlexibility() debug:');
+        console.log('- Total pills found:', allPills.length);
+        console.log('- Selected pill found:', !!selectedPill);
+        
+        if (allPills.length > 0) {
+            allPills.forEach((pill, index) => {
+                console.log(`- Pill ${index}: data-flexibility="${pill.dataset.flexibility}", selected=${pill.classList.contains('selected')}`);
+            });
+        }
+        
         const flexibility = selectedPill ? selectedPill.dataset.flexibility : 'exact';
-        console.log('getSelectedFlexibility() called, found:', flexibility, 'from pill:', selectedPill);
+        console.log('- Final flexibility value:', flexibility);
         return flexibility;
     }
 
