@@ -109,20 +109,7 @@ class ConfirmBooking {
         
         // Format perks HTML
         let perksHtml = '';
-        if (perks && perks.length > 0) {
-            const perksGrid = perks.map(perk => 
-                `<div class="perk-item">${perk.activity_name}</div>`
-            ).join('');
-            
-            perksHtml = `
-                <div class="perks-section">
-                    <div class="perks-title">Included Perks</div>
-                    <div class="perks-grid">
-                        ${perksGrid}
-                    </div>
-                </div>
-            `;
-        }
+        // Perks are now displayed in the "What is included" section - no separate perks section needed
         
         // Format price in IDR
         const formatIDR = (amount) => {
@@ -168,7 +155,7 @@ class ConfirmBooking {
                     ${checkInText}
                 </div>
 
-                ${perksHtml}
+
 
                 <div class="included-section">
                     <div class="included-title">What is included</div>
