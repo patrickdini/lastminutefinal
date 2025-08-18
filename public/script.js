@@ -353,8 +353,14 @@ class ActivitiesDashboard {
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
                 console.log('🚀 CACHE BUSTED: About to call getSelectedFlexibility()');
-                const testFlexibility = this.getSelectedFlexibility();
-                console.log('🚀 CACHE BUSTED: getSelectedFlexibility() returned:', testFlexibility);
+                let testFlexibility;
+                try {
+                    testFlexibility = this.getSelectedFlexibility();
+                    console.log('🚀 CACHE BUSTED: getSelectedFlexibility() returned:', testFlexibility);
+                } catch (error) {
+                    console.error('🚀 ERROR in getSelectedFlexibility():', error);
+                    testFlexibility = 'exact'; // fallback
+                }
                 
                 // Save user state when flexibility changes
                 this.saveUserState();
