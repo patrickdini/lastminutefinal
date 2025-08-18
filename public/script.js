@@ -2382,12 +2382,17 @@ class ActivitiesDashboard {
      * Handle champion booking button click
      */
     handleChampionBooking(offerId, villaKey) {
+        console.log('handleChampionBooking called with:', offerId, villaKey);
+        
         // Find the offer details
         const offer = this.currentOffers.find(o => o.offer_id === offerId);
         if (!offer) {
             console.error('Offer not found:', offerId);
+            console.error('Available offers:', this.currentOffers);
             return;
         }
+
+        console.log('Found offer:', offer);
 
         // Save user state before booking to preserve selections
         this.saveUserState();
@@ -2420,19 +2425,20 @@ class ActivitiesDashboard {
             timestamp: Date.now()
         };
 
-        // Store in sessionStorage (clears when tab closes)
-        sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
-        
-        // Navigate to confirm-booking page in same tab
-        window.location.href = '/confirm-booking';
-        
-        // Track booking attempt
-        console.log('Navigating to confirm booking page:', {
-            offer_id: offerId,
-            villa: villaKey,
-            nights: offer.nights,
-            price: offer.totalRate
-        });
+        console.log('Storing booking data:', bookingData);
+
+        try {
+            // Store in sessionStorage (clears when tab closes)
+            sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+            console.log('Booking data stored in sessionStorage');
+            
+            // Navigate to confirm-booking page in same tab
+            console.log('Navigating to /confirm-booking...');
+            window.location.href = '/confirm-booking';
+        } catch (error) {
+            console.error('Error during booking process:', error);
+            alert('There was an error processing your booking. Please try again.');
+        }
     }
 
     /**
