@@ -1,0 +1,43 @@
+Calendar generated with 15 selectable dates
+script.js?v=__ASSET_VERSION__:172 Loading saved user state: {selectedAdults: 2, selectedChildren: 0, selectedCheckIn: 5, selectedCheckOut: 6, currentFilter: 'default', …}
+script.js?v=__ASSET_VERSION__:173 DEBUG: Loaded flexibility value: undefined
+script.js?v=__ASSET_VERSION__:205 DEBUG: Set pendingFlexibilityRestore to: undefined
+script.js?v=__ASSET_VERSION__:207 User state restored successfully
+script.js?v=__ASSET_VERSION__:567 Calendar display updated - CheckIn: 5 CheckOut: 6
+script.js?v=__ASSET_VERSION__:107 Loading offers cache...
+script.js?v=__ASSET_VERSION__:75 DEBUG: About to restore flexibility, pendingFlexibilityRestore = undefined
+script.js?v=__ASSET_VERSION__:90 DEBUG: No pending flexibility to restore
+script.js?v=__ASSET_VERSION__:93 Applying calendar filter with restored state...
+script.js?v=__ASSET_VERSION__:613 Calendar filter applied: 2025-08-23 to 2025-08-24
+script.js?v=__ASSET_VERSION__:1270 Building query with flexibility: exact
+script.js?v=__ASSET_VERSION__:1203 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-23&checkoutDate=2025-08-24&flexibility=exact
+script.js?v=__ASSET_VERSION__:1205 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1219 Received 3 available offers: {selected_checkin_date: '2025-08-23', selected_checkout_date: '2025-08-24', desired_nights: 1, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1220 Displaying available offers: (3) [{…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1500 Displaying available offers: (3) [{…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1507 Stored currentOffers with offer_ids: (3) [11, 466, 3460]
+script.js?v=__ASSET_VERSION__:1586 Generating villa cards for 3 offers
+script.js?v=__ASSET_VERSION__:1590 Grouped into 3 villas
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Pearl Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-23T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-23 (1n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Pearl', checkIn: '2025-08-23T00:00:00.000Z', checkOut: '2025-08-24', nights: 1, rate: 5500000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Pearl Villa
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Shore Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-23T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-23 (1n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Shore', checkIn: '2025-08-23T00:00:00.000Z', checkOut: '2025-08-24', nights: 1, rate: 9300000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Sunset Room with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-23T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-23 (1n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Sunset', checkIn: '2025-08-23T00:00:00.000Z', checkOut: '2025-08-24', nights: 1, rate: 3800000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:114 Loaded 4715 offers into cache
+script.js?v=__ASSET_VERSION__:118 Unique villa names in cache: (8) ['The Sunset Room', 'The Leaf Villa', 'The Shore Villa', 'The Swell 2BR', 'The Swell 3BR Villa', 'The Tide Villa', 'The Pearl Villa', 'The Wave Villa']
