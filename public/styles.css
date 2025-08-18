@@ -2384,3 +2384,23 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* --- Mobile-Only Styles for Villa Card Date Display --- */
+@media (max-width: 768px) {
+    /* Hide the date circles inside the booking options */
+    .single-booking-option .date-range,
+    .booking-option-btn .date-range {
+        display: none;
+    }
+
+    /* Center the remaining text elements for a cleaner look */
+    .single-booking-option .date-labels,
+    .booking-option-btn {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .booking-option-btn .option-details {
+        text-align: center;
+    }
+}
