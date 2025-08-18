@@ -2108,6 +2108,7 @@ class ActivitiesDashboard {
                 <div class="champion-content">
                     <!-- Collapsible Details -->
                     <div class="villa-details-collapsible" style="display: none;">
+                        <div class="villa-name-subtitle" style="display: none;">${villaKey}</div>
                         <h3 class="champion-title">${tagline}</h3>
                         <div class="champion-checkin">${checkInText}</div>
                         
