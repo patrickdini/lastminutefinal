@@ -677,7 +677,21 @@ body {
 }
 
 /* Loading spinner */
+.loading-spinner {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
 
+.loading-spinner i {
+    font-size: 3rem;
+    color: #AA7831;
+    margin-bottom: 20px;
+}
+
+.loading-spinner p {
+    font-size: 1.2rem;
+}
 
 /* Error message */
 .error-message {
