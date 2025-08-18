@@ -353,13 +353,23 @@ class ActivitiesDashboard {
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
                 console.log('🚀 CACHE BUSTED: About to call getSelectedFlexibility()');
+                console.log('🚀 DEBUG: this context:', typeof this, this.constructor?.name);
+                
+                // Test calling getSelectedFlexibility directly
+                console.log('🚀 DIRECT TEST: Calling method directly');
+                const allPills = document.querySelectorAll('.flexibility-pill');
+                const selectedPill = document.querySelector('.flexibility-pill.selected');
+                console.log('🚀 DIRECT: Found', allPills.length, 'pills,', !!selectedPill, 'selected');
+                const directResult = selectedPill ? selectedPill.dataset.flexibility : 'exact';
+                console.log('🚀 DIRECT: Result:', directResult);
+                
                 let testFlexibility;
                 try {
                     testFlexibility = this.getSelectedFlexibility();
                     console.log('🚀 CACHE BUSTED: getSelectedFlexibility() returned:', testFlexibility);
                 } catch (error) {
                     console.error('🚀 ERROR in getSelectedFlexibility():', error);
-                    testFlexibility = 'exact'; // fallback
+                    testFlexibility = directResult; // use direct result as fallback
                 }
                 
                 // Save user state when flexibility changes
