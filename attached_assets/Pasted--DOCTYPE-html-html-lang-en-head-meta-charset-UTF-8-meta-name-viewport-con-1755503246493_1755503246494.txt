@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Villa Tokay Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f7f5;
+            color: #262626;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .brand-name {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #0F3128;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: #4A4A47;
+            font-weight: 300;
+        }
+
+        /* Booking Summary Card */
+        .booking-summary {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(15, 49, 40, 0.08);
+            margin-bottom: 40px;
+            border: 1px solid rgba(15, 49, 40, 0.06);
+        }
+
+        .summary-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .summary-content {
+            padding: 32px;
+        }
+
+        .villa-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #0F3128;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .check-in-info {
+            color: #4A4A47;
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+
+        .perks-section {
+            margin-bottom: 24px;
+        }
+
+        .perks-title {
+            font-weight: 600;
+            color: #0F3128;
+            margin-bottom: 8px;
+        }
+
+        .perk-item {
+            color: #AA7831;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .perk-item::before {
+            content: "✧";
+            margin-right: 8px;
+            color: #AA7831;
+        }
+
+        .stay-details {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+        }
+
+        .stay-title {
+            font-weight: 600;
+            color: #0F3128;
+            margin-bottom: 12px;
+        }
+
+        .date-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.25rem;
+            color: #262626;
+        }
+
+        .date-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F3128;
+        }
+
+        .date-separator {
+            color: #4A4A47;
+            font-weight: 300;
+        }
+
+        .date-range {
+            color: #4A4A47;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(15, 49, 40, 0.08);
+            border: 1px solid rgba(15, 49, 40, 0.06);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0F3128;
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: #4A4A47;
+            margin-bottom: 32px;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #0F3128;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fefefe;
+            color: #262626;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #AA7831;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(170, 120, 49, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        /* Submit Button */
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #0F3128 0%, #1a4d3f 100%);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(15, 49, 40, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .brand-name {
+                font-size: 2rem;
+            }
+
+            .summary-content {
+                padding: 24px;
+            }
+
+            .villa-title {
+                font-size: 1.5rem;
+            }
+
+            .form-section {
+                padding: 28px 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .date-display {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+
+            .date-number {
+                font-size: 1.75rem;
+            }
+
+            .summary-image {
+                height: 240px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-name {
+                font-size: 1.75rem;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .submit-btn {
+                width: 100%;
+                padding: 16px;
+            }
+        }
+
+        /* Subtle animations */
+        .booking-summary,
+        .form-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form validation styles */
+        input:invalid:not(:placeholder-shown) {
+            border-color: #e74c3c;
+        }
+
+        input:valid {
+            border-color: #27ae60;
+        }
+
+        /* Mobile checkbox adjustments */
+        @media (max-width: 480px) {
+            .checkbox-group {
+                padding: 16px;
+            }
+            
+            .checkbox-text {
+                font-size: 0.95rem;
+            }
+            
+            .checkbox-subtitle {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+
+        <!-- Booking Summary -->
+        <div class="booking-summary">
+            <img src="https://villatokay.com/wp-content/uploads/2025/07/Villa-Tokay-Sunset-Bedroom.jpg" 
+                 alt="Villa Tokay Sunset Bedroom" 
+                 class="summary-image">
+            
+            <div class="summary-content">
+                <h2 class="villa-title">Private sunset terrace among swaying palms</h2>
+                
+                <div class="check-in-info">
+                    Check-in: Wed, Aug 20 (In 2 days)
+                </div>
+
+                <div class="perks-section">
+                    <div class="perks-title">Included Perks</div>
+                    <div class="perk-item">Champagne Bottle</div>
+                </div>
+
+                <div class="stay-details">
+                    <div class="stay-title">Choose Your Stay</div>
+                    <div class="date-display">
+                        <span class="date-number">20</span>
+                        <span class="date-separator">—</span>
+                        <span class="date-number">21</span>
+                    </div>
+                    <div class="date-range">AUG 20 — AUG 21 • 1 nights</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Information Form -->
+        <div class="form-section">
+            <h2 class="form-title">Complete Your Booking</h2>
+            <p class="form-subtitle">Just a few details to secure your escape to paradise</p>
+
+            <form id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required placeholder="Your first name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required placeholder="Your last name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 123-4567">
+                </div>
+
+                <div class="form-group">
+                    <label for="transfer">Do you need a door-to-door transfer?</label>
+                    <select id="transfer" name="transfer" required>
+                        <option value="">Please select an option</option>
+                        <option value="yes">Yes, arrange my transfer</option>
+                        <option value="no">No, I'll arrange my own transport</option>
+                        <option value="unsure">I'm not sure yet</option>
+                    </select>
+                </div>
+
+                <!-- Transfer Details (conditionally shown) -->
+                <div id="transferDetails" class="transfer-details" style="display: none;">
+                    <div class="form-group">
+                        <label for="transferAddress">Your accommodation address</label>
+                        <input type="text" id="transferAddress" name="transferAddress" placeholder="Hotel name or full address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="transferLocation">Location</label>
+                        <select id="transferLocation" name="transferLocation">
+                            <option value="">Please select location</option>
+                            <option value="bali">Bali</option>
+                            <option value="lombok">Lombok</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="privateBoat" name="privateBoat" value="interested">
+                        <label for="privateBoat" class="checkbox-label">
+                            <span class="checkbox-text">I'm interested in a private boat transfer</span>
+                            <span class="checkbox-subtitle">We'll contact you with exclusive options</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">Secure Your Villa Experience</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Form submission handling
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                transfer: document.getElementById('transfer').value,
+                transferAddress: document.getElementById('transferAddress').value,
+                transferLocation: document.getElementById('transferLocation').value,
+                privateBoat: document.getElementById('privateBoat').checked
+            };
+            
+            // Here you would typically send this data to your server
+            console.log('Booking data:', formData);
+            
+            // Show success message (you can customize this)
+            alert('Thank you! Your booking request has been submitted. We\'ll be in touch within 24 hours to confirm your villa experience.');
+        });
+
+        // Transfer dropdown logic
+        document.getElementById('transfer').addEventListener('change', function() {
+            const transferDetails = document.getElementById('transferDetails');
+            const transferAddress = document.getElementById('transferAddress');
+            const transferLocation = document.getElementById('transferLocation');
+            
+            if (this.value === 'yes') {
+                transferDetails.style.display = 'block';
+                transferAddress.required = true;
+                transferLocation.required = true;
+            } else {
+                transferDetails.style.display = 'none';
+                transferAddress.required = false;
+                transferLocation.required = false;
+                transferAddress.value = '';
+                transferLocation.value = '';
+            }
+        });
+
+        // Add some nice interaction feedback
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                if (this.type !== 'checkbox') {
+                    this.parentElement.style.transform = 'translateY(-2px)';
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.type !== 'checkbox') {
+                    this.parentElement.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
