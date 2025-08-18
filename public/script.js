@@ -1868,6 +1868,11 @@ class ActivitiesDashboard {
         // Replace all content (no pagination needed)
         document.getElementById('championOffers').innerHTML = villaCardsHtml.join('');
         
+        // Show the offers container (fix for hidden villa cards)
+        if (this.elements.offersContainer) {
+            this.elements.offersContainer.style.display = 'block';
+        }
+        
         // Start carousels for all villa cards
         document.querySelectorAll('.champion-offer-card').forEach(card => {
             this.startCarousel(card);
