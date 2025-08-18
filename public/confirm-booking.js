@@ -77,7 +77,8 @@ class ConfirmBooking {
             bedrooms,
             bathrooms,
             viewType,
-            poolType
+            poolType,
+            webpageUrl
         } = this.bookingData;
         
         // Parse image URLs if they're a string
@@ -126,7 +127,10 @@ class ConfirmBooking {
                  class="summary-image">
             
             <div class="summary-content">
-                <h2 class="villa-title">${tagline}</h2>
+                <h2 class="villa-title">
+                    ${tagline}
+                    ${webpageUrl ? `<a href="${webpageUrl}" target="_blank" class="villa-link" title="View villa details"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                </h2>
                 
                 <div class="villa-details">
                     <div class="villa-detail">

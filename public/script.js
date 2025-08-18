@@ -2439,6 +2439,7 @@ class ActivitiesDashboard {
             squareMeters: offer.square_meters,
             viewType: offer.view_type,
             poolType: offer.pool_type,
+            webpageUrl: offer.webpage_url,
             timestamp: Date.now()
         };
 
