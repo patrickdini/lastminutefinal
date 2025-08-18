@@ -3343,10 +3343,7 @@ class ActivitiesDashboard {
     /**
      * Handle champion offer booking
      */
-    handleChampionBooking(offerId, villaName, checkInDate, nights) {
-        console.log(`Champion booking action: Offer ID ${offerId}, ${villaName}: ${nights} nights starting ${checkInDate}`);
-        this.showNotification(`Champion Offer Booking! Offer ID: ${offerId}, Villa: ${villaName}, ${nights} nights starting ${this.formatDateForDisplay(checkInDate)}`, 'success');
-    }
+
     
     /**
      * Toggle villa details visibility
