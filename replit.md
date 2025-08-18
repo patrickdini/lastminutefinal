@@ -62,3 +62,9 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 ### Infrastructure
 - **Node.js Runtime**: Application runs on a configurable port (default 5000).
 - **Static File Hosting**: Serves assets from a `public` directory.
+
+## Recent Changes
+
+### Performance & Architecture Improvements
+- **Mobile-First CSS Architecture (Aug 18, 2025)**: Restructured all CSS files from desktop-first (max-width media queries) to mobile-first approach (min-width media queries). Converted public/styles.css, public/admin/villa-config-styles.css, and public/confirm-booking.css to use progressive enhancement with mobile base styles and breakpoints at 481px (tablet) and 769px (desktop). This improves mobile performance by reducing CSS parsing time and follows modern responsive design best practices.
+- **Comprehensive Booking Validation System (Aug 18, 2025)**: Implemented robust data validation for `/api/confirm-booking` endpoint to eliminate intermittent booking failures. Added validation for required fields (firstName, lastName, email), field length limits matching database schema, email format validation, numeric validation for guest counts and prices, and safe date/JSON processing with error handling. System now provides clear error messages for validation failures and prevents database constraint violations.

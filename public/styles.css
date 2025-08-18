@@ -15,10 +15,10 @@ body {
     min-height: 100vh;
 }
 
+/* Mobile-first base styles */
 .container {
-    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -34,7 +34,7 @@ body {
 
 .header h1 {
     font-family: 'Crimson Text', serif;
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -47,7 +47,7 @@ body {
 }
 
 .subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
     opacity: 0.9;
     font-weight: 400;
     color: #FFFFFF;
@@ -846,54 +846,75 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-    
+/* Mobile-first: Base styles are mobile, enhance for larger screens */
+
+/* Mobile base styles for components */
+.controls {
+    flex-direction: column;
+    align-items: center;
+}
+
+.filter-buttons {
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+}
+
+.btn-filter {
+    width: 100%;
+    max-width: 220px;
+}
+
+.status-bar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+}
+
+.activities-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+}
+
+.content {
+    padding: 20px 15px;
+}
+
+.activities-table {
+    font-size: 0.8rem;
+}
+
+.activities-table th,
+.activities-table td {
+    padding: 8px 6px;
+}
+
+.cell-text {
+    max-width: 150px;
+}
+
+/* Tablet styles (481px and up) */
+@media (min-width: 481px) {
     .header h1 {
         font-size: 2rem;
     }
     
-    .controls {
-        flex-direction: column;
-        align-items: center;
+    .subtitle {
+        font-size: 1.1rem;
     }
     
-    .filter-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .btn-filter {
-        width: 100%;
-        max-width: 220px;
-    }
-    
-    .status-bar {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-    
-    .activities-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .content {
-        padding: 20px 15px;
+    .btn {
+        padding: 12px 20px;
+        font-size: 1rem;
     }
     
     .activities-table {
         font-size: 0.85rem;
-    }
-    
-    .activities-table th,
-    .activities-table td {
-        padding: 8px 6px;
     }
     
     .cell-text {
@@ -901,26 +922,60 @@ body {
     }
 }
 
-@media (max-width: 480px) {
+/* Desktop styles (769px and up) */
+@media (min-width: 769px) {
+    .container {
+        max-width: 1200px;
+        padding: 20px;
+    }
+    
     .header h1 {
-        font-size: 1.5rem;
+        font-size: 2.5rem;
     }
     
-    .subtitle {
-        font-size: 1rem;
+    .controls {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
     }
     
-    .btn {
-        padding: 10px 16px;
-        font-size: 0.9rem;
+    .filter-buttons {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .btn-filter {
+        width: auto;
+        max-width: none;
+    }
+    
+    .status-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+    
+    .activities-header {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+    
+    .content {
+        padding: 30px;
     }
     
     .activities-table {
-        font-size: 0.8rem;
+        font-size: 1rem;
+    }
+    
+    .activities-table th,
+    .activities-table td {
+        padding: 12px 15px;
     }
     
     .cell-text {
-        max-width: 150px;
+        max-width: none;
     }
 }
 
