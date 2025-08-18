@@ -89,7 +89,7 @@ app.post('/api/confirm-booking', async (req, res) => {
             location: bookingRequest.transferLocation || null, // From transferLocation dropdown
             special_requests: bookingRequest.specialRequests || null,
             transport: bookingRequest.needTransfer, // From transfer dropdown (yes/no/unsure)
-            private_boat_interest: bookingRequest.interestedInPrivateBoat ? 'Yes' : 'No',
+            private_boat_interest: bookingRequest.interestedInPrivateBoat ? 1 : 0,
             
             // Booking details (fields 11-12)
             accommodations_booked: JSON.stringify([{
