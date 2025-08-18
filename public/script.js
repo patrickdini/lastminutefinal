@@ -350,9 +350,9 @@ class ActivitiesDashboard {
                 
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
-                console.log('🔍 IMMEDIATE TEST: About to call getSelectedFlexibility()');
+                console.log('🚀 CACHE BUSTED: About to call getSelectedFlexibility()');
                 const testFlexibility = this.getSelectedFlexibility();
-                console.log('🔍 IMMEDIATE TEST: getSelectedFlexibility() returned:', testFlexibility);
+                console.log('🚀 CACHE BUSTED: getSelectedFlexibility() returned:', testFlexibility);
                 
                 // Save user state when flexibility changes
                 this.saveUserState();
