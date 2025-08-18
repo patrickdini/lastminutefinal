@@ -219,7 +219,9 @@ class ActivitiesDashboard {
      */
     getSelectedFlexibility() {
         const selectedPill = document.querySelector('.flexibility-pill.selected');
-        return selectedPill ? selectedPill.dataset.flexibility : 'exact';
+        const flexibility = selectedPill ? selectedPill.dataset.flexibility : 'exact';
+        console.log('getSelectedFlexibility() called, found:', flexibility, 'from pill:', selectedPill);
+        return flexibility;
     }
 
     /**
@@ -1239,9 +1241,11 @@ class ActivitiesDashboard {
         }
         // If no date range specified, API will use default (tomorrow + 7 days)
         
-        // Add flexibility parameter
+        // Add flexibility parameter with fallback
         const flexibility = this.getSelectedFlexibility();
-        params.append('flexibility', flexibility);
+        const safeFlexibility = flexibility || 'exact';
+        console.log('Building query with flexibility:', safeFlexibility);
+        params.append('flexibility', safeFlexibility);
         
         return params.toString();
     }

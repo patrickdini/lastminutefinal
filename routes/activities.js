@@ -35,7 +35,9 @@ router.get('/activities', async (req, res) => {
         const desiredNights = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24));
         
         // Apply flexibility to create search window for start dates
-        const flexibilityDays = flexibility === 'exact' ? 0 : parseInt(flexibility);
+        // Handle undefined/null flexibility values
+        const safeFlexibility = flexibility || 'exact';
+        const flexibilityDays = safeFlexibility === 'exact' ? 0 : parseInt(safeFlexibility) || 0;
         
         // Create search window for possible check-in dates
         const earliestCheckinObj = new Date(checkinDateObj);
@@ -53,7 +55,7 @@ router.get('/activities', async (req, res) => {
             tomorrowStr : earliestCheckinObj.toISOString().split('T')[0];
         const latestCheckin = latestCheckinObj.toISOString().split('T')[0];
         
-        console.log(`Finding ${desiredNights}-night offers with flexibility=${flexibility}: check-in window ${earliestCheckin} to ${latestCheckin} (base: ${checkinDate})`);
+        console.log(`Finding ${desiredNights}-night offers with flexibility=${safeFlexibility}: check-in window ${earliestCheckin} to ${latestCheckin} (base: ${checkinDate})`);
         
         // Query for offers with exact number of nights within the check-in window
         const connection = await db.getConnection();
