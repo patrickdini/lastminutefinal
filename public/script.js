@@ -127,9 +127,13 @@ class ActivitiesDashboard {
     /**
      * Save current user state to localStorage
      */
-    saveUserState() {
+    saveUserState(flexibility = null) {
         try {
-            const currentFlexibility = this.getSelectedFlexibility();
+            // Get flexibility directly if not provided
+            const currentFlexibility = flexibility || (() => {
+                const selectedPill = document.querySelector('.flexibility-pill.selected');
+                return selectedPill ? selectedPill.dataset.flexibility : 'exact';
+            })();
             console.log('DEBUG: Saving flexibility value:', currentFlexibility);
             
             const state = {
@@ -352,28 +356,13 @@ class ActivitiesDashboard {
                 
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
-                console.log('🚀 CACHE BUSTED: About to call getSelectedFlexibility()');
-                console.log('🚀 DEBUG: this context:', typeof this, this.constructor?.name);
-                
-                // Test calling getSelectedFlexibility directly
-                console.log('🚀 DIRECT TEST: Calling method directly');
-                const allPills = document.querySelectorAll('.flexibility-pill');
+                // Get flexibility directly (bypassing broken method)
                 const selectedPill = document.querySelector('.flexibility-pill.selected');
-                console.log('🚀 DIRECT: Found', allPills.length, 'pills,', !!selectedPill, 'selected');
-                const directResult = selectedPill ? selectedPill.dataset.flexibility : 'exact';
-                console.log('🚀 DIRECT: Result:', directResult);
-                
-                let testFlexibility;
-                try {
-                    testFlexibility = this.getSelectedFlexibility();
-                    console.log('🚀 CACHE BUSTED: getSelectedFlexibility() returned:', testFlexibility);
-                } catch (error) {
-                    console.error('🚀 ERROR in getSelectedFlexibility():', error);
-                    testFlexibility = directResult; // use direct result as fallback
-                }
+                const flexibility = selectedPill ? selectedPill.dataset.flexibility : 'exact';
+                console.log('🎯 FIXED: Using direct approach, flexibility =', flexibility);
                 
                 // Save user state when flexibility changes
-                this.saveUserState();
+                this.saveUserState(flexibility);
                 
                 // Apply the filter with new flexibility
                 this.applyCalendarFilter();
@@ -1308,7 +1297,7 @@ class ActivitiesDashboard {
     
     getSelectedFlexibility() {
         const selectedPill = document.querySelector('.flexibility-pill.selected');
-        return selectedPill ? selectedPill.dataset.tolerance : 'exact';
+        return selectedPill ? selectedPill.dataset.flexibility : 'exact';
     }
     
     /**
