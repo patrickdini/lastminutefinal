@@ -65,7 +65,12 @@ class ActivitiesDashboard {
         } else {
             // State was restored, apply the calendar filter with restored dates
             this.updateCalendarDisplay();
-            this.applyCalendarFilter();
+            
+            // Add a small delay to ensure all UI elements are properly restored
+            setTimeout(() => {
+                console.log('Applying calendar filter with restored state...');
+                this.applyCalendarFilter();
+            }, 150);
         }
         this.initializeImageCarousels();
         this.initializeGalleryModal();
@@ -169,9 +174,23 @@ class ActivitiesDashboard {
             this.updateGuestDisplay();
             this.updateGuestButtons();
             
-            // Restore flexibility selection
+            // Restore flexibility selection with verification
             if (state.selectedFlexibility) {
+                console.log('Restoring flexibility to:', state.selectedFlexibility);
                 this.setSelectedFlexibility(state.selectedFlexibility);
+                
+                // Verify it was set correctly
+                const actualFlexibility = this.getSelectedFlexibility();
+                console.log('Verified flexibility after restoration:', actualFlexibility);
+                
+                if (actualFlexibility !== state.selectedFlexibility) {
+                    console.warn('Flexibility restoration failed, retrying...');
+                    // Retry after a short delay to ensure DOM is ready
+                    setTimeout(() => {
+                        this.setSelectedFlexibility(state.selectedFlexibility);
+                        console.log('Flexibility retry set to:', this.getSelectedFlexibility());
+                    }, 100);
+                }
             }
 
             console.log('User state restored successfully');
@@ -208,12 +227,19 @@ class ActivitiesDashboard {
      */
     setSelectedFlexibility(flexibility) {
         const pills = document.querySelectorAll('.flexibility-pill');
+        console.log('Setting flexibility to:', flexibility, 'Pills found:', pills.length);
+        
         pills.forEach(pill => {
             pill.classList.remove('selected');
             if (pill.dataset.flexibility === flexibility) {
                 pill.classList.add('selected');
+                console.log('Selected pill with flexibility:', pill.dataset.flexibility);
             }
         });
+        
+        // Verify the selection was applied
+        const selectedPill = document.querySelector('.flexibility-pill.selected');
+        console.log('Current selected pill:', selectedPill?.dataset.flexibility || 'none');
     }
 
     /**
