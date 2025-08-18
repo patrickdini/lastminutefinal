@@ -56,6 +56,11 @@ app.use(
     }),
 );
 
+// Serve confirm-booking page
+app.get('/confirm-booking', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'confirm-booking.html'));
+});
+
 // Preload index.html and inject a *fresh* version each restart (busts caches)
 let htmlWithVersion;
 const ASSET_VERSION = Date.now().toString();

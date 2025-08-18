@@ -2392,23 +2392,42 @@ class ActivitiesDashboard {
         // Save user state before booking to preserve selections
         this.saveUserState();
 
-        // Construct booking URL with offer details
-        const bookingParams = new URLSearchParams({
-            villa: villaKey,
-            checkin: offer.checkIn,
-            checkout: offer.checkOut,
+        // Store complete booking data in sessionStorage for confirm-booking page
+        const bookingData = {
+            offerId: offerId,
+            villaKey: villaKey,
+            villaDisplayName: offer.villa_display_name,
+            tagline: offer.tagline,
+            description: offer.description,
+            checkIn: offer.checkIn,
+            checkOut: offer.checkOut,
             nights: offer.nights,
-            guests: this.currentGuests || 2,
-            offer_id: offerId
-        });
+            adults: this.selectedAdults || 2,
+            children: this.selectedChildren || 0,
+            totalGuests: (this.selectedAdults || 2) + (this.selectedChildren || 0),
+            rate: offer.rate,
+            totalRate: offer.totalRate,
+            faceValue: offer.faceValue,
+            savings: offer.savings,
+            savingsPercent: offer.savingsPercent,
+            perks: offer.perks || [],
+            imageUrls: offer.image_urls,
+            bedrooms: offer.bedrooms,
+            bathrooms: offer.bathrooms,
+            squareMeters: offer.square_meters,
+            viewType: offer.view_type,
+            poolType: offer.pool_type,
+            timestamp: Date.now()
+        };
 
-        const bookingUrl = `https://villatok.wixsite.com/villa-tokay/book-online?${bookingParams.toString()}`;
+        // Store in sessionStorage (clears when tab closes)
+        sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
         
-        // Open booking page in new tab
-        window.open(bookingUrl, '_blank');
+        // Navigate to confirm-booking page in same tab
+        window.location.href = '/confirm-booking';
         
         // Track booking attempt
-        console.log('Champion booking initiated:', {
+        console.log('Navigating to confirm booking page:', {
             offer_id: offerId,
             villa: villaKey,
             nights: offer.nights,

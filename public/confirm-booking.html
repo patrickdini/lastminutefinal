@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Villa Tokay Experience</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="confirm-booking.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Villa Tokay Branding -->
+        <div class="header">
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Special Offers</span>
+            </a>
+            <h1 class="brand-name">Villa Tokay</h1>
+            <p class="tagline">Your island escape awaits</p>
+        </div>
+
+        <!-- Booking Summary Card -->
+        <div class="booking-summary" id="bookingSummary">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <!-- Guest Information Form -->
+        <div class="form-section">
+            <h2 class="form-title">Complete Your Booking</h2>
+            <p class="form-subtitle">Just a few details to secure your escape to paradise</p>
+
+            <form id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required placeholder="Your first name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required placeholder="Your last name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="+62 812-3456-7890">
+                </div>
+
+                <div class="form-group">
+                    <label for="specialRequests">Special Requests (Optional)</label>
+                    <textarea id="specialRequests" name="specialRequests" rows="3" 
+                        placeholder="Let us know about any dietary requirements, celebrations, or special arrangements"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="transfer">Do you need a door-to-door transfer?</label>
+                    <select id="transfer" name="transfer" required>
+                        <option value="">Please select an option</option>
+                        <option value="yes">Yes, arrange my transfer</option>
+                        <option value="no">No, I'll arrange my own transport</option>
+                        <option value="unsure">I'm not sure yet</option>
+                    </select>
+                </div>
+
+                <!-- Transfer Details (conditionally shown) -->
+                <div id="transferDetails" class="transfer-details" style="display: none;">
+                    <div class="form-group">
+                        <label for="transferAddress">Your accommodation address</label>
+                        <input type="text" id="transferAddress" name="transferAddress" 
+                            placeholder="Hotel name or full address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="transferLocation">Location</label>
+                        <select id="transferLocation" name="transferLocation">
+                            <option value="">Please select location</option>
+                            <option value="bali">Bali</option>
+                            <option value="lombok">Lombok</option>
+                            <option value="gili-t">Gili Trawangan</option>
+                            <option value="gili-meno">Gili Meno</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Private Boat Option -->
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="privateBoat" name="privateBoat" value="interested">
+                    <label for="privateBoat" class="checkbox-label">
+                        <span class="checkbox-text">I'm interested in a private boat transfer</span>
+                        <span class="checkbox-subtitle">We'll contact you with options and pricing</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-text">Confirm Booking</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <p class="submit-note">You'll receive a confirmation email with payment instructions</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Error Message (shown if no booking data) -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <h2>No Booking Data Found</h2>
+            <p>Please select a villa offer from our special offers page.</p>
+            <a href="/" class="error-btn">Return to Special Offers</a>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="confirm-booking.js"></script>
+</body>
+</html>
