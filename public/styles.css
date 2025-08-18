@@ -56,7 +56,7 @@ body {
 }
 
 .carousel-slide picture,
-.carousel-container .carousel-slide img {
+.carousel-container .carousel-slides .carousel-slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
