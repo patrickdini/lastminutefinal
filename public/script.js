@@ -59,6 +59,7 @@ class ActivitiesDashboard {
         // Pending flexibility restore (for timing issues)
         this.pendingFlexibilityRestore = null;
         
+        this.initializeCarousel();
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
@@ -3809,6 +3810,123 @@ class ActivitiesDashboard {
             this.showNotification('Error updating selection. Please try again.', 'error');
         }
         return false;
+    }
+
+    /**
+     * Initialize the main hero carousel
+     */
+    initializeCarousel() {
+        this.heroCarousel = {
+            currentSlide: 0,
+            totalSlides: 2,
+            autoRotateInterval: null,
+            autoRotateDelay: 3000
+        };
+
+        this.setupCarouselControls();
+        this.generateCarouselDots();
+        this.startAutoRotation();
+    }
+
+    /**
+     * Setup carousel navigation controls
+     */
+    setupCarouselControls() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.goToPrevSlide());
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.goToNextSlide());
+        }
+
+        // Pause auto-rotation on hover
+        const carouselContainer = document.getElementById('carousel-container');
+        if (carouselContainer) {
+            carouselContainer.addEventListener('mouseenter', () => this.pauseAutoRotation());
+            carouselContainer.addEventListener('mouseleave', () => this.startAutoRotation());
+        }
+    }
+
+    /**
+     * Generate dot indicators for carousel
+     */
+    generateCarouselDots() {
+        const indicatorsContainer = document.getElementById('carouselIndicators');
+        if (!indicatorsContainer) return;
+
+        indicatorsContainer.innerHTML = '';
+        for (let i = 0; i < this.heroCarousel.totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = `carousel-dot ${i === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => this.goToSlide(i));
+            indicatorsContainer.appendChild(dot);
+        }
+    }
+
+    /**
+     * Go to next slide
+     */
+    goToNextSlide() {
+        this.heroCarousel.currentSlide = (this.heroCarousel.currentSlide + 1) % this.heroCarousel.totalSlides;
+        this.updateCarouselDisplay();
+    }
+
+    /**
+     * Go to previous slide
+     */
+    goToPrevSlide() {
+        this.heroCarousel.currentSlide = (this.heroCarousel.currentSlide - 1 + this.heroCarousel.totalSlides) % this.heroCarousel.totalSlides;
+        this.updateCarouselDisplay();
+    }
+
+    /**
+     * Go to specific slide
+     */
+    goToSlide(slideIndex) {
+        this.heroCarousel.currentSlide = slideIndex;
+        this.updateCarouselDisplay();
+    }
+
+    /**
+     * Update carousel display to show current slide
+     */
+    updateCarouselDisplay() {
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelectorAll('.carousel-dot');
+
+        // Update slides
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === this.heroCarousel.currentSlide);
+        });
+
+        // Update dots
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.heroCarousel.currentSlide);
+        });
+    }
+
+    /**
+     * Start auto-rotation
+     */
+    startAutoRotation() {
+        this.pauseAutoRotation(); // Clear any existing interval
+        this.heroCarousel.autoRotateInterval = setInterval(() => {
+            this.goToNextSlide();
+        }, this.heroCarousel.autoRotateDelay);
+    }
+
+    /**
+     * Pause auto-rotation
+     */
+    pauseAutoRotation() {
+        if (this.heroCarousel.autoRotateInterval) {
+            clearInterval(this.heroCarousel.autoRotateInterval);
+            this.heroCarousel.autoRotateInterval = null;
+        }
     }
 }
 
