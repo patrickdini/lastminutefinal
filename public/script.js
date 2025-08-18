@@ -1442,8 +1442,9 @@ class ActivitiesDashboard {
         // Transform offers to match expected format
         const offers = this.transformChampionOffers(availableOffers);
         
-        // Store current offers for functionality
+        // Store current offers for functionality - IMPORTANT for booking handler
         this.currentOffers = offers;
+        console.log('Stored currentOffers with offer_ids:', offers.map(o => o.offer_id));
         
         // Generate villa cards
         if (offers.length > 0) {
@@ -1459,11 +1460,15 @@ class ActivitiesDashboard {
      * Transform LMCurrentOffers champion data to match frontend expected format
      */
     transformChampionOffers(championOffers) {
-        return championOffers.map(championOffer => {
+        return championOffers.map((championOffer, index) => {
             // Calculate check-out date
             const checkInDate = new Date(championOffer.EntryDate);
             const checkOutDate = new Date(checkInDate);
             checkOutDate.setDate(checkInDate.getDate() + championOffer.nights);
+            
+            // Generate a unique offer_id if not present
+            const offerId = championOffer.offer_id || 
+                           `${championOffer.UserRoomDisplayName}_${championOffer.EntryDate}_${championOffer.nights}n_${index}`;
             
             return {
                 // Core booking details
@@ -1498,8 +1503,8 @@ class ActivitiesDashboard {
                 ratePlan: championOffer.RatePlanName,
                 class: championOffer.class,
                 
-                // LMCurrentOffers specific
-                offer_id: championOffer.offer_id,
+                // LMCurrentOffers specific - ensure offer_id is always present
+                offer_id: offerId,
                 attractiveness_score: championOffer.attractiveness_score,
                 perks_included: championOffer.perks_included,
                 perk_ids: championOffer.perk_ids || [],
@@ -2383,12 +2388,23 @@ class ActivitiesDashboard {
      */
     handleChampionBooking(offerId, villaKey) {
         console.log('handleChampionBooking called with:', offerId, villaKey);
+        console.log('Available offer IDs in currentOffers:', this.currentOffers.map(o => o.offer_id));
         
-        // Find the offer details
-        const offer = this.currentOffers.find(o => o.offer_id === offerId);
+        // Find the offer details - try both string and number comparison
+        const offer = this.currentOffers.find(o => 
+            o.offer_id == offerId || // Loose comparison for type mismatch
+            o.offer_id === offerId || // Strict comparison
+            String(o.offer_id) === String(offerId) // String comparison
+        );
+        
         if (!offer) {
-            console.error('Offer not found:', offerId);
-            console.error('Available offers:', this.currentOffers);
+            console.error('Offer not found:', offerId, '(type:', typeof offerId, ')');
+            console.error('Available offers with IDs:', this.currentOffers.map(o => ({
+                offer_id: o.offer_id,
+                type: typeof o.offer_id,
+                villa: o.villa_display_name
+            })));
+            alert('Sorry, this offer is no longer available. Please refresh the page and try again.');
             return;
         }
 
