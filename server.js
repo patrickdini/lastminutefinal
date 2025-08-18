@@ -67,6 +67,84 @@ app.post('/api/confirm-booking', async (req, res) => {
         const bookingRequest = req.body;
         console.log('Processing booking request:', bookingRequest);
         
+        // Comprehensive data validation
+        const validationErrors = [];
+        
+        // Required field validation
+        if (!bookingRequest.firstName || bookingRequest.firstName.trim() === '') {
+            validationErrors.push('First name is required');
+        }
+        if (!bookingRequest.lastName || bookingRequest.lastName.trim() === '') {
+            validationErrors.push('Last name is required');
+        }
+        if (!bookingRequest.email || bookingRequest.email.trim() === '') {
+            validationErrors.push('Email is required');
+        }
+        
+        // Field length validation (based on database schema)
+        if (bookingRequest.firstName && bookingRequest.firstName.length > 100) {
+            validationErrors.push('First name must be less than 100 characters');
+        }
+        if (bookingRequest.lastName && bookingRequest.lastName.length > 100) {
+            validationErrors.push('Last name must be less than 100 characters');
+        }
+        if (bookingRequest.email && bookingRequest.email.length > 150) {
+            validationErrors.push('Email must be less than 150 characters');
+        }
+        if (bookingRequest.phone && bookingRequest.phone.length > 50) {
+            validationErrors.push('Phone number must be less than 50 characters');
+        }
+        
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (bookingRequest.email && !emailRegex.test(bookingRequest.email)) {
+            validationErrors.push('Please enter a valid email address');
+        }
+        
+        // Required booking data validation
+        if (!bookingRequest.villaKey || bookingRequest.villaKey.trim() === '') {
+            validationErrors.push('Villa information is missing');
+        }
+        if (!bookingRequest.checkIn) {
+            validationErrors.push('Check-in date is required');
+        }
+        if (!bookingRequest.checkOut) {
+            validationErrors.push('Check-out date is required');
+        }
+        
+        // Numeric validation
+        if (bookingRequest.adults && (isNaN(bookingRequest.adults) || bookingRequest.adults < 1)) {
+            validationErrors.push('Number of adults must be at least 1');
+        }
+        if (bookingRequest.children && (isNaN(bookingRequest.children) || bookingRequest.children < 0)) {
+            validationErrors.push('Number of children cannot be negative');
+        }
+        if (bookingRequest.totalPrice && (isNaN(bookingRequest.totalPrice) || bookingRequest.totalPrice <= 0)) {
+            validationErrors.push('Invalid price information');
+        }
+        
+        // Date format validation
+        let checkInDate, checkOutDate;
+        try {
+            checkInDate = new Date(bookingRequest.checkIn);
+            checkOutDate = new Date(bookingRequest.checkOut);
+            if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+                validationErrors.push('Invalid date format');
+            }
+        } catch (error) {
+            validationErrors.push('Invalid date format');
+        }
+        
+        // Return validation errors if any
+        if (validationErrors.length > 0) {
+            console.error('Validation errors:', validationErrors);
+            return res.status(400).json({
+                success: false,
+                message: 'Please check your booking information: ' + validationErrors.join(', '),
+                errors: validationErrors
+            });
+        }
+        
         // Get database connection
         const db = require('./config/database');
         const connection = await db.getConnection();
@@ -76,39 +154,63 @@ app.post('/api/confirm-booking', async (req, res) => {
         baliTime.setHours(baliTime.getHours() + 8); // Convert to Bali time (UTC+8)
         const dateReceived = baliTime.toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:MM:SS
         
-        // Map form data to database fields according to specifications
+        // Safe date formatting function
+        function formatDateForDatabase(dateInput) {
+            try {
+                const date = new Date(dateInput);
+                if (isNaN(date.getTime())) {
+                    throw new Error('Invalid date');
+                }
+                return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+            } catch (error) {
+                console.error('Date formatting error:', error, 'Input:', dateInput);
+                throw new Error('Invalid date format');
+            }
+        }
+        
+        // Safe JSON stringify with error handling
+        function safeJSONStringify(data, fieldName) {
+            try {
+                return JSON.stringify(data);
+            } catch (error) {
+                console.error(`JSON stringify error for ${fieldName}:`, error, 'Data:', data);
+                throw new Error(`Invalid ${fieldName} data format`);
+            }
+        }
+        
+        // Map form data to database fields with safe processing
         const reservationData = {
-            // Guest information (fields 2-6)
-            first_name: bookingRequest.firstName,
-            last_name: bookingRequest.lastName,
-            email: bookingRequest.email,
-            phone_number: bookingRequest.phone,
-            address: bookingRequest.transferAddress || null,
+            // Guest information (fields 2-6) - validated above
+            first_name: bookingRequest.firstName.trim(),
+            last_name: bookingRequest.lastName.trim(),
+            email: bookingRequest.email.trim().toLowerCase(),
+            phone_number: bookingRequest.phone ? bookingRequest.phone.trim() : null,
+            address: bookingRequest.transferAddress ? bookingRequest.transferAddress.trim() : null,
             
             // Location and preferences (fields 7-10)
-            location: bookingRequest.transferLocation || null, // From transferLocation dropdown
-            special_requests: bookingRequest.specialRequests || null,
-            transport: bookingRequest.needTransfer, // From transfer dropdown (yes/no/unsure)
+            location: bookingRequest.transferLocation || null,
+            special_requests: bookingRequest.specialRequests ? bookingRequest.specialRequests.trim() : null,
+            transport: bookingRequest.needTransfer || null,
             private_boat_interest: bookingRequest.interestedInPrivateBoat ? 1 : 0,
             
-            // Booking details (fields 11-12)
-            accommodations_booked: JSON.stringify([{
+            // Booking details (fields 11-12) - with safe JSON processing
+            accommodations_booked: safeJSONStringify([{
                 villa_id: bookingRequest.villaKey,
-                check_in_date: bookingRequest.checkIn.split('T')[0], // Convert to YYYY-MM-DD
-                check_out_date: bookingRequest.checkOut.split('T')[0]
-            }]),
-            villa_id: JSON.stringify([bookingRequest.villaKey]), // Array format as specified
+                check_in_date: formatDateForDatabase(bookingRequest.checkIn),
+                check_out_date: formatDateForDatabase(bookingRequest.checkOut)
+            }], 'accommodations_booked'),
+            villa_id: safeJSONStringify([bookingRequest.villaKey], 'villa_id'),
             
             // Perks and pricing (fields 13-17)
-            perks: bookingRequest.perks ? JSON.stringify(bookingRequest.perks) : null,
-            price_guests: bookingRequest.totalPrice,
-            number_adults: bookingRequest.adults,
-            number_children: bookingRequest.children,
-            savings_guests: bookingRequest.savings || 0,
+            perks: bookingRequest.perks ? safeJSONStringify(bookingRequest.perks, 'perks') : null,
+            price_guests: parseFloat(bookingRequest.totalPrice) || 0,
+            number_adults: parseInt(bookingRequest.adults) || 0,
+            number_children: parseInt(bookingRequest.children) || 0,
+            savings_guests: parseFloat(bookingRequest.savings) || 0,
             
-            // Stay dates (fields 18-19)
-            check_in_date: bookingRequest.checkIn.split('T')[0],
-            check_out_date: bookingRequest.checkOut.split('T')[0],
+            // Stay dates (fields 18-19) - with safe date formatting
+            check_in_date: formatDateForDatabase(bookingRequest.checkIn),
+            check_out_date: formatDateForDatabase(bookingRequest.checkOut),
             
             // Administrative (fields 20-21)
             date_received: dateReceived, // Bali time timestamp
