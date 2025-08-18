@@ -181,7 +181,7 @@ class ConfirmBooking {
                 </div>
 
                 <div class="included-section">
-                    <div class="included-title">What is included</div>
+                    <div class="included-title">What is Included</div>
                     <div class="included-list">
                         <div class="included-item">
                             <i class="fas fa-bed"></i>
