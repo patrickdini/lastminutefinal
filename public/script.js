@@ -21,6 +21,7 @@ class ActivitiesDashboard {
             offersContainer: document.getElementById('offersContainer'),
             championOffers: document.getElementById('championOffers'),
             calendarGrid: document.getElementById('calendarGrid'),
+            nightsDisplay: document.getElementById('nightsDisplay'),
             // Guest picker elements
             guestSummary: document.getElementById('guestSummary'),
             guestDetails: document.getElementById('guestDetails'),
@@ -788,6 +789,9 @@ class ActivitiesDashboard {
         }
         
         console.log('Calendar display updated - CheckIn:', this.selectedCheckIn, 'CheckOut:', this.selectedCheckOut);
+        
+        // Update nights display
+        this.updateNightsDisplay();
     }
     
     /**
@@ -818,7 +822,33 @@ class ActivitiesDashboard {
         } else {
             // No default loading since we require specific dates
             console.log('No default dates available - calendar dates required for search');
+            // Still update nights display for fallback text
+            this.updateNightsDisplay();
         }
+    }
+    
+    /**
+     * Update the nights display text based on selected dates
+     */
+    updateNightsDisplay() {
+        if (!this.elements.nightsDisplay) return;
+        
+        let nights = 0;
+        let displayText = "Your offers";
+        
+        if (this.selectedCheckIn !== null && this.selectedCheckOut !== null) {
+            nights = this.selectedCheckOut - this.selectedCheckIn;
+            if (nights === 1) {
+                displayText = "Your offers for a 1 night stay";
+            } else {
+                displayText = `Your offers for a ${nights} nights stay`;
+            }
+        } else {
+            // Default text when no complete selection
+            displayText = "Your offers for a 2 nights stay";
+        }
+        
+        this.elements.nightsDisplay.textContent = displayText;
     }
     
     /**
