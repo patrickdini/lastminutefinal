@@ -96,7 +96,7 @@ class ConfirmBooking {
         
         // Calculate days until check-in (using Bali time)
         const today = this.getBaliDate(0);
-        const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+        const daysUntilCheckIn = Math.round((checkInDate - today) / (1000 * 60 * 60 * 24));
         let checkInText = `Check-in: ${dayNames[checkInDate.getDay()]}, ${monthNames[checkInDate.getMonth()]} ${checkInDate.getDate()}`;
         
         if (daysUntilCheckIn === 0) {

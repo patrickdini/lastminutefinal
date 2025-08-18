@@ -2798,9 +2798,9 @@ class ActivitiesDashboard {
         // Get target date without time
         const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
         
-        // Calculate difference in days
+        // Calculate difference in days - use Math.round for accurate day calculation
         const diffTime = target.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
         
         if (diffDays === 0) {
             return ' (Today)';
