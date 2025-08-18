@@ -61,6 +61,125 @@ app.get('/confirm-booking', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'confirm-booking.html'));
 });
 
+// Handle booking confirmation and save to LMReservations
+app.post('/api/confirm-booking', async (req, res) => {
+    try {
+        const bookingRequest = req.body;
+        console.log('Processing booking request:', bookingRequest);
+        
+        // Get database connection
+        const db = require('./config/database');
+        const connection = await db.getConnection();
+        
+        // Create Bali timezone timestamp for date_received
+        const baliTime = new Date();
+        baliTime.setHours(baliTime.getHours() + 8); // Convert to Bali time (UTC+8)
+        const dateReceived = baliTime.toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:MM:SS
+        
+        // Map form data to database fields according to specifications
+        const reservationData = {
+            // Guest information (fields 2-6)
+            first_name: bookingRequest.firstName,
+            last_name: bookingRequest.lastName,
+            email: bookingRequest.email,
+            phone_number: bookingRequest.phone,
+            address: bookingRequest.transferAddress || null,
+            
+            // Location and preferences (fields 7-10)
+            location: bookingRequest.transferLocation || null, // From transferLocation dropdown
+            special_requests: bookingRequest.specialRequests || null,
+            transport: bookingRequest.needTransfer, // From transfer dropdown (yes/no/unsure)
+            fast_boat_interest: bookingRequest.interestedInPrivateBoat ? 'Yes' : 'No',
+            
+            // Booking details (fields 11-12)
+            accommodations_booked: JSON.stringify([{
+                villa_id: bookingRequest.villaKey,
+                check_in_date: bookingRequest.checkIn.split('T')[0], // Convert to YYYY-MM-DD
+                check_out_date: bookingRequest.checkOut.split('T')[0]
+            }]),
+            villa_id: JSON.stringify([bookingRequest.villaKey]), // Array format as specified
+            
+            // Perks and pricing (fields 13-17)
+            perks: bookingRequest.perks ? JSON.stringify(bookingRequest.perks) : null,
+            price_guests: bookingRequest.totalPrice,
+            number_adults: bookingRequest.adults,
+            number_children: bookingRequest.children,
+            savings_guests: bookingRequest.savings || 0,
+            
+            // Stay dates (fields 18-19)
+            check_in_date: bookingRequest.checkIn.split('T')[0],
+            check_out_date: bookingRequest.checkOut.split('T')[0],
+            
+            // Administrative (fields 20-21)
+            date_received: dateReceived, // Bali time timestamp
+            date_payment: null // Initially null, updated when payment confirmed
+        };
+        
+        console.log('Mapped reservation data:', reservationData);
+        
+        // Insert into LMReservations table
+        const insertQuery = `
+            INSERT INTO LMReservations (
+                first_name, last_name, email, phone_number, address, location,
+                special_requests, transport, fast_boat_interest, accommodations_booked,
+                villa_id, perks, price_guests, number_adults, number_children,
+                savings_guests, check_in_date, check_out_date, date_received, date_payment
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        const values = [
+            reservationData.first_name,
+            reservationData.last_name,
+            reservationData.email,
+            reservationData.phone_number,
+            reservationData.address,
+            reservationData.location,
+            reservationData.special_requests,
+            reservationData.transport,
+            reservationData.fast_boat_interest,
+            reservationData.accommodations_booked,
+            reservationData.villa_id,
+            reservationData.perks,
+            reservationData.price_guests,
+            reservationData.number_adults,
+            reservationData.number_children,
+            reservationData.savings_guests,
+            reservationData.check_in_date,
+            reservationData.check_out_date,
+            reservationData.date_received,
+            reservationData.date_payment
+        ];
+        
+        const [result] = await connection.execute(insertQuery, values);
+        connection.release();
+        
+        console.log('Reservation saved with ID:', result.insertId);
+        
+        // Return success response
+        res.json({
+            success: true,
+            bookingId: result.insertId,
+            message: 'Booking confirmed successfully!',
+            reservationData: {
+                id: result.insertId,
+                villa: bookingRequest.villaName,
+                checkIn: bookingRequest.checkIn,
+                checkOut: bookingRequest.checkOut,
+                guests: `${bookingRequest.adults} Adults${bookingRequest.children > 0 ? `, ${bookingRequest.children} Children` : ''}`,
+                email: bookingRequest.email
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error processing booking:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process booking. Please try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
 // Preload index.html and inject a *fresh* version each restart (busts caches)
 let htmlWithVersion;
 const ASSET_VERSION = Date.now().toString();

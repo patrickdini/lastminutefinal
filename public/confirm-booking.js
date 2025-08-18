@@ -278,6 +278,11 @@ class ConfirmBooking {
             totalGuests: this.bookingData.totalGuests,
             totalPrice: this.bookingData.totalRate,
             
+            // Pricing and perks data
+            savings: this.bookingData.savings,
+            perks: this.bookingData.perks,
+            faceValue: this.bookingData.faceValue,
+            
             // Guest information from form
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
