@@ -1837,11 +1837,13 @@ class ActivitiesDashboard {
      * Generate special offer villa cards sorted by length of stay (multiple offers per villa allowed)
      */
     async generateChampionCards(offers) {
+        console.log('=== STARTING generateChampionCards ===');
         console.log('Generating villa cards for', offers.length, 'offers');
         
         // Group offers by villa
         const villaGroups = this.groupChampionOffersByVilla(offers);
         console.log('Grouped into', Object.keys(villaGroups).length, 'villas');
+        console.log('Villa groups:', Object.keys(villaGroups));
         
         // For each villa, select the primary offer (longest stay first, then best savings)
         const villaCardsHtml = await Promise.all(
@@ -1861,23 +1863,55 @@ class ActivitiesDashboard {
                 console.log('All options:', villaOffers.map(o => `${o.checkIn.split('T')[0]} (${o.nights}n)`));
                 
                 // Generate single card with all booking options for this villa
-                return await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, sortedVillaOffers);
+                const cardHtml = await this.generateChampionVillaCardWithTimeline(villaKey, primaryOffer, sortedVillaOffers);
+                console.log(`Generated HTML for ${villaKey}, length: ${cardHtml ? cardHtml.length : 0} chars`);
+                if (cardHtml && cardHtml.length < 500) {
+                    console.log(`WARNING: Short HTML for ${villaKey}:`, cardHtml);
+                }
+                return cardHtml;
             })
         );
         
+        console.log('Total villa cards HTML generated:', villaCardsHtml.length);
+        console.log('HTML lengths:', villaCardsHtml.map(h => h ? h.length : 0));
+        
+        // Check if championOffers element exists
+        const championOffersElement = document.getElementById('championOffers');
+        console.log('championOffers element exists?', !!championOffersElement);
+        
+        if (!championOffersElement) {
+            console.error('ERROR: championOffers element not found in DOM!');
+            return;
+        }
+        
         // Replace all content (no pagination needed)
-        document.getElementById('championOffers').innerHTML = villaCardsHtml.join('');
+        const joinedHtml = villaCardsHtml.join('');
+        console.log('Total HTML to insert:', joinedHtml.length, 'chars');
+        console.log('First 200 chars of HTML:', joinedHtml.substring(0, 200));
+        
+        championOffersElement.innerHTML = joinedHtml;
+        console.log('HTML inserted into championOffers');
+        
+        // Verify insertion
+        const insertedCards = championOffersElement.querySelectorAll('.villa-card, .champion-offer-card');
+        console.log('Villa cards found after insertion:', insertedCards.length);
         
         // Show the offers container (fix for hidden villa cards)
         if (this.elements.offersContainer) {
+            console.log('Setting offersContainer to display: block');
             this.elements.offersContainer.style.display = 'block';
+        } else {
+            console.log('WARNING: elements.offersContainer not found');
         }
         
         // Start carousels for all villa cards
-        document.querySelectorAll('.champion-offer-card').forEach(card => {
+        const carouselCards = document.querySelectorAll('.champion-offer-card');
+        console.log('Starting carousels for', carouselCards.length, 'cards');
+        carouselCards.forEach(card => {
             this.startCarousel(card);
         });
         
+        console.log('=== COMPLETED generateChampionCards ===');
         // No load more button needed for special offers (all loaded at once)
     }
     
@@ -2030,8 +2064,18 @@ class ActivitiesDashboard {
      * Generate special offer villa card with timeline (new design)
      */
     async generateChampionVillaCardWithTimeline(villaKey, primaryOffer, allVillaOffers) {
+        console.log(`=== Generating card for ${villaKey} ===`);
+        console.log('Primary offer data:', {
+            villa: primaryOffer.villa,
+            villa_display_name: primaryOffer.villa_display_name,
+            tagline: primaryOffer.tagline,
+            image_urls: primaryOffer.image_urls ? primaryOffer.image_urls.substring(0, 100) + '...' : 'NO IMAGE URLS',
+            hasImageUrls: !!primaryOffer.image_urls
+        });
+        
         const tagline = primaryOffer.tagline || primaryOffer.villa_display_name || villaKey;
         const imageUrls = this.parseImageUrls(primaryOffer.image_urls);
+        console.log(`Parsed ${imageUrls.length} image URLs for ${villaKey}:`, imageUrls);
         
         // Format price (in millions)
         const priceInMillions = (primaryOffer.totalRate / 1000000).toFixed(1);
@@ -2998,7 +3042,7 @@ class ActivitiesDashboard {
                 })
         );
         
-        return `
+        const cardHtml = `
             <div class="villa-card">
                 ${imageUrls.length > 0 ? `
                     <div class="villa-image-gallery">
@@ -3008,7 +3052,14 @@ class ActivitiesDashboard {
                             ${villaDetails.class ? `<div class="villa-class-badge">${villaDetails.class}</div>` : ''}
                         </div>
                     </div>
-                ` : ''}
+                ` : ''}`;
+        
+        console.log(`generateVillaCard for ${villaName}:`);
+        console.log('- Image URLs count:', imageUrls.length);
+        console.log('- First image URL:', imageUrls[0] || 'NO IMAGES');
+        console.log('- Villa class:', villaDetails.class || 'NO CLASS');
+        
+        return cardHtml + `
                 
                 <div class="villa-card-header">
                     <div class="villa-tagline">${tagline}</div>
@@ -3336,20 +3387,32 @@ class ActivitiesDashboard {
      * Parse image URLs from database field
      */
     parseImageUrls(imageUrlsField) {
-        if (!imageUrlsField) return [];
+        console.log('parseImageUrls called with:', imageUrlsField ? imageUrlsField.substring(0, 100) + '...' : 'NULL/EMPTY');
+        
+        if (!imageUrlsField) {
+            console.log('parseImageUrls: No image URLs field provided');
+            return [];
+        }
         
         try {
             // Try parsing as JSON array first
             if (imageUrlsField.startsWith('[')) {
-                return JSON.parse(imageUrlsField);
+                console.log('parseImageUrls: Attempting JSON parse');
+                const parsed = JSON.parse(imageUrlsField);
+                console.log(`parseImageUrls: Successfully parsed ${parsed.length} URLs from JSON`);
+                return parsed;
             }
             
             // Otherwise, split by comma and clean up
-            return imageUrlsField.split(',')
+            console.log('parseImageUrls: Splitting comma-separated URLs');
+            const urls = imageUrlsField.split(',')
                 .map(url => url.trim())
                 .filter(url => url.length > 0);
+            console.log(`parseImageUrls: Split into ${urls.length} URLs`);
+            return urls;
         } catch (error) {
-            console.log('Error parsing image URLs:', error);
+            console.error('parseImageUrls ERROR:', error);
+            console.error('Failed to parse:', imageUrlsField);
             return [];
         }
     }
