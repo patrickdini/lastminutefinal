@@ -102,6 +102,37 @@ router.get('/activities', async (req, res) => {
         
         console.log(`Found ${allOffers.length} offers matching ${desiredNights} nights with flexibility: ${flexibility}`);
         
+        // Fetch detailed perk information for all offers
+        const perkDetailsMap = new Map();
+        
+        // Get all unique perk IDs from all offers
+        const allPerkIds = new Set();
+        allOffers.forEach(offer => {
+            try {
+                const perkIds = JSON.parse(offer.perk_ids || '[]');
+                perkIds.forEach(id => allPerkIds.add(id));
+            } catch (e) {
+                console.warn('Error parsing perk_ids for offer:', offer.offer_id);
+            }
+        });
+        
+        // Fetch perk details if we have any perk IDs
+        if (allPerkIds.size > 0) {
+            const perkIdArray = Array.from(allPerkIds);
+            const placeholders = perkIdArray.map(() => '?').join(',');
+            
+            const [perkDetails] = await connection.execute(`
+                SELECT activity_id, name as activity_name, tagline, description, face_price, comments
+                FROM LMActivities 
+                WHERE activity_id IN (${placeholders})
+            `, perkIdArray);
+            
+            // Create a map for quick lookup
+            perkDetails.forEach(perk => {
+                perkDetailsMap.set(perk.activity_id, perk);
+            });
+        }
+        
         // Transform offers to match the frontend expected format
         // The frontend expects data similar to RoomAvailabilityStore format for compatibility
         const transformedOffers = allOffers.map(offer => {
@@ -117,6 +148,11 @@ router.get('/activities', async (req, res) => {
             } catch (e) {
                 console.warn('Error parsing JSON fields for offer:', offer.offer_id, e.message);
             }
+            
+            // Get detailed perk information
+            const detailedPerks = perkIds.map(perkId => {
+                return perkDetailsMap.get(perkId);
+            }).filter(perk => perk !== undefined);
             
             // Transform to match expected frontend format (similar to RoomAvailabilityStore)
             return {
@@ -158,6 +194,7 @@ router.get('/activities', async (req, res) => {
                 has_wow_factor_perk: offer.has_wow_factor_perk,
                 perk_ids: perkIds,
                 perks_included: offer.perks_included,
+                perks: detailedPerks, // Detailed perk information for frontend
                 last_calculated_at: offer.last_calculated_at,
                 
                 // Enhanced filtering fields

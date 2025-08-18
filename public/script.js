@@ -1508,6 +1508,7 @@ class ActivitiesDashboard {
                 attractiveness_score: championOffer.attractiveness_score,
                 perks_included: championOffer.perks_included,
                 perk_ids: championOffer.perk_ids || [],
+                perks: championOffer.perks || [], // Detailed perk information from API
                 has_wow_factor: championOffer.has_wow_factor_perk,
                 
                 // Enhanced filtering fields
