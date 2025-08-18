@@ -336,7 +336,9 @@ class ActivitiesDashboard {
         console.log('DEBUG: initializeEventListeners() - Found', flexibilityPills.length, 'flexibility pills');
         flexibilityPills.forEach((pill, index) => {
             console.log(`DEBUG: Pill ${index}: data-flexibility="${pill.dataset.flexibility}", text="${pill.textContent}"`);
-            pill.addEventListener('click', () => {
+            pill.addEventListener('click', (event) => {
+                console.log('🔥 CLICK DETECTED ON PILL:', pill.dataset.flexibility, event);
+                
                 // Get fresh pill references to avoid stale NodeList issues
                 const currentPills = document.querySelectorAll('.flexibility-pill');
                 console.log('DEBUG: Found', currentPills.length, 'pills on click');
