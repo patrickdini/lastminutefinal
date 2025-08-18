@@ -58,8 +58,15 @@ class ActivitiesDashboard {
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
-        this.loadUserState(); // Load saved state before setting defaults
-        this.setDefaultDateSelection();
+        // Load saved state and only set defaults if no state was restored
+        const stateWasRestored = this.loadUserState();
+        if (!stateWasRestored) {
+            this.setDefaultDateSelection();
+        } else {
+            // State was restored, apply the calendar filter with restored dates
+            this.updateCalendarDisplay();
+            this.applyCalendarFilter();
+        }
         this.initializeImageCarousels();
         this.initializeGalleryModal();
         this.loadOffersCache();
