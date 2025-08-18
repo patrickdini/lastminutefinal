@@ -72,6 +72,7 @@ class ActivitiesDashboard {
             // Add a delay to ensure all UI elements are properly restored, including flexibility
             setTimeout(() => {
                 // Restore flexibility after DOM is fully initialized
+                console.log('DEBUG: About to restore flexibility, pendingFlexibilityRestore =', this.pendingFlexibilityRestore);
                 if (this.pendingFlexibilityRestore) {
                     console.log('Final flexibility restoration to:', this.pendingFlexibilityRestore);
                     this.setSelectedFlexibility(this.pendingFlexibilityRestore);
@@ -80,8 +81,13 @@ class ActivitiesDashboard {
                     setTimeout(() => {
                         const finalCheck = this.getSelectedFlexibility();
                         console.log('Final flexibility verification:', finalCheck);
+                        if (finalCheck !== this.pendingFlexibilityRestore) {
+                            console.error('Flexibility restoration FAILED! Expected:', this.pendingFlexibilityRestore, 'Got:', finalCheck);
+                        }
                         this.pendingFlexibilityRestore = null; // Clear pending restore
                     }, 50);
+                } else {
+                    console.log('DEBUG: No pending flexibility to restore');
                 }
                 
                 console.log('Applying calendar filter with restored state...');
@@ -121,6 +127,9 @@ class ActivitiesDashboard {
      */
     saveUserState() {
         try {
+            const currentFlexibility = this.getSelectedFlexibility();
+            console.log('DEBUG: Saving flexibility value:', currentFlexibility);
+            
             const state = {
                 selectedAdults: this.selectedAdults,
                 selectedChildren: this.selectedChildren,
@@ -128,12 +137,12 @@ class ActivitiesDashboard {
                 selectedCheckOut: this.selectedCheckOut,
                 currentFilter: this.currentFilter,
                 currentDateRange: this.currentDateRange,
-                selectedFlexibility: this.getSelectedFlexibility(),
+                selectedFlexibility: currentFlexibility,
                 timestamp: Date.now()
             };
             
             localStorage.setItem(this.stateKey, JSON.stringify(state));
-            console.log('User state saved:', state);
+            console.log('User state saved with flexibility:', currentFlexibility);
         } catch (error) {
             console.error('Error saving user state:', error);
         }
@@ -161,6 +170,7 @@ class ActivitiesDashboard {
             }
 
             console.log('Loading saved user state:', state);
+            console.log('DEBUG: Loaded flexibility value:', state.selectedFlexibility);
 
             // Restore guest counts
             if (state.selectedAdults) {
@@ -192,6 +202,7 @@ class ActivitiesDashboard {
             
             // Store flexibility for later restoration after DOM is fully ready
             this.pendingFlexibilityRestore = state.selectedFlexibility;
+            console.log('DEBUG: Set pendingFlexibilityRestore to:', this.pendingFlexibilityRestore);
 
             console.log('User state restored successfully');
             return true;
