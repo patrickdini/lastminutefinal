@@ -170,6 +170,26 @@ class ConfirmBooking {
 
                 ${perksHtml}
 
+                <div class="included-section">
+                    <div class="included-title">What is included</div>
+                    <div class="included-list">
+                        <div class="included-item">
+                            <i class="fas fa-bed"></i>
+                            <span>${nights} ${nights === 1 ? 'night' : 'nights'} in ${villaDisplayName}</span>
+                        </div>
+                        <div class="included-item">
+                            <i class="fas fa-car"></i>
+                            <span>Organization of the transfer</span>
+                        </div>
+                        ${perks && perks.length > 0 ? perks.map(perk => `
+                            <div class="included-item">
+                                <i class="fas fa-gift"></i>
+                                <span>${perk.activity_name}</span>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                </div>
+
                 <div class="stay-details">
                     <div class="stay-title">Your Stay</div>
                     <div class="date-display">

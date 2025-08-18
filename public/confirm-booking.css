@@ -153,6 +153,43 @@ body {
     font-size: 1.1rem;
 }
 
+/* What is included Section */
+.included-section {
+    border-top: 1px solid rgba(170, 120, 49, 0.2);
+    padding-top: 20px;
+    margin-bottom: 24px;
+}
+
+.included-title {
+    font-weight: 600;
+    color: #AA7831;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.included-list {
+    display: grid;
+    gap: 12px;
+}
+
+.included-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.included-item i {
+    color: #AA7831;
+    width: 16px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
 .stay-details {
     border-top: 1px solid rgba(170, 120, 49, 0.2);
     padding-top: 20px;
