@@ -134,6 +134,12 @@ class ActivitiesDashboard {
             })();
             console.log('DEBUG: Saving flexibility value:', currentFlexibility);
             
+            // Capture villa expansion states
+            const expandedVillas = this.getExpandedVillaStates();
+            
+            // Capture selected offers within villas
+            const selectedOffers = this.getSelectedOfferStates();
+            
             const state = {
                 selectedAdults: this.selectedAdults,
                 selectedChildren: this.selectedChildren,
@@ -142,11 +148,13 @@ class ActivitiesDashboard {
                 currentFilter: this.currentFilter,
                 currentDateRange: this.currentDateRange,
                 selectedFlexibility: currentFlexibility,
+                expandedVillas: expandedVillas,
+                selectedOffers: selectedOffers,
                 timestamp: Date.now()
             };
             
             localStorage.setItem(this.stateKey, JSON.stringify(state));
-            console.log('User state saved with flexibility:', currentFlexibility);
+            console.log('User state saved with flexibility:', currentFlexibility, 'expanded villas:', expandedVillas, 'selected offers:', selectedOffers);
         } catch (error) {
             console.error('Error saving user state:', error);
         }
@@ -209,6 +217,13 @@ class ActivitiesDashboard {
             console.log('DEBUG: Set pendingFlexibilityRestore to:', this.pendingFlexibilityRestore);
 
             console.log('User state restored successfully');
+            
+            // Restore villa expansion and offer selection states after a brief delay
+            // to ensure the DOM is fully rendered
+            setTimeout(() => {
+                this.restoreVillaStates(state);
+            }, 500);
+            
             return true;
         } catch (error) {
             console.error('Error loading user state:', error);
@@ -226,6 +241,89 @@ class ActivitiesDashboard {
             console.log('User state cleared');
         } catch (error) {
             console.error('Error clearing user state:', error);
+        }
+    }
+    
+    /**
+     * Capture current villa expansion states
+     */
+    getExpandedVillaStates() {
+        const expandedVillas = [];
+        const expandedButtons = document.querySelectorAll('.show-details-btn.expanded');
+        
+        expandedButtons.forEach(button => {
+            const card = button.closest('.champion-offer-card');
+            if (card) {
+                const offerId = card.dataset.offerId;
+                if (offerId) {
+                    expandedVillas.push(offerId);
+                }
+            }
+        });
+        
+        return expandedVillas;
+    }
+    
+    /**
+     * Capture currently selected offers within villas
+     */
+    getSelectedOfferStates() {
+        const selectedOffers = {};
+        const activeButtons = document.querySelectorAll('.night-selector-btn.active');
+        
+        activeButtons.forEach(button => {
+            const card = button.closest('.champion-offer-card');
+            if (card) {
+                const villaOfferId = card.dataset.offerId; // Main villa offer ID
+                const selectedOfferId = button.dataset.offerId; // Selected sub-offer ID
+                if (villaOfferId && selectedOfferId) {
+                    selectedOffers[villaOfferId] = selectedOfferId;
+                }
+            }
+        });
+        
+        return selectedOffers;
+    }
+    
+    /**
+     * Restore villa expansion and offer selection states
+     */
+    restoreVillaStates(state) {
+        try {
+            console.log('Restoring villa states:', state.expandedVillas, state.selectedOffers);
+            
+            // Restore villa expansion states
+            if (state.expandedVillas && state.expandedVillas.length > 0) {
+                state.expandedVillas.forEach(offerId => {
+                    const card = document.querySelector(`[data-offer-id="${offerId}"]`);
+                    if (card) {
+                        const showDetailsBtn = card.querySelector('.show-details-btn');
+                        if (showDetailsBtn && !showDetailsBtn.classList.contains('expanded')) {
+                            // Simulate click to expand
+                            this.toggleVillaDetails(showDetailsBtn);
+                            console.log('Restored expansion for villa:', offerId);
+                        }
+                    }
+                });
+            }
+            
+            // Restore selected offers within villas  
+            if (state.selectedOffers) {
+                Object.entries(state.selectedOffers).forEach(([villaOfferId, selectedOfferId]) => {
+                    const card = document.querySelector(`[data-offer-id="${villaOfferId}"]`);
+                    if (card) {
+                        const targetButton = card.querySelector(`[data-offer-id="${selectedOfferId}"]`);
+                        if (targetButton && !targetButton.classList.contains('active')) {
+                            // Simulate click to select the offer
+                            targetButton.click();
+                            console.log('Restored offer selection:', villaOfferId, '->', selectedOfferId);
+                        }
+                    }
+                });
+            }
+            
+        } catch (error) {
+            console.error('Error restoring villa states:', error);
         }
     }
 
