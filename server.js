@@ -89,7 +89,7 @@ app.post('/api/confirm-booking', async (req, res) => {
             location: bookingRequest.transferLocation || null, // From transferLocation dropdown
             special_requests: bookingRequest.specialRequests || null,
             transport: bookingRequest.needTransfer, // From transfer dropdown (yes/no/unsure)
-            fast_boat_interest: bookingRequest.interestedInPrivateBoat ? 'Yes' : 'No',
+            private_boat_interest: bookingRequest.interestedInPrivateBoat ? 'Yes' : 'No',
             
             // Booking details (fields 11-12)
             accommodations_booked: JSON.stringify([{
@@ -121,7 +121,7 @@ app.post('/api/confirm-booking', async (req, res) => {
         const insertQuery = `
             INSERT INTO LMReservations (
                 first_name, last_name, email, phone_number, address, location,
-                special_requests, transport, fast_boat_interest, accommodations_booked,
+                special_requests, transport, private_boat_interest, accommodations_booked,
                 villa_id, perks, price_guests, number_adults, number_children,
                 savings_guests, check_in_date, check_out_date, date_received, date_payment
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -136,7 +136,7 @@ app.post('/api/confirm-booking', async (req, res) => {
             reservationData.location,
             reservationData.special_requests,
             reservationData.transport,
-            reservationData.fast_boat_interest,
+            reservationData.private_boat_interest,
             reservationData.accommodations_booked,
             reservationData.villa_id,
             reservationData.perks,
