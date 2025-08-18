@@ -167,17 +167,7 @@ class ConfirmBooking {
                     <div class="guests-info">
                         <div class="guest-count">
                             <i class="fas fa-user"></i>
-                            <span>${adults} ${adults === 1 ? 'Adult' : 'Adults'}</span>
-                        </div>
-                        ${children > 0 ? `
-                            <div class="guest-count">
-                                <i class="fas fa-child"></i>
-                                <span>${children} ${children === 1 ? 'Child' : 'Children'}</span>
-                            </div>
-                        ` : ''}
-                        <div class="guest-count">
-                            <i class="fas fa-users"></i>
-                            <span>${totalGuests} Total ${totalGuests === 1 ? 'Guest' : 'Guests'}</span>
+                            <span>${adults} ${adults === 1 ? 'Adult' : 'Adults'}${children > 0 ? `, ${children} ${children === 1 ? 'Child' : 'Children'}` : ''}</span>
                         </div>
                     </div>
                 </div>
