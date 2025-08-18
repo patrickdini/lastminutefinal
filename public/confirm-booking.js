@@ -127,10 +127,7 @@ class ConfirmBooking {
                  class="summary-image">
             
             <div class="summary-content">
-                <h2 class="villa-title">
-                    ${tagline}
-                    ${webpageUrl ? `<a href="${webpageUrl}" target="_blank" class="villa-link" title="View villa details"><i class="fas fa-external-link-alt"></i></a>` : ''}
-                </h2>
+                <h2 class="villa-title">${tagline}</h2>
                 
                 <div class="villa-details">
                     <div class="villa-detail">
@@ -166,7 +163,8 @@ class ConfirmBooking {
                     <div class="included-list">
                         <div class="included-item">
                             <i class="fas fa-bed"></i>
-                            <span>${nights} ${nights === 1 ? 'night' : 'nights'} in ${villaDisplayName}</span>
+                            <span>${nights} ${nights === 1 ? 'night' : 'nights'} in ${villaDisplayName}
+                            ${webpageUrl ? ` <a href="${webpageUrl}" target="_blank" class="villa-link-inline" title="View villa details"><i class="fas fa-external-link-alt"></i></a>` : ''}</span>
                         </div>
                         <div class="included-item">
                             <i class="fas fa-car"></i>

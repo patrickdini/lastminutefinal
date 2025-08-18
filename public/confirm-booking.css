@@ -89,9 +89,6 @@ body {
     color: #FFFFFF;
     margin-bottom: 16px;
     line-height: 1.3;
-    display: flex;
-    align-items: center;
-    gap: 12px;
 }
 
 .villa-link {
@@ -105,6 +102,23 @@ body {
 }
 
 .villa-link:hover {
+    color: #c08c3c;
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.villa-link-inline {
+    color: #AA7831;
+    text-decoration: none;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+.villa-link-inline:hover {
     color: #c08c3c;
     opacity: 1;
     transform: translateY(-1px);
