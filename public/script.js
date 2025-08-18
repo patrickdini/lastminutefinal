@@ -260,9 +260,9 @@ class ActivitiesDashboard {
             const card = button.closest('.champion-offer-card');
             if (card) {
                 // Look for villa name in the card content instead of volatile offer ID
-                const titleElement = card.querySelector('.champion-title');
-                if (titleElement) {
-                    const villaName = titleElement.textContent.trim();
+                const nameElement = card.querySelector('.villa-name-subtitle');
+                if (nameElement) {
+                    const villaName = nameElement.textContent.trim();
                     console.log(`- Villa name: ${villaName}`);
                     expandedVillas.push(villaName);
                 } else {
@@ -296,11 +296,11 @@ class ActivitiesDashboard {
             const card = button.closest('.champion-offer-card');
             if (card) {
                 // Get villa name as stable identifier
-                const titleElement = card.querySelector('.champion-title');
+                const nameElement = card.querySelector('.villa-name-subtitle');
                 let villaName = null;
                 
-                if (titleElement) {
-                    villaName = titleElement.textContent.trim();
+                if (nameElement) {
+                    villaName = nameElement.textContent.trim();
                 } else {
                     // Fallback: get from offers data
                     const offerId = card.dataset.offerId;
@@ -340,8 +340,8 @@ class ActivitiesDashboard {
             const allCards = document.querySelectorAll('.champion-offer-card');
             console.log('- Available villa cards:', allCards.length);
             allCards.forEach((card, index) => {
-                const titleElement = card.querySelector('.champion-title');
-                const villaName = titleElement ? titleElement.textContent.trim() : 'Unknown';
+                const nameElement = card.querySelector('.villa-name-subtitle');
+                const villaName = nameElement ? nameElement.textContent.trim() : 'Unknown';
                 console.log(`- Card ${index}: villa="${villaName}"`);
             });
             
@@ -354,8 +354,8 @@ class ActivitiesDashboard {
                     // Find card by villa name
                     let targetCard = null;
                     allCards.forEach(card => {
-                        const titleElement = card.querySelector('.champion-title');
-                        if (titleElement && titleElement.textContent.trim() === villaName) {
+                        const nameElement = card.querySelector('.villa-name-subtitle');
+                        if (nameElement && nameElement.textContent.trim() === villaName) {
                             targetCard = card;
                         }
                     });
@@ -391,8 +391,8 @@ class ActivitiesDashboard {
                     // Find card by villa name
                     let targetCard = null;
                     allCards.forEach(card => {
-                        const titleElement = card.querySelector('.champion-title');
-                        if (titleElement && titleElement.textContent.trim() === villaName) {
+                        const nameElement = card.querySelector('.villa-name-subtitle');
+                        if (nameElement && nameElement.textContent.trim() === villaName) {
                             targetCard = card;
                         }
                     });
