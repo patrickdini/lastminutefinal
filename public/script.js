@@ -3825,7 +3825,6 @@ class ActivitiesDashboard {
 
         this.setupCarouselControls();
         this.generateCarouselDots();
-        this.startAutoRotation();
     }
 
     /**
@@ -3843,12 +3842,7 @@ class ActivitiesDashboard {
             nextBtn.addEventListener('click', () => this.goToNextSlide());
         }
 
-        // Pause auto-rotation on hover
-        const carouselContainer = document.getElementById('carousel-container');
-        if (carouselContainer) {
-            carouselContainer.addEventListener('mouseenter', () => this.pauseAutoRotation());
-            carouselContainer.addEventListener('mouseleave', () => this.startAutoRotation());
-        }
+        // Manual control only - no auto-rotation
     }
 
     /**

@@ -65,6 +65,9 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 
 ## Recent Changes
 
+### Hero Carousel Implementation (Aug 18, 2025)
+- **Villa Tokay Hero Carousel (Aug 18, 2025)**: Implemented stunning image carousel at the top of homepage replacing the previous header section. Features mobile-first responsive design with portrait aspect ratio on mobile (4:5) and landscape on desktop (16:9). Includes Villa Tokay brand messaging with two beautiful slides showcasing spontaneous getaways and effortless planning. Uses existing brand colors (dark jade green overlay, gold accents) and typography (Crimson Text for headlines, Nexa for body text). Carousel includes navigation arrows, dot indicators, and manual control only (auto-rotation removed per user preference). Images optimized for different screen sizes with responsive picture elements.
+
 ### Performance & Architecture Improvements
 - **Mobile-First CSS Architecture (Aug 18, 2025)**: Restructured all CSS files from desktop-first (max-width media queries) to mobile-first approach (min-width media queries). Converted public/styles.css, public/admin/villa-config-styles.css, and public/confirm-booking.css to use progressive enhancement with mobile base styles and breakpoints at 481px (tablet) and 769px (desktop). This improves mobile performance by reducing CSS parsing time and follows modern responsive design best practices.
 - **Enhanced Layout Robustness with Flexbox & Grid (Aug 18, 2025)**: Improved layout structures throughout the application using modern CSS layout methods. Enhanced header layout in confirm-booking.css to prevent overlapping issues on mobile, upgraded villa image gallery and modal components with better Flexbox structure, implemented Grid areas for booking content layout, and strengthened admin panel layouts. These changes provide more predictable responsive behavior and eliminate layout issues across different screen sizes.
