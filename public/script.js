@@ -337,10 +337,16 @@ class ActivitiesDashboard {
         flexibilityPills.forEach((pill, index) => {
             console.log(`DEBUG: Pill ${index}: data-flexibility="${pill.dataset.flexibility}", text="${pill.textContent}"`);
             pill.addEventListener('click', () => {
+                // Get fresh pill references to avoid stale NodeList issues
+                const currentPills = document.querySelectorAll('.flexibility-pill');
+                console.log('DEBUG: Found', currentPills.length, 'pills on click');
+                
                 // Remove selected class from all pills
-                flexibilityPills.forEach(p => p.classList.remove('selected'));
+                currentPills.forEach(p => p.classList.remove('selected'));
                 // Add selected class to clicked pill
                 pill.classList.add('selected');
+                
+                console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
                 // Add small delay to ensure DOM updates before checking selection
                 setTimeout(() => {
