@@ -30,115 +30,147 @@
                     Your room availability at a glance. Live data from our
                     exclusive villa collection on Gili Air.
                 </p>
-
             </header>
 
             <div class="main-content-column">
                 <!-- Guest Selection -->
                 <div class="guest-selection">
-                <div class="picker-title">Select Guests</div>
-                
-                <div class="guest-summary" onclick="toggleGuestDetails()" id="guestSummary">
-                    <span class="summary-text">Guests</span>
-                    <div>
-                        <span class="summary-count" id="totalGuests">2 guests</span>
-                        <span class="chevron">▼</span>
-                    </div>
-                </div>
-                
-                <div class="guest-details" id="guestDetails">
-                    <div class="detail-row">
+                    <div class="picker-title">Select Guests</div>
+
+                    <div
+                        class="guest-summary"
+                        onclick="toggleGuestDetails()"
+                        id="guestSummary"
+                    >
+                        <span class="summary-text">Guests</span>
                         <div>
-                            <div class="detail-label">Adults</div>
-                            <div class="detail-desc">Ages 13 and above</div>
-                        </div>
-                        <div class="detail-counter">
-                            <button onclick="changeGuestCount('adults', -1)" id="adultsMinusBtn">−</button>
-                            <span class="count" id="adultsCount">2</span>
-                            <button onclick="changeGuestCount('adults', 1)" id="adultsPlusBtn">+</button>
+                            <span class="summary-count" id="totalGuests"
+                                >2 guests</span
+                            >
+                            <span class="chevron">▼</span>
                         </div>
                     </div>
-                    
-                    <div class="detail-row">
-                        <div>
-                            <div class="detail-label">Children</div>
-                            <div class="detail-desc">Ages 0-12</div>
+
+                    <div class="guest-details" id="guestDetails">
+                        <div class="detail-row">
+                            <div>
+                                <div class="detail-label">Adults</div>
+                                <div class="detail-desc">Ages 13 and above</div>
+                            </div>
+                            <div class="detail-counter">
+                                <button
+                                    onclick="changeGuestCount('adults', -1)"
+                                    id="adultsMinusBtn"
+                                >
+                                    −
+                                </button>
+                                <span class="count" id="adultsCount">2</span>
+                                <button
+                                    onclick="changeGuestCount('adults', 1)"
+                                    id="adultsPlusBtn"
+                                >
+                                    +
+                                </button>
+                            </div>
                         </div>
-                        <div class="detail-counter">
-                            <button onclick="changeGuestCount('children', -1)" id="childrenMinusBtn">−</button>
-                            <span class="count" id="childrenCount">0</span>
-                            <button onclick="changeGuestCount('children', 1)" id="childrenPlusBtn">+</button>
+
+                        <div class="detail-row">
+                            <div>
+                                <div class="detail-label">Children</div>
+                                <div class="detail-desc">Ages 0-12</div>
+                            </div>
+                            <div class="detail-counter">
+                                <button
+                                    onclick="changeGuestCount('children', -1)"
+                                    id="childrenMinusBtn"
+                                >
+                                    −
+                                </button>
+                                <span class="count" id="childrenCount">0</span>
+                                <button
+                                    onclick="changeGuestCount('children', 1)"
+                                    id="childrenPlusBtn"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar-section">
+                    <div class="calendar-label">Choose Your Dates</div>
+
+                    <div class="calendar-container">
+                        <div id="calendarGrid" class="calendar-grid">
+                            <div class="day-header">Mon</div>
+                            <div class="day-header">Tue</div>
+                            <div class="day-header">Wed</div>
+                            <div class="day-header">Thu</div>
+                            <div class="day-header">Fri</div>
+                            <div class="day-header">Sat</div>
+                            <div class="day-header">Sun</div>
+                            <!-- Calendar dates will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Date Flexibility Pills -->
+                    <div class="flexibility-pills-container">
+                        <div class="flexibility-pills">
+                            <div
+                                class="flexibility-pill selected"
+                                data-flexibility="exact"
+                            >
+                                Exact
+                            </div>
+                            <div class="flexibility-pill" data-flexibility="1">
+                                ±1 day
+                            </div>
+                            <div class="flexibility-pill" data-flexibility="2">
+                                ±2 days
+                            </div>
+                            <div class="flexibility-pill" data-flexibility="3">
+                                ±3 days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <div id="loadingSpinner" class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading activities...</p>
+                    </div>
+
+                    <div
+                        id="errorMessage"
+                        class="error-message"
+                        style="display: none"
+                    >
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Data</h3>
+                        <p id="errorText"></p>
+                        <button id="retryBtn" class="btn btn-primary">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+
+                    <!-- Empty state removed for cleaner interface -->
+
+                    <div
+                        id="offersContainer"
+                        class="offers-container"
+                        style="display: none"
+                    >
+                        <!-- Header removed for cleaner interface -->
+
+                        <div id="championOffers" class="champion-offers">
+                            <!-- Champion offer cards will be populated dynamically -->
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="calendar-section">
-                <div class="calendar-label">Choose Your Dates</div>
-                
-
-                
-                <div class="calendar-container">
-                    <div id="calendarGrid" class="calendar-grid">
-                        <div class="day-header">Mon</div>
-                        <div class="day-header">Tue</div>
-                        <div class="day-header">Wed</div>
-                        <div class="day-header">Thu</div>
-                        <div class="day-header">Fri</div>
-                        <div class="day-header">Sat</div>
-                        <div class="day-header">Sun</div>
-                        <!-- Calendar dates will be populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Date Flexibility Pills -->
-                <div class="flexibility-pills-container">
-                    <div class="flexibility-pills">
-                        <div class="flexibility-pill selected" data-flexibility="exact">Exact</div>
-                        <div class="flexibility-pill" data-flexibility="1">±1 day</div>
-                        <div class="flexibility-pill" data-flexibility="2">±2 days</div>
-                        <div class="flexibility-pill" data-flexibility="3">±3 days</div>
-                    </div>
-                </div>
-            </div>
-
-
-
-            <div class="content">
-                <div id="loadingSpinner" class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading activities...</p>
-                </div>
-
-                <div
-                    id="errorMessage"
-                    class="error-message"
-                    style="display: none"
-                >
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Error Loading Data</h3>
-                    <p id="errorText"></p>
-                    <button id="retryBtn" class="btn btn-primary">
-                        <i class="fas fa-redo"></i> Retry
-                    </button>
-                </div>
-
-                <!-- Empty state removed for cleaner interface -->
-
-                <div
-                    id="offersContainer"
-                    class="offers-container"
-                    style="display: none"
-                >
-                    <!-- Header removed for cleaner interface -->
-
-                    <div id="championOffers" class="champion-offers">
-                        <!-- Champion offer cards will be populated dynamically -->
-                    </div>
-                </div>
-            </div>
-
-            </div> <!-- End main-content-column -->
+            <!-- End main-content-column -->
 
             <footer class="footer">
                 <p>

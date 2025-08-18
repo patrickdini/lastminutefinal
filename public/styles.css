@@ -71,8 +71,8 @@ body {
     background: linear-gradient(145deg, #f8f9fa, #e9ecef);
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    padding: 30px 25px;
-    margin-bottom: 30px;
+    padding: 20px;
+    margin-bottom: 20px;
     border: none; /* Remove previous borders */
 
     /* Remove individual sizing/centering */
@@ -659,7 +659,7 @@ body {
 /* Content area - Keep original dark styling for villa cards */
 .content {
     flex: 1;
-    background: rgba(38, 38, 38, 0.95);
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.3);
