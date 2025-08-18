@@ -152,39 +152,10 @@ class ConfirmBooking {
                     ` : ''}
                 </div>
                 
-                <div class="check-in-info">
-                    ${checkInText}
-                </div>
-
-
-
-                <div class="included-section">
-                    <div class="included-title">What is included</div>
-                    <div class="included-list">
-                        <div class="included-item">
-                            <i class="fas fa-bed"></i>
-                            <span>${nights} ${nights === 1 ? 'night' : 'nights'} in ${villaDisplayName}
-                            ${webpageUrl ? ` <a href="${webpageUrl}" target="_blank" class="villa-link-inline" title="View villa details"><i class="fas fa-external-link-alt"></i></a>` : ''}</span>
-                        </div>
-                        <div class="included-item">
-                            <i class="fas fa-car"></i>
-                            <span>Organization of the transfer</span>
-                        </div>
-                        ${perks && perks.length > 0 ? perks.map(perk => `
-                            <div class="included-item">
-                                <i class="fas fa-gift"></i>
-                                <span>${perk.activity_name}</span>
-                            </div>
-                        `).join('') : ''}
-                    </div>
-                </div>
-
                 <div class="stay-details">
                     <div class="stay-title">Your Stay</div>
-                    <div class="date-display">
-                        <span class="date-number">${checkInDate.getDate()}</span>
-                        <span class="date-separator">—</span>
-                        <span class="date-number">${checkOutDate.getDate()}</span>
+                    <div class="check-in-info">
+                        ${checkInText}
                     </div>
                     <div class="date-range">
                         ${monthNames[checkInDate.getMonth()].toUpperCase()} ${checkInDate.getDate()} — 
@@ -206,6 +177,27 @@ class ConfirmBooking {
                             <i class="fas fa-users"></i>
                             <span>${totalGuests} Total ${totalGuests === 1 ? 'Guest' : 'Guests'}</span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="included-section">
+                    <div class="included-title">What is included</div>
+                    <div class="included-list">
+                        <div class="included-item">
+                            <i class="fas fa-bed"></i>
+                            <span>${nights} ${nights === 1 ? 'night' : 'nights'} in ${villaDisplayName}
+                            ${webpageUrl ? ` <a href="${webpageUrl}" target="_blank" class="villa-link-inline" title="View villa details"><i class="fas fa-external-link-alt"></i></a>` : ''}</span>
+                        </div>
+                        <div class="included-item">
+                            <i class="fas fa-car"></i>
+                            <span>Organization of the transfer</span>
+                        </div>
+                        ${perks && perks.length > 0 ? perks.map(perk => `
+                            <div class="included-item">
+                                <i class="fas fa-gift"></i>
+                                <span>${perk.activity_name}</span>
+                            </div>
+                        `).join('') : ''}
                     </div>
                 </div>
                 
