@@ -1,0 +1,110 @@
+script.js?v=__ASSET_VERSION__:6 🚀🚀🚀 SCRIPT LOADED - CACHE_BUSTER_ROCKET_2025_08_18_V4 🚀🚀🚀
+script.js?v=__ASSET_VERSION__:342 DEBUG: initializeEventListeners() - Found 4 flexibility pills
+script.js?v=__ASSET_VERSION__:344 DEBUG: Pill 0: data-flexibility="exact", text="Exact"
+script.js?v=__ASSET_VERSION__:344 DEBUG: Pill 1: data-flexibility="1", text="±1 day"
+script.js?v=__ASSET_VERSION__:344 DEBUG: Pill 2: data-flexibility="2", text="±2 days"
+script.js?v=__ASSET_VERSION__:344 DEBUG: Pill 3: data-flexibility="3", text="±3 days"
+script.js?v=__ASSET_VERSION__:475 Calendar generated with 15 selectable dates
+script.js?v=__ASSET_VERSION__:178 Loading saved user state: {selectedAdults: 2, selectedChildren: 0, selectedCheckIn: 11, selectedCheckOut: 13, currentFilter: 'default', …}
+script.js?v=__ASSET_VERSION__:179 DEBUG: Loaded flexibility value: undefined
+script.js?v=__ASSET_VERSION__:211 DEBUG: Set pendingFlexibilityRestore to: undefined
+script.js?v=__ASSET_VERSION__:213 User state restored successfully
+script.js?v=__ASSET_VERSION__:589 Calendar display updated - CheckIn: 11 CheckOut: 13
+script.js?v=__ASSET_VERSION__:109 Loading offers cache...
+favicon.ico:1  GET https://20a81510-eee8-4dd0-ba48-91a58e465e9f-00-3hohfbrplbvwc.worf.replit.dev:5000/favicon.ico 404 (Not Found)
+script.js?v=__ASSET_VERSION__:77 DEBUG: About to restore flexibility, pendingFlexibilityRestore = undefined
+script.js?v=__ASSET_VERSION__:92 DEBUG: No pending flexibility to restore
+script.js?v=__ASSET_VERSION__:95 Applying calendar filter with restored state...
+script.js?v=__ASSET_VERSION__:635 Calendar filter applied: 2025-08-29 to 2025-08-31
+script.js?v=__ASSET_VERSION__:1292 Building query with flexibility: exact
+script.js?v=__ASSET_VERSION__:1225 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-29&checkoutDate=2025-08-31&flexibility=exact
+script.js?v=__ASSET_VERSION__:1227 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1241 Received 2 available offers: {selected_checkin_date: '2025-08-29', selected_checkout_date: '2025-08-31', desired_nights: 2, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1242 Displaying available offers: (2) [{…}, {…}]
+script.js?v=__ASSET_VERSION__:1522 Displaying available offers: (2) [{…}, {…}]
+script.js?v=__ASSET_VERSION__:1529 Stored currentOffers with offer_ids: (2) [1316, 3715]
+script.js?v=__ASSET_VERSION__:1608 Generating villa cards for 2 offers
+script.js?v=__ASSET_VERSION__:1612 Grouped into 2 villas
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Shore Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-29T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: ['2025-08-29 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Shore', checkIn: '2025-08-29T00:00:00.000Z', checkOut: '2025-08-31', nights: 2, rate: 18600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1710 Found 1 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Sunset Room with 1 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-29T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: ['2025-08-29 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Sunset', checkIn: '2025-08-29T00:00:00.000Z', checkOut: '2025-08-31', nights: 2, rate: 7600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1710 Found 1 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:346 🔥 CLICK DETECTED ON PILL: 2 PointerEvent {isTrusted: true, pointerId: 1, width: 1, height: 1, pressure: 0, …}
+script.js?v=__ASSET_VERSION__:350 DEBUG: Found 4 pills on click
+script.js?v=__ASSET_VERSION__:357 DEBUG: Set selected class on pill with data-flexibility: 2
+script.js?v=__ASSET_VERSION__:362 🎯 FIXED: Using direct approach, flexibility = 2
+script.js?v=__ASSET_VERSION__:137 DEBUG: Saving flexibility value: 2
+script.js?v=__ASSET_VERSION__:151 User state saved with flexibility: 2
+script.js?v=__ASSET_VERSION__:635 Calendar filter applied: 2025-08-29 to 2025-08-31
+script.js?v=__ASSET_VERSION__:1292 Building query with flexibility: 2
+script.js?v=__ASSET_VERSION__:1225 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-29&checkoutDate=2025-08-31&flexibility=2
+script.js?v=__ASSET_VERSION__:1292 Building query with flexibility: 2
+script.js?v=__ASSET_VERSION__:1225 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-29&checkoutDate=2025-08-31&flexibility=2
+script.js?v=__ASSET_VERSION__:1227 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1241 Received 11 available offers: {selected_checkin_date: '2025-08-29', selected_checkout_date: '2025-08-31', desired_nights: 2, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1242 Displaying available offers: (11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1522 Displaying available offers: (11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1529 Stored currentOffers with offer_ids: (11) [144, 1036, 3631, 1176, 3673, 1316, 3715, 1456, 3757, 1596, 3799]
+script.js?v=__ASSET_VERSION__:1608 Generating villa cards for 11 offers
+script.js?v=__ASSET_VERSION__:1612 Grouped into 3 villas
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Pearl Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: ['2025-08-27 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Pearl', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 11000000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1710 Found 1 unique booking options for villa The Pearl Villa
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Shore Villa with 5 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: (5) ['2025-08-27 (2n)', '2025-08-28 (2n)', '2025-08-29 (2n)', '2025-08-30 (2n)', '2025-08-31 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Shore', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 18600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: (5) [{…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1710 Found 5 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Sunset Room with 5 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: (5) ['2025-08-27 (2n)', '2025-08-28 (2n)', '2025-08-29 (2n)', '2025-08-30 (2n)', '2025-08-31 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Sunset', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 7600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: (5) [{…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1710 Found 5 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:1227 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1241 Received 11 available offers: {selected_checkin_date: '2025-08-29', selected_checkout_date: '2025-08-31', desired_nights: 2, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1242 Displaying available offers: (11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1522 Displaying available offers: (11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1529 Stored currentOffers with offer_ids: (11) [144, 1036, 3631, 1176, 3673, 1316, 3715, 1456, 3757, 1596, 3799]
+script.js?v=__ASSET_VERSION__:1608 Generating villa cards for 11 offers
+script.js?v=__ASSET_VERSION__:1612 Grouped into 3 villas
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Pearl Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: ['2025-08-27 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Pearl', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 11000000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1710 Found 1 unique booking options for villa The Pearl Villa
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Shore Villa with 5 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: (5) ['2025-08-27 (2n)', '2025-08-28 (2n)', '2025-08-29 (2n)', '2025-08-30 (2n)', '2025-08-31 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Shore', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 18600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: (5) [{…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1710 Found 5 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1627 Generating card for villa: The Sunset Room with 5 booking options
+script.js?v=__ASSET_VERSION__:1628 Primary offer: 2025-08-27T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1629 All options: (5) ['2025-08-27 (2n)', '2025-08-28 (2n)', '2025-08-29 (2n)', '2025-08-30 (2n)', '2025-08-31 (2n)']
+script.js?v=__ASSET_VERSION__:1675 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1676 Primary offer: {villa: 'Sunset', checkIn: '2025-08-27T00:00:00.000Z', checkOut: '2025-08-29', nights: 2, rate: 7600000, …}
+script.js?v=__ASSET_VERSION__:1677 All villa offers: (5) [{…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1710 Found 5 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:116 Loaded 4715 offers into cache
+script.js?v=__ASSET_VERSION__:120 Unique villa names in cache: (8) ['The Sunset Room', 'The Leaf Villa', 'The Shore Villa', 'The Swell 2BR', 'The Swell 3BR Villa', 'The Tide Villa', 'The Pearl Villa', 'The Wave Villa']

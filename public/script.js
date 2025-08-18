@@ -1,9 +1,7 @@
 /**
  * Activities Dashboard JavaScript
  * Handles frontend interactions and API communication
- * VERSION: CACHE_BUSTER_ROCKET_2025_08_18_V4
  */
-console.log('🚀🚀🚀 SCRIPT LOADED - CACHE_BUSTER_ROCKET_2025_08_18_V4 🚀🚀🚀');
 
 class ActivitiesDashboard {
     constructor() {
@@ -356,10 +354,9 @@ class ActivitiesDashboard {
                 
                 console.log('DEBUG: Set selected class on pill with data-flexibility:', pill.dataset.flexibility);
                 
-                // Get flexibility directly (bypassing broken method)
+                // Get flexibility value from selected pill
                 const selectedPill = document.querySelector('.flexibility-pill.selected');
                 const flexibility = selectedPill ? selectedPill.dataset.flexibility : 'exact';
-                console.log('🎯 FIXED: Using direct approach, flexibility =', flexibility);
                 
                 // Save user state when flexibility changes
                 this.saveUserState(flexibility);
