@@ -315,7 +315,9 @@ class ActivitiesDashboard {
                 
                 if (villaName && buttonText) {
                     selectedOffers[villaName] = buttonText;
-                    console.log(`- Villa: ${villaName}, Selected: ${buttonText}`);
+                    console.log(`- Villa: ${villaName}, Selected: "${buttonText}"`);
+                    console.log(`- Button classes: ${button.className}`);
+                    console.log(`- Button innerHTML: "${button.innerHTML}"`);
                 }
             }
         });
@@ -400,9 +402,15 @@ class ActivitiesDashboard {
                         const buttons = targetCard.querySelectorAll('.night-selector-btn');
                         let targetButton = null;
                         
-                        buttons.forEach(button => {
-                            if (button.textContent.trim() === selectedButtonText) {
+                        console.log(`- Looking for button text: "${selectedButtonText}"`);
+                        console.log(`- Available buttons in villa "${villaName}":`);
+                        
+                        buttons.forEach((button, btnIndex) => {
+                            const btnText = button.textContent.trim();
+                            console.log(`  * Button ${btnIndex}: "${btnText}" (classes: ${button.className})`);
+                            if (btnText === selectedButtonText) {
                                 targetButton = button;
+                                console.log(`  → MATCHED button ${btnIndex}`);
                             }
                         });
                         
