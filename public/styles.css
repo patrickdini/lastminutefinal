@@ -1651,14 +1651,13 @@ body {
     background: rgba(168, 85, 247, 0.9); /* Purple for mixed matches */
 }
 
-/* Nights Display */
+/* Nights Display - Match picker and calendar label styling */
 .nights-display {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #FFFFFF;
-    margin-bottom: 2rem;
+    font-size: 1.4rem;
+    color: #0F3128;
+    margin-bottom: 20px;
     text-align: center;
-    font-family: 'Crimson Text', serif;
+    font-weight: 600;
 }
 
 /* Special Offers Layout */

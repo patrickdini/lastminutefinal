@@ -834,18 +834,18 @@ class ActivitiesDashboard {
         if (!this.elements.nightsDisplay) return;
         
         let nights = 0;
-        let displayText = "Your offers";
+        let displayText = "Select Your Offer";
         
         if (this.selectedCheckIn !== null && this.selectedCheckOut !== null) {
             nights = this.selectedCheckOut - this.selectedCheckIn;
             if (nights === 1) {
-                displayText = "Your offers for a 1 night stay";
+                displayText = "Select Your 1 Night Offer";
             } else {
-                displayText = `Your offers for a ${nights} nights stay`;
+                displayText = `Select Your ${nights} Nights Offer`;
             }
         } else {
             // Default text when no complete selection
-            displayText = "Your offers for a 2 nights stay";
+            displayText = "Select Your 2 Nights Offer";
         }
         
         this.elements.nightsDisplay.textContent = displayText;
