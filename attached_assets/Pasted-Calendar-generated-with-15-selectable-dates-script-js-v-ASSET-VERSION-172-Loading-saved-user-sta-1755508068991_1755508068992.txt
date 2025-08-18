@@ -1,0 +1,27 @@
+Calendar generated with 15 selectable dates
+script.js?v=__ASSET_VERSION__:172 Loading saved user state: {selectedAdults: 2, selectedChildren: 0, selectedCheckIn: 2, selectedCheckOut: 4, currentFilter: 'default', …}
+script.js?v=__ASSET_VERSION__:173 DEBUG: Loaded flexibility value: undefined
+script.js?v=__ASSET_VERSION__:205 DEBUG: Set pendingFlexibilityRestore to: undefined
+script.js?v=__ASSET_VERSION__:207 User state restored successfully
+script.js?v=__ASSET_VERSION__:567 Calendar display updated - CheckIn: 2 CheckOut: 4
+script.js?v=__ASSET_VERSION__:107 Loading offers cache...
+script.js?v=__ASSET_VERSION__:75 DEBUG: About to restore flexibility, pendingFlexibilityRestore = undefined
+script.js?v=__ASSET_VERSION__:90 DEBUG: No pending flexibility to restore
+script.js?v=__ASSET_VERSION__:93 Applying calendar filter with restored state...
+script.js?v=__ASSET_VERSION__:613 Calendar filter applied: 2025-08-20 to 2025-08-22
+script.js?v=__ASSET_VERSION__:1270 Building query with flexibility: exact
+script.js?v=__ASSET_VERSION__:1203 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-20&checkoutDate=2025-08-22&flexibility=exact
+script.js?v=__ASSET_VERSION__:1205 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1219 Received 1 available offers: {selected_checkin_date: '2025-08-20', selected_checkout_date: '2025-08-22', desired_nights: 2, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1220 Displaying available offers: [{…}]
+script.js?v=__ASSET_VERSION__:1500 Displaying available offers: [{…}]
+script.js?v=__ASSET_VERSION__:1507 Stored currentOffers with offer_ids: [3337]
+script.js?v=__ASSET_VERSION__:1586 Generating villa cards for 1 offers
+script.js?v=__ASSET_VERSION__:1590 Grouped into 1 villas
+script.js?v=__ASSET_VERSION__:1605 Generating card for villa: The Sunset Room with 1 booking options
+script.js?v=__ASSET_VERSION__:1606 Primary offer: 2025-08-20T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1607 All options: ['2025-08-20 (2n)']
+script.js?v=__ASSET_VERSION__:1653 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1654 Primary offer: {villa: 'Sunset', checkIn: '2025-08-20T00:00:00.000Z', checkOut: '2025-08-22', nights: 2, rate: 7600000, …}
+script.js?v=__ASSET_VERSION__:1655 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1688 Found 1 unique booking options for villa The Sunset Room
