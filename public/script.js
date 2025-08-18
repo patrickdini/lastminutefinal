@@ -333,7 +333,9 @@ class ActivitiesDashboard {
         
         // Flexibility pills event listeners
         const flexibilityPills = document.querySelectorAll('.flexibility-pill');
-        flexibilityPills.forEach(pill => {
+        console.log('DEBUG: initializeEventListeners() - Found', flexibilityPills.length, 'flexibility pills');
+        flexibilityPills.forEach((pill, index) => {
+            console.log(`DEBUG: Pill ${index}: data-flexibility="${pill.dataset.flexibility}", text="${pill.textContent}"`);
             pill.addEventListener('click', () => {
                 // Remove selected class from all pills
                 flexibilityPills.forEach(p => p.classList.remove('selected'));
