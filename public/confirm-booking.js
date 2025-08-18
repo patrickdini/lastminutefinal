@@ -61,6 +61,7 @@ class ConfirmBooking {
         const {
             villaDisplayName,
             tagline,
+            description,
             checkIn,
             checkOut,
             nights,
@@ -128,6 +129,7 @@ class ConfirmBooking {
             
             <div class="summary-content">
                 <h2 class="villa-title">${tagline}</h2>
+                <p class="villa-description">${description || ''}</p>
                 
                 <div class="villa-details">
                     <div class="villa-detail">
