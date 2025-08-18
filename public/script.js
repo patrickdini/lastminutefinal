@@ -1,7 +1,9 @@
 /**
  * Activities Dashboard JavaScript
  * Handles frontend interactions and API communication
+ * VERSION: CACHE_BUSTER_ROCKET_2025_08_18_V4
  */
+console.log('🚀🚀🚀 SCRIPT LOADED - CACHE_BUSTER_ROCKET_2025_08_18_V4 🚀🚀🚀');
 
 class ActivitiesDashboard {
     constructor() {
