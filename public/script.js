@@ -286,7 +286,7 @@ class ActivitiesDashboard {
      */
     getSelectedOfferStates() {
         const selectedOffers = {};
-        const activeButtons = document.querySelectorAll('.night-selector-btn.active');
+        const activeButtons = document.querySelectorAll('.booking-option-btn.selected');
         
         console.log('DEBUG: Capturing selected offer states');
         console.log('- Found active buttons:', activeButtons.length);
@@ -310,14 +310,15 @@ class ActivitiesDashboard {
                     }
                 }
                 
-                // Get the selected date from button text (more stable than offer ID)
-                const buttonText = button.textContent.trim();
+                // Get the button index within this villa (more stable than text or offer ID)
+                const villaButtons = card.querySelectorAll('.booking-option-btn');
+                const buttonIndex = Array.from(villaButtons).indexOf(button);
                 
-                if (villaName && buttonText) {
-                    selectedOffers[villaName] = buttonText;
-                    console.log(`- Villa: ${villaName}, Selected: "${buttonText}"`);
+                if (villaName && buttonIndex >= 0) {
+                    selectedOffers[villaName] = buttonIndex;
+                    console.log(`- Villa: ${villaName}, Selected button index: ${buttonIndex}`);
                     console.log(`- Button classes: ${button.className}`);
-                    console.log(`- Button innerHTML: "${button.innerHTML}"`);
+                    console.log(`- Total buttons in villa: ${villaButtons.length}`);
                 }
             }
         });
@@ -385,8 +386,8 @@ class ActivitiesDashboard {
             // Restore selected offers within villas  
             if (state.selectedOffers && Object.keys(state.selectedOffers).length > 0) {
                 console.log('DEBUG: Restoring offer selections...');
-                Object.entries(state.selectedOffers).forEach(([villaName, selectedButtonText]) => {
-                    console.log(`- Looking for villa "${villaName}" with selected "${selectedButtonText}"`);
+                Object.entries(state.selectedOffers).forEach(([villaName, selectedButtonIndex]) => {
+                    console.log(`- Looking for villa "${villaName}" with selected button index: ${selectedButtonIndex}`);
                     
                     // Find card by villa name
                     let targetCard = null;
@@ -398,31 +399,26 @@ class ActivitiesDashboard {
                     });
                     
                     if (targetCard) {
-                        // Find button by text content
-                        const buttons = targetCard.querySelectorAll('.night-selector-btn');
-                        let targetButton = null;
+                        // Find button by index
+                        const buttons = targetCard.querySelectorAll('.booking-option-btn');
                         
-                        console.log(`- Looking for button text: "${selectedButtonText}"`);
-                        console.log(`- Available buttons in villa "${villaName}":`);
+                        console.log(`- Looking for button index: ${selectedButtonIndex}`);
+                        console.log(`- Available buttons in villa "${villaName}": ${buttons.length}`);
                         
-                        buttons.forEach((button, btnIndex) => {
-                            const btnText = button.textContent.trim();
-                            console.log(`  * Button ${btnIndex}: "${btnText}" (classes: ${button.className})`);
-                            if (btnText === selectedButtonText) {
-                                targetButton = button;
-                                console.log(`  → MATCHED button ${btnIndex}`);
+                        if (selectedButtonIndex < buttons.length) {
+                            const targetButton = buttons[selectedButtonIndex];
+                            console.log(`- Found target button at index ${selectedButtonIndex}`);
+                            console.log(`- Button selected state:`, targetButton?.classList.contains('selected'));
+                            
+                            if (targetButton && !targetButton.classList.contains('selected')) {
+                                console.log(`- Clicking button ${selectedButtonIndex} in villa "${villaName}"...`);
+                                targetButton.click();
+                                console.log('✅ Restored offer selection:', villaName, '-> button', selectedButtonIndex);
+                            } else {
+                                console.log('⚠️ Offer already selected or button not found');
                             }
-                        });
-                        
-                        console.log(`- Found target button:`, !!targetButton);
-                        console.log(`- Button active state:`, targetButton?.classList.contains('active'));
-                        
-                        if (targetButton && !targetButton.classList.contains('active')) {
-                            console.log(`- Selecting "${selectedButtonText}" in villa "${villaName}"...`);
-                            targetButton.click();
-                            console.log('✅ Restored offer selection:', villaName, '->', selectedButtonText);
                         } else {
-                            console.log('⚠️ Offer already selected or button not found');
+                            console.log(`❌ Button index ${selectedButtonIndex} out of range (${buttons.length} buttons available)`);
                         }
                     } else {
                         console.log('❌ Villa card not found:', villaName);
