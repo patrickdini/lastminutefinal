@@ -52,9 +52,13 @@ class ActivitiesDashboard {
         this.cachedOffers = [];
         this.cacheLoaded = false;
         
+        // State management key
+        this.stateKey = 'villaTokenUserState';
+        
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
+        this.loadUserState(); // Load saved state before setting defaults
         this.setDefaultDateSelection();
         this.initializeImageCarousels();
         this.initializeGalleryModal();
@@ -82,6 +86,127 @@ class ActivitiesDashboard {
         } catch (error) {
             console.error('Error loading offers cache:', error);
         }
+    }
+
+    /**
+     * Save current user state to localStorage
+     */
+    saveUserState() {
+        try {
+            const state = {
+                selectedAdults: this.selectedAdults,
+                selectedChildren: this.selectedChildren,
+                selectedCheckIn: this.selectedCheckIn,
+                selectedCheckOut: this.selectedCheckOut,
+                currentFilter: this.currentFilter,
+                currentDateRange: this.currentDateRange,
+                selectedFlexibility: this.getSelectedFlexibility(),
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem(this.stateKey, JSON.stringify(state));
+            console.log('User state saved:', state);
+        } catch (error) {
+            console.error('Error saving user state:', error);
+        }
+    }
+
+    /**
+     * Load user state from localStorage and apply it
+     */
+    loadUserState() {
+        try {
+            const savedState = localStorage.getItem(this.stateKey);
+            if (!savedState) {
+                console.log('No saved user state found');
+                return false;
+            }
+
+            const state = JSON.parse(savedState);
+            
+            // Check if state is not too old (24 hours)
+            const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+            if (Date.now() - state.timestamp > maxAge) {
+                console.log('Saved state too old, clearing');
+                this.clearUserState();
+                return false;
+            }
+
+            console.log('Loading saved user state:', state);
+
+            // Restore guest counts
+            if (state.selectedAdults) {
+                this.selectedAdults = state.selectedAdults;
+            }
+            if (state.selectedChildren) {
+                this.selectedChildren = state.selectedChildren;
+            }
+
+            // Restore date selections
+            if (state.selectedCheckIn) {
+                this.selectedCheckIn = state.selectedCheckIn;
+            }
+            if (state.selectedCheckOut) {
+                this.selectedCheckOut = state.selectedCheckOut;
+            }
+            if (state.currentDateRange) {
+                this.currentDateRange = state.currentDateRange;
+            }
+
+            // Restore filter
+            if (state.currentFilter) {
+                this.currentFilter = state.currentFilter;
+            }
+
+            // Update UI elements to reflect loaded state
+            this.updateGuestDisplay();
+            this.updateGuestButtons();
+            
+            // Restore flexibility selection
+            if (state.selectedFlexibility) {
+                this.setSelectedFlexibility(state.selectedFlexibility);
+            }
+
+            console.log('User state restored successfully');
+            return true;
+        } catch (error) {
+            console.error('Error loading user state:', error);
+            this.clearUserState();
+            return false;
+        }
+    }
+
+    /**
+     * Clear saved user state
+     */
+    clearUserState() {
+        try {
+            localStorage.removeItem(this.stateKey);
+            console.log('User state cleared');
+        } catch (error) {
+            console.error('Error clearing user state:', error);
+        }
+    }
+
+    /**
+     * Get currently selected flexibility value
+     */
+    getSelectedFlexibility() {
+        const selectedPill = document.querySelector('.flexibility-pill.selected');
+        return selectedPill ? selectedPill.dataset.flexibility : 'exact';
+    }
+
+    /**
+     * Set selected flexibility pill
+     */
+    setSelectedFlexibility(flexibility) {
+        const pills = document.querySelectorAll('.flexibility-pill');
+        pills.forEach(pill => {
+            pill.classList.remove('selected');
+            if (pill.dataset.flexibility === flexibility) {
+                pill.classList.add('selected');
+            }
+        });
     }
 
     /**
@@ -158,6 +283,10 @@ class ActivitiesDashboard {
                 pill.classList.add('selected');
                 
                 console.log('Flexibility changed to:', this.getSelectedFlexibility());
+                
+                // Save user state when flexibility changes
+                this.saveUserState();
+                
                 // Only reload if we have a date range selected
                 if (this.currentDateRange && this.currentDateRange.startDate && this.currentDateRange.endDate) {
                     this.loadActivities();
@@ -320,6 +449,9 @@ class ActivitiesDashboard {
             this.selectedCheckOut = null;
             console.log('Reset selection, new check-in:', index);
         }
+        
+        // Save user state when dates are selected
+        this.saveUserState();
         
         this.updateCalendarDisplay();
         
@@ -846,6 +978,9 @@ class ActivitiesDashboard {
      */
     handleGuestCountChange() {
         console.log(`Guest count changed: ${this.selectedAdults} adults, ${this.selectedChildren} children`);
+        
+        // Save user state when guest count changes
+        this.saveUserState();
         
         // Pagination removed - no reset needed
         
@@ -2253,6 +2388,9 @@ class ActivitiesDashboard {
             console.error('Offer not found:', offerId);
             return;
         }
+
+        // Save user state before booking to preserve selections
+        this.saveUserState();
 
         // Construct booking URL with offer details
         const bookingParams = new URLSearchParams({
