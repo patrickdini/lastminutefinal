@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villa Tokay - Last-Minute Escape</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts to approximate brand typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+
+    <style>
+        /* * Custom styles to implement Villa Tokay's brand identity.
+         * We define CSS variables for the brand colors and apply the custom fonts.
+         */
+        :root {
+            --brand-dark-jade: #0F3128;
+            --brand-gold: #AA7831;
+            --brand-copper: #A7684F;
+            --brand-white: #FFFFFF;
+        }
+
+        /* Approximating 'Athisthan Trial' with 'Playfair Display' for headlines */
+        .font-headline {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Approximating 'Nexa' with 'Montserrat' for body text */
+        .font-body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Custom background color class */
+        .bg-brand-dark-jade {
+            background-color: var(--brand-dark-jade);
+        }
+        
+        /* Custom text color class */
+        .text-brand-gold {
+            color: var(--brand-gold);
+        }
+
+        /* Custom border/button color class */
+        .border-brand-gold {
+            border-color: var(--brand-gold);
+        }
+        .bg-brand-gold {
+            background-color: var(--brand-gold);
+        }
+
+        /* Styling for carousel transition */
+        .carousel-slide {
+            transition: opacity 0.7s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-body">
+
+    <!-- 
+      Main Carousel Container
+      - relative: Positions child elements relative to this container.
+      - w-full: Takes the full width of its parent.
+      - max-w-7xl: Sets a maximum width for larger screens.
+      - mx-auto: Centers the container horizontally.
+      - shadow-lg: Adds a nice shadow for depth.
+    -->
+    <div id="carousel-container" class="relative w-full max-w-7xl mx-auto shadow-lg rounded-lg overflow-hidden">
+        
+        <!-- Slides Wrapper -->
+        <div class="relative w-full aspect-[4/5] md:aspect-[16/9]">
+            
+            <!-- Slide 1: Spontaneous Gili Air Escape -->
+            <div class="carousel-slide absolute top-0 left-0 w-full h-full opacity-100">
+                <!-- 
+                  The <picture> element allows us to serve different images based on screen size.
+                  - On screens < 768px (mobile), it uses 'slide_1_mobile.jpeg'.
+                  - On screens >= 768px (desktop), it uses 'slide_1_desktop.jpeg'.
+                -->
+                <picture>
+                    <source media="(max-width: 767px)" srcset="slide_1_mobile.jpeg">
+                    <source media="(min-width: 768px)" srcset="slide_1_desktop.jpeg">
+                    <img src="slide_1_desktop.jpeg" alt="Stunning view from a Villa Tokay accommodation with a welcome cocktail" class="w-full h-full object-cover">
+                </picture>
+                
+                <!-- Text Overlay Box -->
+                <div class="absolute bottom-0 left-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-12 w-full md:w-1/2 lg:w-1/3 p-6 md:p-8 bg-brand-dark-jade bg-opacity-90 text-white md:rounded-lg">
+                    <h2 class="font-headline text-3xl md:text-4xl lg:text-5xl mb-3">Your Spontaneous Gili Air Escape.</h2>
+                    <p class="font-body text-base lg:text-lg font-light">Leave the mainland behind. We organize your seamless boat transfer for your perfect last-minute getaway (2-14 days out).</p>
+                </div>
+            </div>
+            
+            <!-- Slide 2: Effortless Planning -->
+            <div class="carousel-slide absolute top-0 left-0 w-full h-full opacity-0">
+                <picture>
+                    <source media="(max-width: 767px)" srcset="slide_2_mobile.jpeg">
+                    <source media="(min-width: 768px)" srcset="slide_2_desktop.jpeg">
+                    <img src="slide_2_desktop.jpeg" alt="A boat arriving near Gili Air, signifying an easy start to an adventure" class="w-full h-full object-cover">
+                </picture>
+                
+                <!-- Text Overlay Box -->
+                <div class="absolute bottom-0 left-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-12 w-full md:w-1/2 lg:w-1/3 p-6 md:p-8 bg-brand-dark-jade bg-opacity-90 text-white md:rounded-lg">
+                    <h2 class="font-headline text-3xl md:text-4xl lg:text-5xl mb-3">The Easiest Getaway You'll Ever Plan.</h2>
+                    <p class="font-body text-base lg:text-lg font-light">No calendars, no hassle. Choose your escape window—In 2 Days, This Weekend, or Next Weekend—and we'll handle the rest.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons: Previous & Next -->
+        <button id="prev-btn" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-3 transition">
+            <svg class="w-6 h-6 text-brand-dark-jade" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button id="next-btn" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-3 transition">
+            <svg class="w-6 h-6 text-brand-dark-jade" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+
+        <!-- Dot Indicators -->
+        <div id="dot-indicators" class="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-3">
+            <!-- Dots will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for Carousel Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const dotsContainer = document.getElementById('dot-indicators');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            // Create dot indicators for each slide
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.classList.add('w-3', 'h-3', 'rounded-full', 'transition');
+                dot.dataset.slide = i;
+                dotsContainer.appendChild(dot);
+            }
+            
+            const dots = dotsContainer.querySelectorAll('button');
+
+            // Function to show a specific slide
+            function showSlide(slideIndex) {
+                // Ensure index is within bounds
+                if (slideIndex >= totalSlides) {
+                    slideIndex = 0;
+                } else if (slideIndex < 0) {
+                    slideIndex = totalSlides - 1;
+                }
+
+                // Hide all slides and deactivate all dots
+                slides.forEach(slide => {
+                    slide.style.opacity = '0';
+                });
+                dots.forEach(dot => {
+                    dot.classList.remove('bg-brand-gold');
+                    dot.classList.add('bg-white', 'bg-opacity-50');
+                });
+
+                // Show the target slide and activate its dot
+                slides[slideIndex].style.opacity = '1';
+                dots[slideIndex].classList.add('bg-brand-gold');
+                dots[slideIndex].classList.remove('bg-white', 'bg-opacity-50');
+                
+                currentSlide = slideIndex;
+            }
+
+            // Event Listeners for buttons
+            nextBtn.addEventListener('click', () => {
+                showSlide(currentSlide + 1);
+            });
+
+            prevBtn.addEventListener('click', () => {
+                showSlide(currentSlide - 1);
+            });
+
+            // Event Listeners for dots
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const slideIndex = parseInt(e.target.dataset.slide);
+                    showSlide(slideIndex);
+                });
+            });
+
+            // Initialize the carousel
+            showSlide(0);
+        });
+    </script>
+
+</body>
+</html>
