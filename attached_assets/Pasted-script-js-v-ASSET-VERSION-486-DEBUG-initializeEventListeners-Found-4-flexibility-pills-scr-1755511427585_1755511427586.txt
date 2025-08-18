@@ -1,0 +1,76 @@
+script.js?v=__ASSET_VERSION__:486 DEBUG: initializeEventListeners() - Found 4 flexibility pills
+script.js?v=__ASSET_VERSION__:488 DEBUG: Pill 0: data-flexibility="exact", text="Exact"
+script.js?v=__ASSET_VERSION__:488 DEBUG: Pill 1: data-flexibility="1", text="±1 day"
+script.js?v=__ASSET_VERSION__:488 DEBUG: Pill 2: data-flexibility="2", text="±2 days"
+script.js?v=__ASSET_VERSION__:488 DEBUG: Pill 3: data-flexibility="3", text="±3 days"
+script.js?v=__ASSET_VERSION__:618 Calendar generated with 15 selectable dates
+script.js?v=__ASSET_VERSION__:184 Loading saved user state: {selectedAdults: 2, selectedChildren: 0, selectedCheckIn: 5, selectedCheckOut: 6, currentFilter: 'default', …}
+script.js?v=__ASSET_VERSION__:185 DEBUG: Loaded flexibility value: 1
+script.js?v=__ASSET_VERSION__:217 DEBUG: Set pendingFlexibilityRestore to: 1
+script.js?v=__ASSET_VERSION__:219 User state restored successfully
+script.js?v=__ASSET_VERSION__:732 Calendar display updated - CheckIn: 5 CheckOut: 6
+script.js?v=__ASSET_VERSION__:107 Loading offers cache...
+script.js?v=__ASSET_VERSION__:75 DEBUG: About to restore flexibility, pendingFlexibilityRestore = 1
+script.js?v=__ASSET_VERSION__:77 Final flexibility restoration to: 1
+script.js?v=__ASSET_VERSION__:405 Setting flexibility to: 1 Pills found: 4
+script.js?v=__ASSET_VERSION__:411 Selected pill with flexibility: 1
+script.js?v=__ASSET_VERSION__:417 Current selected pill: 1
+script.js?v=__ASSET_VERSION__:93 Applying calendar filter with restored state...
+script.js?v=__ASSET_VERSION__:778 Calendar filter applied: 2025-08-23 to 2025-08-24
+script.js?v=__ASSET_VERSION__:1435 Building query with flexibility: 1
+script.js?v=__ASSET_VERSION__:1368 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-23&checkoutDate=2025-08-24&flexibility=1
+script.js?v=__ASSET_VERSION__:83 Final flexibility verification: 1
+script.js?v=__ASSET_VERSION__:1370 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1384 Received 9 available offers: {selected_checkin_date: '2025-08-23', selected_checkout_date: '2025-08-24', desired_nights: 1, search_window: {…}, adults: 2, …}
+script.js?v=__ASSET_VERSION__:1385 Displaying available offers: (9) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1665 Displaying available offers: (9) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1672 Stored currentOffers with offer_ids: (9) [326, 3418, 11, 466, 3460, 53, 606, 3502, 4325]
+script.js?v=__ASSET_VERSION__:1751 Generating villa cards for 9 offers
+script.js?v=__ASSET_VERSION__:1755 Grouped into 4 villas
+script.js?v=__ASSET_VERSION__:1770 Generating card for villa: The Shore Villa with 3 booking options
+script.js?v=__ASSET_VERSION__:1771 Primary offer: 2025-08-22T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1772 All options: (3) ['2025-08-22 (1n)', '2025-08-23 (1n)', '2025-08-24 (1n)']
+script.js?v=__ASSET_VERSION__:1818 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1819 Primary offer: {villa: 'Shore', checkIn: '2025-08-22T00:00:00.000Z', checkOut: '2025-08-23', nights: 1, rate: 9300000, …}
+script.js?v=__ASSET_VERSION__:1820 All villa offers: (3) [{…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1853 Found 3 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1770 Generating card for villa: The Sunset Room with 3 booking options
+script.js?v=__ASSET_VERSION__:1771 Primary offer: 2025-08-22T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1772 All options: (3) ['2025-08-22 (1n)', '2025-08-23 (1n)', '2025-08-24 (1n)']
+script.js?v=__ASSET_VERSION__:1818 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1819 Primary offer: {villa: 'Sunset', checkIn: '2025-08-22T00:00:00.000Z', checkOut: '2025-08-23', nights: 1, rate: 3800000, …}
+script.js?v=__ASSET_VERSION__:1820 All villa offers: (3) [{…}, {…}, {…}]
+script.js?v=__ASSET_VERSION__:1853 Found 3 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:1770 Generating card for villa: The Pearl Villa with 2 booking options
+script.js?v=__ASSET_VERSION__:1771 Primary offer: 2025-08-23T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1772 All options: (2) ['2025-08-23 (1n)', '2025-08-24 (1n)']
+script.js?v=__ASSET_VERSION__:1818 Booking options generation for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:1819 Primary offer: {villa: 'Pearl', checkIn: '2025-08-23T00:00:00.000Z', checkOut: '2025-08-24', nights: 1, rate: 5500000, …}
+script.js?v=__ASSET_VERSION__:1820 All villa offers: (2) [{…}, {…}]
+script.js?v=__ASSET_VERSION__:1853 Found 2 unique booking options for villa The Pearl Villa
+script.js?v=__ASSET_VERSION__:1770 Generating card for villa: The Swell 2BR with 1 booking options
+script.js?v=__ASSET_VERSION__:1771 Primary offer: 2025-08-24T00:00:00.000Z nights: 1
+script.js?v=__ASSET_VERSION__:1772 All options: ['2025-08-24 (1n)']
+script.js?v=__ASSET_VERSION__:1818 Booking options generation for villa: The Swell 2BR
+script.js?v=__ASSET_VERSION__:1819 Primary offer: {villa: 'Swell 2BR', checkIn: '2025-08-24T00:00:00.000Z', checkOut: '2025-08-25', nights: 1, rate: 14600000, …}
+script.js?v=__ASSET_VERSION__:1820 All villa offers: [{…}]
+script.js?v=__ASSET_VERSION__:1853 Found 1 unique booking options for villa The Swell 2BR
+script.js?v=__ASSET_VERSION__:224 DEBUG: Starting delayed villa state restoration...
+script.js?v=__ASSET_VERSION__:306 DEBUG: Starting villa state restoration
+script.js?v=__ASSET_VERSION__:307 - State to restore: {selectedAdults: 2, selectedChildren: 0, selectedCheckIn: 5, selectedCheckOut: 6, currentFilter: 'default', …}
+script.js?v=__ASSET_VERSION__:308 - Expanded villas: ['466']
+script.js?v=__ASSET_VERSION__:309 - Selected offers: {}
+script.js?v=__ASSET_VERSION__:313 - Available villa cards: 4
+script.js?v=__ASSET_VERSION__:315 - Card 0: offer-id="326"
+script.js?v=__ASSET_VERSION__:315 - Card 1: offer-id="3418"
+script.js?v=__ASSET_VERSION__:315 - Card 2: offer-id="11"
+script.js?v=__ASSET_VERSION__:315 - Card 3: offer-id="4325"
+script.js?v=__ASSET_VERSION__:320 DEBUG: Restoring villa expansions...
+script.js?v=__ASSET_VERSION__:322 - Looking for card with offer-id="466"
+script.js?v=__ASSET_VERSION__:324 - Found card: true
+script.js?v=__ASSET_VERSION__:328 - Found show details button: false
+script.js?v=__ASSET_VERSION__:329 - Button expanded state: undefined
+script.js?v=__ASSET_VERSION__:336 ⚠️ Villa already expanded or button not found: 466
+script.js?v=__ASSET_VERSION__:370 DEBUG: No offer selections to restore
+script.js?v=__ASSET_VERSION__:114 Loaded 4715 offers into cache
+script.js?v=__ASSET_VERSION__:118 Unique villa names in cache: (8) ['The Sunset Room', 'The Leaf Villa', 'The Shore Villa', 'The Swell 2BR', 'The Swell 3BR Villa', 'The Tide Villa', 'The Pearl Villa', 'The Wave Villa']

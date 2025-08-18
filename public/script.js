@@ -246,7 +246,7 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Capture current villa expansion states
+     * Capture current villa expansion states using stable villa names
      */
     getExpandedVillaStates() {
         const expandedVillas = [];
@@ -259,10 +259,20 @@ class ActivitiesDashboard {
             console.log(`- Expanded button ${index}:`, button);
             const card = button.closest('.champion-offer-card');
             if (card) {
-                const offerId = card.dataset.offerId;
-                console.log(`- Card offer ID: ${offerId}`);
-                if (offerId) {
-                    expandedVillas.push(offerId);
+                // Look for villa name in the card content instead of volatile offer ID
+                const titleElement = card.querySelector('.champion-title');
+                if (titleElement) {
+                    const villaName = titleElement.textContent.trim();
+                    console.log(`- Villa name: ${villaName}`);
+                    expandedVillas.push(villaName);
+                } else {
+                    // Fallback: try to get from current offers data
+                    const offerId = card.dataset.offerId;
+                    const offer = this.currentOffers?.find(o => o.offer_id == offerId);
+                    if (offer && offer.villa_display_name) {
+                        console.log(`- Villa name from offer: ${offer.villa_display_name}`);
+                        expandedVillas.push(offer.villa_display_name);
+                    }
                 }
             }
         });
@@ -272,7 +282,7 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Capture currently selected offers within villas
+     * Capture currently selected offers within villas using stable identifiers
      */
     getSelectedOfferStates() {
         const selectedOffers = {};
@@ -285,11 +295,27 @@ class ActivitiesDashboard {
             console.log(`- Active button ${index}:`, button);
             const card = button.closest('.champion-offer-card');
             if (card) {
-                const villaOfferId = card.dataset.offerId; // Main villa offer ID
-                const selectedOfferId = button.dataset.offerId; // Selected sub-offer ID
-                console.log(`- Villa offer ID: ${villaOfferId}, Selected offer ID: ${selectedOfferId}`);
-                if (villaOfferId && selectedOfferId) {
-                    selectedOffers[villaOfferId] = selectedOfferId;
+                // Get villa name as stable identifier
+                const titleElement = card.querySelector('.champion-title');
+                let villaName = null;
+                
+                if (titleElement) {
+                    villaName = titleElement.textContent.trim();
+                } else {
+                    // Fallback: get from offers data
+                    const offerId = card.dataset.offerId;
+                    const offer = this.currentOffers?.find(o => o.offer_id == offerId);
+                    if (offer && offer.villa_display_name) {
+                        villaName = offer.villa_display_name;
+                    }
+                }
+                
+                // Get the selected date from button text (more stable than offer ID)
+                const buttonText = button.textContent.trim();
+                
+                if (villaName && buttonText) {
+                    selectedOffers[villaName] = buttonText;
+                    console.log(`- Villa: ${villaName}, Selected: ${buttonText}`);
                 }
             }
         });
@@ -299,7 +325,7 @@ class ActivitiesDashboard {
     }
     
     /**
-     * Restore villa expansion and offer selection states
+     * Restore villa expansion and offer selection states using stable identifiers
      */
     restoreVillaStates(state) {
         try {
@@ -312,31 +338,42 @@ class ActivitiesDashboard {
             const allCards = document.querySelectorAll('.champion-offer-card');
             console.log('- Available villa cards:', allCards.length);
             allCards.forEach((card, index) => {
-                console.log(`- Card ${index}: offer-id="${card.dataset.offerId}"`);
+                const titleElement = card.querySelector('.champion-title');
+                const villaName = titleElement ? titleElement.textContent.trim() : 'Unknown';
+                console.log(`- Card ${index}: villa="${villaName}"`);
             });
             
             // Restore villa expansion states
             if (state.expandedVillas && state.expandedVillas.length > 0) {
                 console.log('DEBUG: Restoring villa expansions...');
-                state.expandedVillas.forEach(offerId => {
-                    console.log(`- Looking for card with offer-id="${offerId}"`);
-                    const card = document.querySelector(`[data-offer-id="${offerId}"]`);
-                    console.log(`- Found card:`, !!card);
+                state.expandedVillas.forEach(villaName => {
+                    console.log(`- Looking for villa: "${villaName}"`);
                     
-                    if (card) {
-                        const showDetailsBtn = card.querySelector('.show-details-btn');
+                    // Find card by villa name
+                    let targetCard = null;
+                    allCards.forEach(card => {
+                        const titleElement = card.querySelector('.champion-title');
+                        if (titleElement && titleElement.textContent.trim() === villaName) {
+                            targetCard = card;
+                        }
+                    });
+                    
+                    console.log(`- Found card for villa "${villaName}":`, !!targetCard);
+                    
+                    if (targetCard) {
+                        const showDetailsBtn = targetCard.querySelector('.show-details-btn');
                         console.log(`- Found show details button:`, !!showDetailsBtn);
                         console.log(`- Button expanded state:`, showDetailsBtn?.classList.contains('expanded'));
                         
                         if (showDetailsBtn && !showDetailsBtn.classList.contains('expanded')) {
-                            console.log(`- Expanding villa ${offerId}...`);
+                            console.log(`- Expanding villa "${villaName}"...`);
                             this.toggleVillaDetails(showDetailsBtn);
-                            console.log('✅ Restored expansion for villa:', offerId);
+                            console.log('✅ Restored expansion for villa:', villaName);
                         } else {
-                            console.log('⚠️ Villa already expanded or button not found:', offerId);
+                            console.log('⚠️ Villa already expanded or button not found:', villaName);
                         }
                     } else {
-                        console.log('❌ Card not found for offer ID:', offerId);
+                        console.log('❌ Card not found for villa:', villaName);
                     }
                 });
             } else {
@@ -346,24 +383,41 @@ class ActivitiesDashboard {
             // Restore selected offers within villas  
             if (state.selectedOffers && Object.keys(state.selectedOffers).length > 0) {
                 console.log('DEBUG: Restoring offer selections...');
-                Object.entries(state.selectedOffers).forEach(([villaOfferId, selectedOfferId]) => {
-                    console.log(`- Looking for villa ${villaOfferId} with selected offer ${selectedOfferId}`);
-                    const card = document.querySelector(`[data-offer-id="${villaOfferId}"]`);
+                Object.entries(state.selectedOffers).forEach(([villaName, selectedButtonText]) => {
+                    console.log(`- Looking for villa "${villaName}" with selected "${selectedButtonText}"`);
                     
-                    if (card) {
-                        const targetButton = card.querySelector(`[data-offer-id="${selectedOfferId}"]`);
+                    // Find card by villa name
+                    let targetCard = null;
+                    allCards.forEach(card => {
+                        const titleElement = card.querySelector('.champion-title');
+                        if (titleElement && titleElement.textContent.trim() === villaName) {
+                            targetCard = card;
+                        }
+                    });
+                    
+                    if (targetCard) {
+                        // Find button by text content
+                        const buttons = targetCard.querySelectorAll('.night-selector-btn');
+                        let targetButton = null;
+                        
+                        buttons.forEach(button => {
+                            if (button.textContent.trim() === selectedButtonText) {
+                                targetButton = button;
+                            }
+                        });
+                        
                         console.log(`- Found target button:`, !!targetButton);
                         console.log(`- Button active state:`, targetButton?.classList.contains('active'));
                         
                         if (targetButton && !targetButton.classList.contains('active')) {
-                            console.log(`- Selecting offer ${selectedOfferId} in villa ${villaOfferId}...`);
+                            console.log(`- Selecting "${selectedButtonText}" in villa "${villaName}"...`);
                             targetButton.click();
-                            console.log('✅ Restored offer selection:', villaOfferId, '->', selectedOfferId);
+                            console.log('✅ Restored offer selection:', villaName, '->', selectedButtonText);
                         } else {
                             console.log('⚠️ Offer already selected or button not found');
                         }
                     } else {
-                        console.log('❌ Villa card not found:', villaOfferId);
+                        console.log('❌ Villa card not found:', villaName);
                     }
                 });
             } else {
