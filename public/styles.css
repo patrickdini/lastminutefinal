@@ -25,7 +25,8 @@ body {
 }
 
 /* Carousel Styles */
-.carousel-container {
+/* Hero carousel at top of page */
+body > .container > .carousel-container {
     position: relative;
     width: 100%;
     max-width: 100vw;
@@ -35,13 +36,13 @@ body {
     overflow: hidden;
 }
 
-.carousel-wrapper {
+body > .container > .carousel-container .carousel-wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 4/5; /* Mobile portrait aspect ratio */
 }
 
-.carousel-slide {
+body > .container > .carousel-container .carousel-slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -51,7 +52,7 @@ body {
     transition: opacity 0.7s ease-in-out;
 }
 
-.carousel-slide.active {
+body > .container > .carousel-container .carousel-slide.active {
     opacity: 1;
 }
 
@@ -1866,9 +1867,24 @@ body > .container > .carousel-container .carousel-slide img {
 }
 
 /* Fix for villa card carousel images */
-.champion-offer-card .carousel-slide {
+.champion-offer-card .carousel-container {
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.champion-offer-card .carousel-slides {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.champion-offer-card .carousel-slide {
+    min-width: 100%;
+    height: 100%;
+    opacity: 1 !important; /* Override hero carousel opacity */
+    position: relative !important; /* Override absolute positioning */
 }
 
 .champion-offer-card .carousel-slide img {
@@ -1878,24 +1894,26 @@ body > .container > .carousel-container .carousel-slide img {
     display: block;
 }
 
-/* Carousel Container */
-.carousel-container {
+/* General Carousel Container (villa cards) */
+.champion-hero .carousel-container {
     width: 100%;
     height: 100%;
     overflow: hidden;
     position: relative;
 }
 
-.carousel-slides {
+.champion-hero .carousel-slides {
     display: flex;
     height: 100%;
     transition: transform 0.5s ease-in-out;
 }
 
-.carousel-slide {
+.champion-hero .carousel-slide {
     min-width: 100%;
     height: 100%;
     box-sizing: border-box;
+    opacity: 1;
+    position: relative;
 }
 
 /* Modal Gallery Styles - Enhanced Flexbox Layout */
