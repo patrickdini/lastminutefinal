@@ -405,6 +405,15 @@ class ConfirmBooking {
     }
 }
 
+/**
+ * Navigate back to offers while preserving user state
+ */
+function goBackToOffers() {
+    // The user state is already saved in localStorage from the booking process
+    // Just navigate back to the main page - the state will be restored automatically
+    window.location.href = '/';
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new ConfirmBooking();
