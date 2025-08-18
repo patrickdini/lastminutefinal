@@ -53,31 +53,7 @@ body {
     color: #FFFFFF;
 }
 
-/* Admin Button */
-.admin-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    color: #AA7831;
-    background: rgba(74, 74, 71, 0.8);
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid #AA7831;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-}
 
-.admin-btn:hover {
-    background: #AA7831;
-    color: #0F3128;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.3);
-}
-
-.admin-btn i {
-    font-size: 1.1rem;
-}
 
 /* Controls */
 
