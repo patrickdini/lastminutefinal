@@ -995,14 +995,17 @@ body {
     border: 1px solid #4A4A47;
 }
 
-/* Villa Image Gallery */
+/* Villa Image Gallery - Enhanced Flexbox Layout */
 .villa-image-gallery {
+    display: flex;
     position: relative;
     height: 250px;
     overflow: hidden;
 }
 
 .villa-image-container {
+    display: flex;
+    flex: 1;
     position: relative;
     width: 100%;
     height: 100%;
@@ -1013,6 +1016,7 @@ body {
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .villa-card:hover .villa-main-image {
@@ -1030,6 +1034,7 @@ body {
     font-size: 0.8rem;
     font-weight: 600;
     backdrop-filter: blur(4px);
+    z-index: 2;
 }
 
 .villa-card-header {
@@ -1397,12 +1402,28 @@ body {
     box-shadow: 0 0 12px rgba(170, 120, 49, 0.4);
 }
 
-/* Booking Content Layout */
+/* Booking Content Layout - Enhanced Grid */
 .booking-content {
     display: grid;
     grid-template-columns: 1fr auto auto;
+    grid-template-areas: "info nights book";
     gap: 20px;
     align-items: center;
+}
+
+.booking-info {
+    grid-area: info;
+}
+
+.night-selector {
+    grid-area: nights;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.book-now-btn {
+    grid-area: book;
 }
 
 /* Villa Cards Responsive */
@@ -1449,6 +1470,10 @@ body {
     
     .booking-content {
         grid-template-columns: 1fr;
+        grid-template-areas: 
+            "info"
+            "nights"
+            "book";
         gap: 15px;
         text-align: center;
     }
@@ -1667,7 +1692,7 @@ body {
     box-sizing: border-box;
 }
 
-/* Modal Gallery Styles */
+/* Modal Gallery Styles - Enhanced Flexbox Layout */
 .modal {
     display: none;
     position: fixed;
@@ -1677,14 +1702,39 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.95);
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
+.modal.show {
+    display: flex;
+}
+
+.modal-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    max-width: 1200px;
+    padding: 20px;
+}
+
 .modal-content {
-    max-width: 90%;
+    max-width: 100%;
     max-height: 85%;
     object-fit: contain;
+    flex-shrink: 0;
+}
+
+.modal-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    height: 100%;
 }
 
 .modal .prev, 
@@ -1700,22 +1750,24 @@ body {
     font-size: 40px;
     user-select: none;
     background: rgba(0, 0, 0, 0.5);
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 8px;
+    z-index: 2;
 }
 
 .modal .prev:hover, 
 .modal .next:hover {
     background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .modal .prev {
-    left: 0;
-    border-radius: 0 8px 8px 0;
+    left: 20px;
 }
 
 .modal .next {
-    right: 0;
-    border-radius: 8px 0 0 8px;
+    right: 20px;
 }
 
 .modal .close {

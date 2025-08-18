@@ -288,34 +288,47 @@
 
 /* Mobile-first Responsive Design */
 
-/* Mobile base styles */
+/* Mobile base styles - Enhanced layout structure */
 .nav-content {
+    display: flex;
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
 }
 
 .nav-actions {
+    display: flex;
     justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .config-main {
     padding: 20px 15px;
+    min-height: calc(100vh - 120px);
 }
 
 .config-section {
     padding: 20px;
+    background: rgba(15, 49, 40, 0.3);
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
 .villas-grid {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 20px;
 }
 
 .villa-form {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 15px;
 }
 
 .form-row {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
@@ -323,6 +336,7 @@
 
 .form-row label {
     min-width: auto;
+    font-weight: 600;
 }
 
 .section-header h2 {
@@ -342,26 +356,33 @@
         flex-direction: row;
         align-items: center;
         gap: 20px;
+        justify-content: space-between;
     }
     
     .nav-actions {
         justify-content: flex-end;
+        flex-shrink: 0;
     }
     
     .config-main {
         padding: 40px;
+        display: grid;
+        gap: 30px;
     }
     
     .config-section {
         padding: 30px;
+        background: rgba(15, 49, 40, 0.5);
     }
     
     .villas-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+        gap: 25px;
     }
     
     .villa-form {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
     }
     
     .form-row {
@@ -372,10 +393,20 @@
     
     .form-row label {
         min-width: 120px;
+        flex-shrink: 0;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 15px;
     }
     
     .section-header h2 {
         font-size: 2rem;
+        margin: 0;
     }
     
     .villa-card h3 {
