@@ -1,0 +1,76 @@
+Please find my comments after “->” below
+
+LMReservations Field Mapping & Examples
+1. id
+•	Example: 1001 (auto-increment primary key)
+•	-> ok
+2. first_name
+•	Example: Sarah
+•	-> ok
+3. last_name
+•	Example: Johnson
+-> ok
+4. email
+•	Example: sarah.johnson@email.com
+•	-> ok
+5. phone_number
+•	Example: +1-555-123-4567
+•	-> ok
+6. address
+•	Example: 123 Oak Street, San Francisco, CA 94102
+•	-> ok
+7. location
+•	Example: United States (guest's country/region)
+•	->text taken from existing drop down list
+8. special_requests
+•	Example: Early check-in requested. Vegetarian meal preferences. Celebrating anniversary.
+•	-> ok
+9. transport
+•	Example: Airport pickup needed or Self-arranged or Taxi
+->text taken from existing drop down list
+•	
+10. fast_boat_interest
+•	Example: Yes or No (boolean for fast boat services)
+•	-> ok
+11. accommodations_booked
+•	Example: The Pearl Villa - 2 nights (from our villa_display_name + nights)
+•	-> here a bit more complicated I would like a json file containing the following info:
+[
+  {
+    "villa_id": "Leaf",
+    "check_in_date": "2025-09-01",
+    "check_out_date": "2025-09-05"
+  }
+]
+
+12. villa_id
+•	Example: Pearl (from our current villa keys: Pearl, Shore, Wave, etc.)
+•	-> here a list of villas [“villa_id”...”] in case a guests change villa during our stay (not an issue for now”
+13. perks
+•	Example: Homemade Cocktails (140,000 IDR), Massage 1 hour (1,000,000 IDR) (JSON string of our perks array)
+•	-> ok
+14. price_guests
+•	Example: 11000000 (our current totalRate in IDR)
+•	-> ok
+15. number_adults
+•	Example: 2 (from our current adults selection)
+•	-> ok
+16. number_children
+•	Example: 0 (from our current children selection)
+•	-> ok
+17. savings_guests
+•	Example: 2280000 (our current savings amount in IDR)
+•	-> ok
+18. check_in_date
+•	Example: 2025-08-26 (from our checkIn date)
+•	-> ok
+19. check_out_date
+•	Example: 2025-08-28 (from our checkOut date)
+•	-> ok
+20. date_received
+•	Example: 2025-08-18 12:30:00 (timestamp when reservation was submitted)
+•	->ok (please use Bali time, as always)
+21. date_payment
+•	Example: NULL initially, then 2025-08-18 14:15:00 when payment confirmed
+•	-> ok
+
