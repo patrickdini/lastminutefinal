@@ -56,7 +56,7 @@ body {
 }
 
 .carousel-slide picture,
-.carousel-slide img {
+.carousel-container .carousel-slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1177,14 +1177,14 @@ body {
 }
 
 /* Villa Image Gallery - Enhanced Flexbox Layout */
-.villa-image-gallery {
+.villa-card .villa-image-gallery {
     display: flex;
     position: relative;
     height: 250px;
     overflow: hidden;
 }
 
-.villa-image-container {
+.villa-card .villa-image-container {
     display: flex;
     flex: 1;
     position: relative;
@@ -1192,12 +1192,13 @@ body {
     height: 100%;
 }
 
-.villa-main-image {
+.villa-card .villa-main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
     flex-shrink: 0;
+    display: block;
 }
 
 .villa-card:hover .villa-main-image {
