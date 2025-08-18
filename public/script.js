@@ -352,8 +352,9 @@ class ActivitiesDashboard {
                 
                 // Add small delay to ensure DOM updates before checking selection
                 setTimeout(() => {
+                    console.log('🔍 About to call getSelectedFlexibility()');
                     const selectedFlexibility = this.getSelectedFlexibility();
-                    console.log('Flexibility changed to:', selectedFlexibility);
+                    console.log('🔍 getSelectedFlexibility() returned:', selectedFlexibility);
                     
                     // Save user state when flexibility changes
                     this.saveUserState();
