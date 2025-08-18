@@ -187,7 +187,7 @@ class ConfirmBooking {
                         ${perks && perks.length > 0 ? perks.map(perk => `
                             <div class="included-item">
                                 <i class="fas fa-gift"></i>
-                                <span>${perk.tagline}: ${perk.description}</span>
+                                <span>${perk.tagline}: <i>${perk.description}</i></span>
                             </div>
                         `).join('') : ''}
                     </div>
