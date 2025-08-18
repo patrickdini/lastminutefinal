@@ -55,6 +55,9 @@ class ActivitiesDashboard {
         // State management key
         this.stateKey = 'villaTokenUserState';
         
+        // Pending flexibility restore (for timing issues)
+        this.pendingFlexibilityRestore = null;
+        
         this.initializeEventListeners();
         this.setupCalendar();
         this.setupGuestPicker();
@@ -66,13 +69,24 @@ class ActivitiesDashboard {
             // State was restored, apply the calendar filter with restored dates
             this.updateCalendarDisplay();
             
-            // Add a small delay to ensure all UI elements are properly restored
+            // Add a delay to ensure all UI elements are properly restored, including flexibility
             setTimeout(() => {
+                // Restore flexibility after DOM is fully initialized
+                if (this.pendingFlexibilityRestore) {
+                    console.log('Final flexibility restoration to:', this.pendingFlexibilityRestore);
+                    this.setSelectedFlexibility(this.pendingFlexibilityRestore);
+                    
+                    // Double-check it worked
+                    setTimeout(() => {
+                        const finalCheck = this.getSelectedFlexibility();
+                        console.log('Final flexibility verification:', finalCheck);
+                        this.pendingFlexibilityRestore = null; // Clear pending restore
+                    }, 50);
+                }
+                
                 console.log('Applying calendar filter with restored state...');
-                console.log('Final flexibility check before API call:');
-                this.getSelectedFlexibility(); // This will log the debug info
                 this.applyCalendarFilter();
-            }, 200);
+            }, 300);
         }
         this.initializeImageCarousels();
         this.initializeGalleryModal();
@@ -176,24 +190,8 @@ class ActivitiesDashboard {
             this.updateGuestDisplay();
             this.updateGuestButtons();
             
-            // Restore flexibility selection with verification
-            if (state.selectedFlexibility) {
-                console.log('Restoring flexibility to:', state.selectedFlexibility);
-                this.setSelectedFlexibility(state.selectedFlexibility);
-                
-                // Verify it was set correctly
-                const actualFlexibility = this.getSelectedFlexibility();
-                console.log('Verified flexibility after restoration:', actualFlexibility);
-                
-                if (actualFlexibility !== state.selectedFlexibility) {
-                    console.warn('Flexibility restoration failed, retrying...');
-                    // Retry after a short delay to ensure DOM is ready
-                    setTimeout(() => {
-                        this.setSelectedFlexibility(state.selectedFlexibility);
-                        console.log('Flexibility retry set to:', this.getSelectedFlexibility());
-                    }, 100);
-                }
-            }
+            // Store flexibility for later restoration after DOM is fully ready
+            this.pendingFlexibilityRestore = state.selectedFlexibility;
 
             console.log('User state restored successfully');
             return true;
