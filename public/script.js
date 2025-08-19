@@ -4106,11 +4106,27 @@ class MailingListHandler {
             this.messageContainer.className = 'escape-list-message ' + type;
             this.messageContainer.style.display = 'block';
             
-            // Auto-hide success messages after 8 seconds
+            // Hide form on successful submission
+            if (type === 'success' && this.form) {
+                this.form.style.display = 'none';
+                
+                // Add "Update preferences" button to success message
+                const updateButton = document.createElement('button');
+                updateButton.className = 'escape-list-update-btn';
+                updateButton.innerHTML = '<i class="fas fa-edit"></i> Update preferences';
+                updateButton.onclick = () => this.showForm();
+                
+                // Check if button doesn't already exist
+                if (!this.messageContainer.querySelector('.escape-list-update-btn')) {
+                    this.messageContainer.appendChild(updateButton);
+                }
+            }
+            
+            // Auto-hide success messages after 12 seconds (longer since form is hidden)
             if (type === 'success') {
                 setTimeout(() => {
                     this.hideMessage();
-                }, 8000);
+                }, 12000);
             }
         }
     }
@@ -4118,7 +4134,19 @@ class MailingListHandler {
     hideMessage() {
         if (this.messageContainer) {
             this.messageContainer.style.display = 'none';
+            // Remove update button if it exists
+            const updateButton = this.messageContainer.querySelector('.escape-list-update-btn');
+            if (updateButton) {
+                updateButton.remove();
+            }
         }
+    }
+    
+    showForm() {
+        if (this.form) {
+            this.form.style.display = 'block';
+        }
+        this.hideMessage();
     }
 }
 

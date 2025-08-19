@@ -2910,3 +2910,42 @@ body > .container > .carousel-container .carousel-slide img {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Update preferences button styling */
+.escape-list-update-btn {
+    background: linear-gradient(135deg, #AA7831, #CC9444);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Nexa', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.escape-list-update-btn:hover {
+    background: linear-gradient(135deg, #CC9444, #AA7831);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(170, 120, 49, 0.3);
+}
+
+.escape-list-update-btn:active {
+    transform: translateY(0);
+}
+
+/* Smooth form transitions */
+.escape-list-form {
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.escape-list-form[style*="display: none"] {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
