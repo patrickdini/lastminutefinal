@@ -390,30 +390,48 @@ app.post('/api/mailing-list', async (req, res) => {
         const db = require('./config/database');
         const connection = await db.getConnection();
         
-        const insertQuery = `
+        // Use INSERT ... ON DUPLICATE KEY UPDATE to handle existing emails
+        const upsertQuery = `
             INSERT INTO LMMailing_List (
                 name, email, whatsapp_number, travel_type, staycation_window,
                 preferred_lead_time, channel_opt_in, consent, consent_at,
                 last_mail_sent, number_of_bookings, source, locale,
                 ip_address, user_agent, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
+                whatsapp_number = VALUES(whatsapp_number),
+                travel_type = VALUES(travel_type),
+                staycation_window = VALUES(staycation_window),
+                preferred_lead_time = VALUES(preferred_lead_time),
+                channel_opt_in = VALUES(channel_opt_in),
+                consent = VALUES(consent),
+                consent_at = VALUES(consent_at),
+                ip_address = VALUES(ip_address),
+                user_agent = VALUES(user_agent),
+                updated_at = VALUES(updated_at)
         `;
         
-        const [result] = await connection.execute(insertQuery, values);
+        const [result] = await connection.execute(upsertQuery, values);
         connection.release();
         
-        console.log('Mailing list signup saved with ID:', result.insertId);
+        const recordId = result.insertId || result.affectedRows;
+        console.log('Mailing list signup saved/updated with ID:', recordId);
         
         // Return success response
+        const responseMessage = result.insertId ? 
+            "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise." :
+            "Your preferences have been updated! 🌞\nWe've saved your latest choices. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.";
+            
         res.json({
             success: true,
-            signupId: result.insertId,
-            message: "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.",
+            signupId: recordId,
+            message: responseMessage,
             data: {
-                id: result.insertId,
+                id: recordId,
                 name: mailingListData.name,
                 email: mailingListData.email,
-                channelOptIn: channelOptIn
+                channelOptIn: channelOptIn.split(',')
             }
         });
         
