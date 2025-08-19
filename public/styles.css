@@ -24,6 +24,23 @@ body {
     flex-direction: column;
 }
 
+/* Header Styles */
+.site-header {
+    padding: 20px 0;
+    margin-bottom: 0;
+}
+
+.logo-link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.site-logo {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+
 /* Carousel Styles */
 /* Hero carousel at top of page */
 body > .container > .carousel-container {
