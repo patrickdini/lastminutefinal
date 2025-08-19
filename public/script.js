@@ -4113,7 +4113,7 @@ class MailingListHandler {
                 // Add "Update preferences" button to success message
                 const updateButton = document.createElement('button');
                 updateButton.className = 'escape-list-update-btn';
-                updateButton.innerHTML = '<i class="fas fa-edit"></i> Update preferences';
+                updateButton.textContent = 'Update preferences';
                 updateButton.onclick = () => this.showForm();
                 
                 // Check if button doesn't already exist
