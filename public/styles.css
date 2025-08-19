@@ -26,7 +26,11 @@ body {
 
 /* Header Styles */
 .site-header {
-    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin: 0 -15px;
     margin-bottom: 0;
 }
 
@@ -36,6 +40,12 @@ body {
 }
 
 .site-logo {
+    height: 80px;
+    width: auto;
+    display: block;
+}
+
+.slh-logo {
     height: 80px;
     width: auto;
     display: block;
