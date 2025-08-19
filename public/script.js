@@ -4033,13 +4033,17 @@ class MailingListHandler {
     }
     
     async handleSubmit() {
+        console.log('=== START handleSubmit ===');
         try {
+            console.log('Setting loading state...');
             // Show loading state
             this.setLoadingState(true);
             this.hideMessage();
             
+            console.log('Creating FormData...');
             // Collect form data
             const formData = new FormData(this.form);
+            console.log('Collecting form data...');
             const data = {
                 name: formData.get('name'),
                 email: formData.get('email'),
@@ -4049,6 +4053,7 @@ class MailingListHandler {
                 leadTime: formData.get('leadTime'),
                 consent: formData.get('consent') === 'on'
             };
+            console.log('Form data collected successfully.');
             
             console.log('Submitting mailing list form:', data);
             
