@@ -75,3 +75,6 @@ Time Zone: Always use Bali time (Central Indonesia Time, WITA, UTC+8) for all ti
 
 ### Logo Integration & Branding (Aug 19, 2025)
 - **Dual Logo Header System**: Implemented professional header with Villa Tokay logo (left, clickable to villatokay.com) and Small Luxury Hotels certification logo (right, display only). Both logos set to 80px height with flexbox layout ensuring proper spacing and alignment. Header uses 20px padding and extends full width above the hero carousel for optimal brand visibility and credibility.
+
+### Email Marketing Integration (Aug 19, 2025)
+- **"Join the Escape List!" Email Signup Section**: Comprehensive email marketing signup form positioned after villa cards section. Features Villa Tokay brand styling with white gradient background matching calendar/guest selection sections. Includes segmentation fields for targeted marketing: Travel Type (Couple/Solo, Family), Staycation Window (Weekdays, Weekends, Either), and Lead Time preferences (Within 3 days, 4-7 days, 8+ days). Form includes Name, Email (required), optional WhatsApp number with helper text, and GDPR-compliant consent checkbox. Smart defaults pre-selected: Travel Type="Couple/Solo", Staycation Window="Either", Lead Time="4–7 days", consent checkbox checked by default. Mobile-responsive design with form field stacking and optimized spacing for all screen sizes.
