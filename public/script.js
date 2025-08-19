@@ -3884,9 +3884,12 @@ class ActivitiesDashboard {
      * Initialize the main hero carousel
      */
     initializeCarousel() {
+        // Dynamically count actual slides in the DOM
+        const slides = document.querySelectorAll('.carousel-slide');
+        
         this.heroCarousel = {
             currentSlide: 0,
-            totalSlides: 2,
+            totalSlides: slides.length,
             autoRotateInterval: null,
             autoRotateDelay: 3000
         };
