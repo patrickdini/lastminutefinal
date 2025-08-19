@@ -163,7 +163,7 @@ body > .container > .carousel-container .carousel-slide img {
         margin-right: auto;
     }
 
-    .carousel-wrapper {
+    body > .container > .carousel-container .carousel-wrapper {
         aspect-ratio: 16/9; /* Desktop landscape aspect ratio */
     }
 
