@@ -382,6 +382,91 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Join the Escape List Section -->
+                <div class="escape-list-section">
+                    <div class="escape-list-header">
+                        <h2>✨ Join the Escape List ✨</h2>
+                        <p class="escape-list-description">
+                            Be the first to know about last-minute villa escapes at Villa Tokay — with exclusive perks only for subscribers.
+                        </p>
+                        <p class="escape-list-subheader">
+                            We'll only send you what matters: short-notice stays, private offers, and special perks.<br>
+                            Max 2 messages per month.
+                        </p>
+                    </div>
+
+                    <form class="escape-list-form" id="escapeListForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="escapeName">Name *</label>
+                                <input type="text" id="escapeName" name="name" required>
+                                <span class="field-help">So we can say hi properly.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="escapeEmail">Email *</label>
+                                <input type="email" id="escapeEmail" name="email" required>
+                                <span class="field-help">For exclusive escape offers and villa news.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="escapeWhatsApp">WhatsApp Number</label>
+                                <input type="tel" id="escapeWhatsApp" name="whatsapp" placeholder="+62 812 3456 7890">
+                                <span class="field-help">Get offers instantly on WhatsApp (fastest way).</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="travelType">Travel Type *</label>
+                                <select id="travelType" name="travelType" required>
+                                    <option value="">Choose one</option>
+                                    <option value="couple-solo">Couple/Solo</option>
+                                    <option value="family">Family</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="staycationWindow">Typical Staycation Window *</label>
+                                <select id="staycationWindow" name="staycationWindow" required>
+                                    <option value="">Choose one</option>
+                                    <option value="weekdays">Weekdays</option>
+                                    <option value="weekends">Weekends</option>
+                                    <option value="either">Either</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="leadTime">Preferred Lead Time *</label>
+                                <select id="leadTime" name="leadTime" required>
+                                    <option value="">Choose one</option>
+                                    <option value="within-3-days">Within 3 days</option>
+                                    <option value="4-7-days">4–7 days</option>
+                                    <option value="8-plus-days">8+ days</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="consent-section">
+                            <label class="consent-checkbox">
+                                <input type="checkbox" id="escapeConsent" name="consent" required>
+                                <span class="checkmark"></span>
+                                <span class="consent-text">
+                                    I agree to receive exclusive last-minute offers from Villa Tokay via Email and/or WhatsApp.
+                                    <br><small>(We'll never share your data. You can unsubscribe anytime.)</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="escape-list-submit-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Join the Escape List
+                        </button>
+                    </form>
+                </div>
             </div>
             <!-- End main-content-column -->
 
