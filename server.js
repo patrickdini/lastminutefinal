@@ -22,16 +22,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session middleware for admin panel
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'villa-tokay-admin-secret-2025',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "villa-tokay-admin-secret-2025",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        },
+    }),
+);
 
 // Disable caching so new CSS/JS show up immediately
 app.use((req, res, next) => {
@@ -57,168 +59,218 @@ app.use(
 );
 
 // Serve confirm-booking page
-app.get('/confirm-booking', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'confirm-booking.html'));
+app.get("/confirm-booking", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "confirm-booking.html"));
 });
 
 // Handle booking confirmation and save to LMReservations
-app.post('/api/confirm-booking', async (req, res) => {
+app.post("/api/confirm-booking", async (req, res) => {
     try {
         const bookingRequest = req.body;
-        console.log('Processing booking request:', bookingRequest);
-        
+        console.log("Processing booking request:", bookingRequest);
+
         // Comprehensive data validation
         const validationErrors = [];
-        
+
         // Required field validation
-        if (!bookingRequest.firstName || bookingRequest.firstName.trim() === '') {
-            validationErrors.push('First name is required');
+        if (
+            !bookingRequest.firstName ||
+            bookingRequest.firstName.trim() === ""
+        ) {
+            validationErrors.push("First name is required");
         }
-        if (!bookingRequest.lastName || bookingRequest.lastName.trim() === '') {
-            validationErrors.push('Last name is required');
+        if (!bookingRequest.lastName || bookingRequest.lastName.trim() === "") {
+            validationErrors.push("Last name is required");
         }
-        if (!bookingRequest.email || bookingRequest.email.trim() === '') {
-            validationErrors.push('Email is required');
+        if (!bookingRequest.email || bookingRequest.email.trim() === "") {
+            validationErrors.push("Email is required");
         }
-        
+
         // Field length validation (based on database schema)
         if (bookingRequest.firstName && bookingRequest.firstName.length > 100) {
-            validationErrors.push('First name must be less than 100 characters');
+            validationErrors.push(
+                "First name must be less than 100 characters",
+            );
         }
         if (bookingRequest.lastName && bookingRequest.lastName.length > 100) {
-            validationErrors.push('Last name must be less than 100 characters');
+            validationErrors.push("Last name must be less than 100 characters");
         }
         if (bookingRequest.email && bookingRequest.email.length > 150) {
-            validationErrors.push('Email must be less than 150 characters');
+            validationErrors.push("Email must be less than 150 characters");
         }
         if (bookingRequest.phone && bookingRequest.phone.length > 50) {
-            validationErrors.push('Phone number must be less than 50 characters');
+            validationErrors.push(
+                "Phone number must be less than 50 characters",
+            );
         }
-        
+
         // Email format validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (bookingRequest.email && !emailRegex.test(bookingRequest.email)) {
-            validationErrors.push('Please enter a valid email address');
+            validationErrors.push("Please enter a valid email address");
         }
-        
+
         // Required booking data validation
-        if (!bookingRequest.villaKey || bookingRequest.villaKey.trim() === '') {
-            validationErrors.push('Villa information is missing');
+        if (!bookingRequest.villaKey || bookingRequest.villaKey.trim() === "") {
+            validationErrors.push("Villa information is missing");
         }
         if (!bookingRequest.checkIn) {
-            validationErrors.push('Check-in date is required');
+            validationErrors.push("Check-in date is required");
         }
         if (!bookingRequest.checkOut) {
-            validationErrors.push('Check-out date is required');
+            validationErrors.push("Check-out date is required");
         }
-        
+
         // Numeric validation
-        if (bookingRequest.adults && (isNaN(bookingRequest.adults) || bookingRequest.adults < 1)) {
-            validationErrors.push('Number of adults must be at least 1');
+        if (
+            bookingRequest.adults &&
+            (isNaN(bookingRequest.adults) || bookingRequest.adults < 1)
+        ) {
+            validationErrors.push("Number of adults must be at least 1");
         }
-        if (bookingRequest.children && (isNaN(bookingRequest.children) || bookingRequest.children < 0)) {
-            validationErrors.push('Number of children cannot be negative');
+        if (
+            bookingRequest.children &&
+            (isNaN(bookingRequest.children) || bookingRequest.children < 0)
+        ) {
+            validationErrors.push("Number of children cannot be negative");
         }
-        if (bookingRequest.totalPrice && (isNaN(bookingRequest.totalPrice) || bookingRequest.totalPrice <= 0)) {
-            validationErrors.push('Invalid price information');
+        if (
+            bookingRequest.totalPrice &&
+            (isNaN(bookingRequest.totalPrice) || bookingRequest.totalPrice <= 0)
+        ) {
+            validationErrors.push("Invalid price information");
         }
-        
+
         // Date format validation
         let checkInDate, checkOutDate;
         try {
             checkInDate = new Date(bookingRequest.checkIn);
             checkOutDate = new Date(bookingRequest.checkOut);
             if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
-                validationErrors.push('Invalid date format');
+                validationErrors.push("Invalid date format");
             }
         } catch (error) {
-            validationErrors.push('Invalid date format');
+            validationErrors.push("Invalid date format");
         }
-        
+
         // Return validation errors if any
         if (validationErrors.length > 0) {
-            console.error('Validation errors:', validationErrors);
+            console.error("Validation errors:", validationErrors);
             return res.status(400).json({
                 success: false,
-                message: 'Please check your booking information: ' + validationErrors.join(', '),
-                errors: validationErrors
+                message:
+                    "Please check your booking information: " +
+                    validationErrors.join(", "),
+                errors: validationErrors,
             });
         }
-        
+
         // Get database connection
-        const db = require('./config/database');
+        const db = require("./config/database");
         const connection = await db.getConnection();
-        
+
         // Create Bali timezone timestamp for date_received
         const baliTime = new Date();
         baliTime.setHours(baliTime.getHours() + 8); // Convert to Bali time (UTC+8)
-        const dateReceived = baliTime.toISOString().slice(0, 19).replace('T', ' '); // Format: YYYY-MM-DD HH:MM:SS
-        
+        const dateReceived = baliTime
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " "); // Format: YYYY-MM-DD HH:MM:SS
+
         // Safe date formatting function
         function formatDateForDatabase(dateInput) {
             try {
                 const date = new Date(dateInput);
                 if (isNaN(date.getTime())) {
-                    throw new Error('Invalid date');
+                    throw new Error("Invalid date");
                 }
-                return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+                return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
             } catch (error) {
-                console.error('Date formatting error:', error, 'Input:', dateInput);
-                throw new Error('Invalid date format');
+                console.error(
+                    "Date formatting error:",
+                    error,
+                    "Input:",
+                    dateInput,
+                );
+                throw new Error("Invalid date format");
             }
         }
-        
+
         // Safe JSON stringify with error handling
         function safeJSONStringify(data, fieldName) {
             try {
                 return JSON.stringify(data);
             } catch (error) {
-                console.error(`JSON stringify error for ${fieldName}:`, error, 'Data:', data);
+                console.error(
+                    `JSON stringify error for ${fieldName}:`,
+                    error,
+                    "Data:",
+                    data,
+                );
                 throw new Error(`Invalid ${fieldName} data format`);
             }
         }
-        
+
         // Map form data to database fields with safe processing
         const reservationData = {
             // Guest information (fields 2-6) - validated above
             first_name: bookingRequest.firstName.trim(),
             last_name: bookingRequest.lastName.trim(),
             email: bookingRequest.email.trim().toLowerCase(),
-            phone_number: bookingRequest.phone ? bookingRequest.phone.trim() : null,
-            address: bookingRequest.transferAddress ? bookingRequest.transferAddress.trim() : null,
-            
+            phone_number: bookingRequest.phone
+                ? bookingRequest.phone.trim()
+                : null,
+            address: bookingRequest.transferAddress
+                ? bookingRequest.transferAddress.trim()
+                : null,
+
             // Location and preferences (fields 7-10)
             location: bookingRequest.transferLocation || null,
-            special_requests: bookingRequest.specialRequests ? bookingRequest.specialRequests.trim() : null,
+            special_requests: bookingRequest.specialRequests
+                ? bookingRequest.specialRequests.trim()
+                : null,
             transport: bookingRequest.needTransfer || null,
-            private_boat_interest: bookingRequest.interestedInPrivateBoat ? 1 : 0,
-            
+            private_boat_interest: bookingRequest.interestedInPrivateBoat
+                ? 1
+                : 0,
+
             // Booking details (fields 11-12) - with safe JSON processing
-            accommodations_booked: safeJSONStringify([{
-                villa_id: bookingRequest.villaKey,
-                check_in_date: formatDateForDatabase(bookingRequest.checkIn),
-                check_out_date: formatDateForDatabase(bookingRequest.checkOut)
-            }], 'accommodations_booked'),
-            villa_id: safeJSONStringify([bookingRequest.villaKey], 'villa_id'),
-            
+            accommodations_booked: safeJSONStringify(
+                [
+                    {
+                        villa_id: bookingRequest.villaKey,
+                        check_in_date: formatDateForDatabase(
+                            bookingRequest.checkIn,
+                        ),
+                        check_out_date: formatDateForDatabase(
+                            bookingRequest.checkOut,
+                        ),
+                    },
+                ],
+                "accommodations_booked",
+            ),
+            villa_id: safeJSONStringify([bookingRequest.villaKey], "villa_id"),
+
             // Perks and pricing (fields 13-17)
-            perks: bookingRequest.perks ? safeJSONStringify(bookingRequest.perks, 'perks') : null,
+            perks: bookingRequest.perks
+                ? safeJSONStringify(bookingRequest.perks, "perks")
+                : null,
             price_guests: parseFloat(bookingRequest.totalPrice) || 0,
             number_adults: parseInt(bookingRequest.adults) || 0,
             number_children: parseInt(bookingRequest.children) || 0,
             savings_guests: parseFloat(bookingRequest.savings) || 0,
-            
+
             // Stay dates (fields 18-19) - with safe date formatting
             check_in_date: formatDateForDatabase(bookingRequest.checkIn),
             check_out_date: formatDateForDatabase(bookingRequest.checkOut),
-            
+
             // Administrative (fields 20-21)
             date_received: dateReceived, // Bali time timestamp
-            date_payment: null // Initially null, updated when payment confirmed
+            date_payment: null, // Initially null, updated when payment confirmed
         };
-        
-        console.log('Mapped reservation data:', reservationData);
-        
+
+        console.log("Mapped reservation data:", reservationData);
+
         // Insert into LMReservations table
         const insertQuery = `
             INSERT INTO LMReservations (
@@ -228,7 +280,7 @@ app.post('/api/confirm-booking', async (req, res) => {
                 savings_guests, check_in_date, check_out_date, date_received, date_payment
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        
+
         const values = [
             reservationData.first_name,
             reservationData.last_name,
@@ -249,112 +301,118 @@ app.post('/api/confirm-booking', async (req, res) => {
             reservationData.check_in_date,
             reservationData.check_out_date,
             reservationData.date_received,
-            reservationData.date_payment
+            reservationData.date_payment,
         ];
-        
+
         const [result] = await connection.execute(insertQuery, values);
         connection.release();
-        
-        console.log('Reservation saved with ID:', result.insertId);
-        
+
+        console.log("Reservation saved with ID:", result.insertId);
+
         // Return success response
         res.json({
             success: true,
             bookingId: result.insertId,
-            message: 'Booking confirmed successfully!',
+            message: "Booking confirmed successfully!",
             reservationData: {
                 id: result.insertId,
                 villa: bookingRequest.villaName,
                 checkIn: bookingRequest.checkIn,
                 checkOut: bookingRequest.checkOut,
-                guests: `${bookingRequest.adults} Adults${bookingRequest.children > 0 ? `, ${bookingRequest.children} Children` : ''}`,
-                email: bookingRequest.email
-            }
+                guests: `${bookingRequest.adults} Adults${bookingRequest.children > 0 ? `, ${bookingRequest.children} Children` : ""}`,
+                email: bookingRequest.email,
+            },
         });
-        
     } catch (error) {
-        console.error('Error processing booking:', error);
+        console.error("Error processing booking:", error);
         res.status(500).json({
             success: false,
-            message: 'Failed to process booking. Please try again.',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            message: "Failed to process booking. Please try again.",
+            error:
+                process.env.NODE_ENV === "development"
+                    ? error.message
+                    : "Internal server error",
         });
     }
 });
 
 // Handle mailing list signup
-app.post('/api/mailing-list', async (req, res) => {
+app.post("/api/mailing-list", async (req, res) => {
     try {
         const signupRequest = req.body;
-        console.log('Processing mailing list signup:', signupRequest);
-        
+        console.log("Processing mailing list signup:", signupRequest);
+
         // Validation
         const validationErrors = [];
-        
-        if (!signupRequest.name || signupRequest.name.trim() === '') {
-            validationErrors.push('Name is required');
+
+        if (!signupRequest.name || signupRequest.name.trim() === "") {
+            validationErrors.push("Name is required");
         }
-        
-        if (!signupRequest.email || signupRequest.email.trim() === '') {
-            validationErrors.push('Email is required');
+
+        if (!signupRequest.email || signupRequest.email.trim() === "") {
+            validationErrors.push("Email is required");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupRequest.email)) {
-            validationErrors.push('Valid email is required');
+            validationErrors.push("Valid email is required");
         }
-        
+
         if (!signupRequest.travelType) {
-            validationErrors.push('Travel type is required');
+            validationErrors.push("Travel type is required");
         }
-        
+
         if (!signupRequest.staycationWindow) {
-            validationErrors.push('Staycation window is required');
+            validationErrors.push("Staycation window is required");
         }
-        
+
         if (!signupRequest.leadTime) {
-            validationErrors.push('Lead time preference is required');
+            validationErrors.push("Lead time preference is required");
         }
-        
+
         if (signupRequest.name && signupRequest.name.length > 255) {
-            validationErrors.push('Name must be less than 255 characters');
+            validationErrors.push("Name must be less than 255 characters");
         }
-        
+
         if (signupRequest.email && signupRequest.email.length > 255) {
-            validationErrors.push('Email must be less than 255 characters');
+            validationErrors.push("Email must be less than 255 characters");
         }
-        
+
         if (validationErrors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: validationErrors.join('. '),
-                errors: validationErrors
+                message: validationErrors.join(". "),
+                errors: validationErrors,
             });
         }
-        
+
         // Determine channel opt-in based on form data (MySQL SET format)
         const channelOptIn = [];
-        if (signupRequest.email) channelOptIn.push('email');
-        if (signupRequest.whatsapp && signupRequest.whatsapp.trim()) channelOptIn.push('whatsapp');
-        
+        if (signupRequest.email) channelOptIn.push("email");
+        if (signupRequest.whatsapp && signupRequest.whatsapp.trim())
+            channelOptIn.push("whatsapp");
+
         // Get client IP and user agent
-        const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
-        const userAgent = req.headers['user-agent'] || '';
-        
+        const clientIP =
+            req.ip ||
+            req.connection.remoteAddress ||
+            req.headers["x-forwarded-for"];
+        const userAgent = req.headers["user-agent"] || "";
+
         // Create timestamps
         const now = new Date();
         const consentAt = signupRequest.consent ? now : null;
-        
+
         // Map staycation window to database ENUM values
         const staycationWindowMap = {
-            'weekdays': 'Weekdays',
-            'weekends': 'Weekends', 
-            'either': 'Either'
+            weekdays: "Weekdays",
+            weekends: "Weekends",
+            either: "Either",
         };
-        
+
         // Convert IP address to binary format for varbinary(16) field
         function ipToBinary(ip) {
             if (!ip) return null;
             try {
                 // For IPv4, convert to 4-byte binary. For IPv6, would be 16 bytes
-                const parts = ip.split('.');
+                const parts = ip.split(".");
                 if (parts.length === 4) {
                     const buffer = Buffer.alloc(4);
                     parts.forEach((part, index) => {
@@ -367,30 +425,33 @@ app.post('/api/mailing-list', async (req, res) => {
                 return null;
             }
         }
-        
+
         // Prepare data for database
         const mailingListData = {
             name: signupRequest.name.trim(),
             email: signupRequest.email.trim().toLowerCase(),
-            whatsapp_number: signupRequest.whatsapp ? signupRequest.whatsapp.trim() : null,
+            whatsapp_number: signupRequest.whatsapp
+                ? signupRequest.whatsapp.trim()
+                : null,
             travel_type: signupRequest.travelType,
-            staycation_window: staycationWindowMap[signupRequest.staycationWindow] || 'Either',
+            staycation_window:
+                staycationWindowMap[signupRequest.staycationWindow] || "Either",
             preferred_lead_time: signupRequest.leadTime,
-            channel_opt_in: channelOptIn.join(','), // MySQL SET format: comma-separated values
+            channel_opt_in: channelOptIn.join(","), // MySQL SET format: comma-separated values
             consent: signupRequest.consent || false,
             consent_at: consentAt,
             last_mail_sent: null,
             number_of_bookings: 0,
-            source: 'lastminute.villatokay.com',
-            locale: 'en', // Default to English
+            source: "lastminute.villatokay.com",
+            locale: "en", // Default to English
             ip_address: clientIP,
             user_agent: userAgent ? userAgent.substring(0, 255) : null, // Truncate to field length
             created_at: now,
-            updated_at: now
+            updated_at: now,
         };
-        
-        console.log('Prepared mailing list data:', mailingListData);
-        
+
+        console.log("Prepared mailing list data:", mailingListData);
+
         // Insert into LMMailing_List table
         const values = [
             mailingListData.name,
@@ -409,13 +470,13 @@ app.post('/api/mailing-list', async (req, res) => {
             mailingListData.ip_address,
             mailingListData.user_agent,
             mailingListData.created_at,
-            mailingListData.updated_at
+            mailingListData.updated_at,
         ];
-        
+
         // Execute the query using MySQL (same as rest of the app)
-        const db = require('./config/database');
+        const db = require("./config/database");
         const connection = await db.getConnection();
-        
+
         // Use INSERT ... ON DUPLICATE KEY UPDATE to handle existing emails
         const upsertQuery = `
             INSERT INTO LMMailing_List (
@@ -437,18 +498,18 @@ app.post('/api/mailing-list', async (req, res) => {
                 user_agent = VALUES(user_agent),
                 updated_at = VALUES(updated_at)
         `;
-        
+
         const [result] = await connection.execute(upsertQuery, values);
         connection.release();
-        
+
         const recordId = result.insertId || result.affectedRows;
-        console.log('Mailing list signup saved/updated with ID:', recordId);
-        
+        console.log("Mailing list signup saved/updated with ID:", recordId);
+
         // Return success response
-        const responseMessage = result.insertId ? 
-            "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise." :
-            "Your preferences have been updated! 🌞\nWe've saved your latest choices. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.";
-            
+        const responseMessage = result.insertId
+            ? "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise."
+            : "Your preferences have been updated! 🌞\nWe've saved your latest choices. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.";
+
         res.json({
             success: true,
             signupId: recordId,
@@ -457,16 +518,18 @@ app.post('/api/mailing-list', async (req, res) => {
                 id: recordId,
                 name: mailingListData.name,
                 email: mailingListData.email,
-                channelOptIn: channelOptIn
-            }
+                channelOptIn: channelOptIn,
+            },
         });
-        
     } catch (error) {
-        console.error('Error processing mailing list signup:', error);
+        console.error("Error processing mailing list signup:", error);
         res.status(500).json({
             success: false,
-            message: 'Failed to process signup. Please try again.',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            message: "Failed to process signup. Please try again.",
+            error:
+                process.env.NODE_ENV === "development"
+                    ? error.message
+                    : "Internal server error",
         });
     }
 });
@@ -488,10 +551,10 @@ try {
 // --- Cache Management ---
 async function loadAllOffersIntoCache() {
     try {
-        console.log('Loading all offers into memory cache...');
-        const db = require('./config/database');
+        console.log("Loading all offers into memory cache...");
+        const db = require("./config/database");
         const connection = await db.getConnection();
-        
+
         const offersQuery = `
             SELECT 
                 co.*,
@@ -509,45 +572,49 @@ async function loadAllOffersIntoCache() {
             WHERE co.checkin_date >= CURDATE()
             ORDER BY co.checkin_date, co.villa_id
         `;
-        
+
         const [offers] = await connection.execute(offersQuery);
         connection.release();
-        
+
         // Create villa name mapping to match what the working API returns
         const villaNameMapping = {
-            'Sunset': 'The Sunset Room',
-            'Tide': 'The Tide Villa', 
-            'Wave': 'The Wave Villa',
-            'Shore': 'The Shore Villa',
-            'Swell 2BR': 'The Swell 2BR',
-            'Flow': 'The Flow Villa',
-            'Breeze': 'The Breeze Villa'
+            Sunset: "The Sunset Room",
+            Tide: "The Tide Villa",
+            Wave: "The Wave Villa",
+            Shore: "The Shore Villa",
+            "Swell 2BR": "The Swell 2BR",
+            Flow: "The Flow Villa",
+            Breeze: "The Breeze Villa",
         };
-        
+
         // Transform offers to add villa_display_name matching the API format
-        const transformedOffers = offers.map(offer => ({
+        const transformedOffers = offers.map((offer) => ({
             ...offer,
-            villa_display_name: villaNameMapping[offer.villa_id] || `The ${offer.villa_id} Villa`
+            villa_display_name:
+                villaNameMapping[offer.villa_id] ||
+                `The ${offer.villa_id} Villa`,
         }));
-        
+
         allOffersCache = transformedOffers;
         lastCacheUpdate = new Date();
-        console.log(`Loaded ${transformedOffers.length} offers into cache at ${lastCacheUpdate}`);
-        
+        console.log(
+            `Loaded ${transformedOffers.length} offers into cache at ${lastCacheUpdate}`,
+        );
+
         return transformedOffers;
     } catch (error) {
-        console.error('Error loading offers cache:', error);
+        console.error("Error loading offers cache:", error);
         return [];
     }
 }
 
 // Expose cache endpoint
-app.get('/api/cached-offers', (req, res) => {
+app.get("/api/cached-offers", (req, res) => {
     res.json({
         success: true,
         lastUpdated: lastCacheUpdate,
         count: allOffersCache.length,
-        data: allOffersCache
+        data: allOffersCache,
     });
 });
 
@@ -587,7 +654,7 @@ function logRoutes() {
                 .map((m) => m.toUpperCase())
                 .join(",");
             routes.push(`${methods} ${layer.route.path}`);
-        } else if (layer.name === 'router') {
+        } else if (layer.name === "router") {
             // Check nested router routes
             (layer.handle?.stack || []).forEach((subLayer) => {
                 if (subLayer.route) {
@@ -622,7 +689,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, "0.0.0.0", async () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-    
+
     // Load offers cache on startup
     await loadAllOffersIntoCache();
 });
