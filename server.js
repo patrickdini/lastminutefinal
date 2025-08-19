@@ -329,10 +329,10 @@ app.post('/api/mailing-list', async (req, res) => {
             });
         }
         
-        // Determine channel opt-in based on form data
+        // Determine channel opt-in based on form data (MySQL SET format)
         const channelOptIn = [];
         if (signupRequest.email) channelOptIn.push('email');
-        if (signupRequest.whatsapp) channelOptIn.push('whatsapp');
+        if (signupRequest.whatsapp && signupRequest.whatsapp.trim()) channelOptIn.push('whatsapp');
         
         // Get client IP and user agent
         const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
@@ -350,7 +350,7 @@ app.post('/api/mailing-list', async (req, res) => {
             travel_type: signupRequest.travelType,
             staycation_window: signupRequest.staycationWindow,
             preferred_lead_time: signupRequest.leadTime,
-            channel_opt_in: JSON.stringify(channelOptIn),
+            channel_opt_in: channelOptIn.join(','), // MySQL SET format: comma-separated values
             consent: signupRequest.consent || false,
             consent_at: consentAt,
             last_mail_sent: null,
