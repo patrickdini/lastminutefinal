@@ -342,23 +342,49 @@ app.post('/api/mailing-list', async (req, res) => {
         const now = new Date();
         const consentAt = signupRequest.consent ? now : null;
         
+        // Map staycation window to database ENUM values
+        const staycationWindowMap = {
+            'weekdays': 'Weekdays',
+            'weekends': 'Weekends', 
+            'either': 'Either'
+        };
+        
+        // Convert IP address to binary format for varbinary(16) field
+        function ipToBinary(ip) {
+            if (!ip) return null;
+            try {
+                // For IPv4, convert to 4-byte binary. For IPv6, would be 16 bytes
+                const parts = ip.split('.');
+                if (parts.length === 4) {
+                    const buffer = Buffer.alloc(4);
+                    parts.forEach((part, index) => {
+                        buffer[index] = parseInt(part, 10);
+                    });
+                    return buffer;
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+        
         // Prepare data for database
         const mailingListData = {
             name: signupRequest.name.trim(),
             email: signupRequest.email.trim().toLowerCase(),
             whatsapp_number: signupRequest.whatsapp ? signupRequest.whatsapp.trim() : null,
             travel_type: signupRequest.travelType,
-            staycation_window: signupRequest.staycationWindow,
+            staycation_window: staycationWindowMap[signupRequest.staycationWindow] || 'Either',
             preferred_lead_time: signupRequest.leadTime,
             channel_opt_in: channelOptIn.join(','), // MySQL SET format: comma-separated values
             consent: signupRequest.consent || false,
             consent_at: consentAt,
             last_mail_sent: null,
             number_of_bookings: 0,
-            source: 'lastminute.villatokay.com',
+            source: 'escape_list_form', // Match database default
             locale: 'en', // Default to English
-            ip_address: clientIP,
-            user_agent: userAgent,
+            ip_address: ipToBinary(clientIP),
+            user_agent: userAgent ? userAgent.substring(0, 255) : null, // Truncate to field length
             created_at: now,
             updated_at: now
         };
@@ -431,7 +457,7 @@ app.post('/api/mailing-list', async (req, res) => {
                 id: recordId,
                 name: mailingListData.name,
                 email: mailingListData.email,
-                channelOptIn: channelOptIn.split(',')
+                channelOptIn: channelOptIn
             }
         });
         
