@@ -2820,3 +2820,93 @@ body > .container > .carousel-container .carousel-slide img {
         font-size: 0.85rem;
     }
 }
+
+/* Success/Error Message Styling */
+.escape-list-message {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.escape-list-message.success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border: 2px solid #28a745;
+    color: #155724;
+}
+
+.escape-list-message.error {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    border: 2px solid #dc3545;
+    color: #721c24;
+}
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.message-icon {
+    font-size: 1.5rem;
+    margin-top: 2px;
+}
+
+.success-icon {
+    color: #28a745;
+    display: none;
+}
+
+.error-icon {
+    color: #dc3545;
+    display: none;
+}
+
+.escape-list-message.success .success-icon {
+    display: block;
+}
+
+.escape-list-message.error .error-icon {
+    display: block;
+}
+
+.message-text {
+    font-family: 'Nexa', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading state for submit button */
+.escape-list-submit-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.escape-list-submit-btn.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

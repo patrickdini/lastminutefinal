@@ -4010,12 +4010,126 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Mailing List Form Handler
+class MailingListHandler {
+    constructor() {
+        this.form = document.getElementById('escapeListForm');
+        this.messageContainer = document.getElementById('escapeListMessage');
+        this.submitButton = null;
+        
+        if (this.form) {
+            this.submitButton = this.form.querySelector('.escape-list-submit-btn');
+            this.initializeEventListeners();
+        }
+    }
+    
+    initializeEventListeners() {
+        if (this.form) {
+            this.form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSubmit();
+            });
+        }
+    }
+    
+    async handleSubmit() {
+        try {
+            // Show loading state
+            this.setLoadingState(true);
+            this.hideMessage();
+            
+            // Collect form data
+            const formData = new FormData(this.form);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                whatsapp: formData.get('whatsapp'),
+                travelType: formData.get('travelType'),
+                staycationWindow: formData.get('staycationWindow'),
+                leadTime: formData.get('leadTime'),
+                consent: formData.get('consent') === 'on'
+            };
+            
+            console.log('Submitting mailing list form:', data);
+            
+            // Submit to API
+            const response = await fetch('/api/mailing-list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showMessage(result.message, 'success');
+                this.form.reset();
+                // Reset to default values
+                document.getElementById('travelType').value = 'couple-solo';
+                document.getElementById('staycationWindow').value = 'either';
+                document.getElementById('leadTime').value = '4-7-days';
+                document.getElementById('escapeConsent').checked = true;
+            } else {
+                this.showMessage(result.message || 'Failed to process signup. Please try again.', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Error submitting mailing list form:', error);
+            this.showMessage('Failed to process signup. Please check your connection and try again.', 'error');
+        } finally {
+            this.setLoadingState(false);
+        }
+    }
+    
+    setLoadingState(loading) {
+        if (this.submitButton) {
+            if (loading) {
+                this.submitButton.classList.add('loading');
+                this.submitButton.disabled = true;
+            } else {
+                this.submitButton.classList.remove('loading');
+                this.submitButton.disabled = false;
+            }
+        }
+    }
+    
+    showMessage(message, type) {
+        if (this.messageContainer) {
+            const messageText = this.messageContainer.querySelector('.message-text');
+            if (messageText) {
+                messageText.textContent = message;
+            }
+            
+            // Remove existing classes and add new type
+            this.messageContainer.className = 'escape-list-message ' + type;
+            this.messageContainer.style.display = 'block';
+            
+            // Auto-hide success messages after 8 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    this.hideMessage();
+                }, 8000);
+            }
+        }
+    }
+    
+    hideMessage() {
+        if (this.messageContainer) {
+            this.messageContainer.style.display = 'none';
+        }
+    }
+}
+
 // Global variable for the app instance
 let app;
+let mailingListHandler;
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     app = new ActivitiesDashboard();
+    mailingListHandler = new MailingListHandler();
 });
 
 // Global function for description toggle

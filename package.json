@@ -18,6 +18,7 @@
     "express-session": "^1.18.2",
     "memoizee": "^0.4.17",
     "mysql2": "^3.14.3",
-    "openid-client": "^6.6.4"
+    "openid-client": "^6.6.4",
+    "pg": "^8.16.3"
   }
 }

@@ -282,6 +282,163 @@ app.post('/api/confirm-booking', async (req, res) => {
     }
 });
 
+// Handle mailing list signup
+app.post('/api/mailing-list', async (req, res) => {
+    try {
+        const signupRequest = req.body;
+        console.log('Processing mailing list signup:', signupRequest);
+        
+        // Validation
+        const validationErrors = [];
+        
+        if (!signupRequest.name || signupRequest.name.trim() === '') {
+            validationErrors.push('Name is required');
+        }
+        
+        if (!signupRequest.email || signupRequest.email.trim() === '') {
+            validationErrors.push('Email is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupRequest.email)) {
+            validationErrors.push('Valid email is required');
+        }
+        
+        if (!signupRequest.travelType) {
+            validationErrors.push('Travel type is required');
+        }
+        
+        if (!signupRequest.staycationWindow) {
+            validationErrors.push('Staycation window is required');
+        }
+        
+        if (!signupRequest.leadTime) {
+            validationErrors.push('Lead time preference is required');
+        }
+        
+        if (signupRequest.name && signupRequest.name.length > 255) {
+            validationErrors.push('Name must be less than 255 characters');
+        }
+        
+        if (signupRequest.email && signupRequest.email.length > 255) {
+            validationErrors.push('Email must be less than 255 characters');
+        }
+        
+        if (validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: validationErrors.join('. '),
+                errors: validationErrors
+            });
+        }
+        
+        // Determine channel opt-in based on form data
+        const channelOptIn = [];
+        if (signupRequest.email) channelOptIn.push('email');
+        if (signupRequest.whatsapp) channelOptIn.push('whatsapp');
+        
+        // Get client IP and user agent
+        const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
+        const userAgent = req.headers['user-agent'] || '';
+        
+        // Create timestamps
+        const now = new Date();
+        const consentAt = signupRequest.consent ? now : null;
+        
+        // Prepare data for database
+        const mailingListData = {
+            name: signupRequest.name.trim(),
+            email: signupRequest.email.trim().toLowerCase(),
+            whatsapp_number: signupRequest.whatsapp ? signupRequest.whatsapp.trim() : null,
+            travel_type: signupRequest.travelType,
+            staycation_window: signupRequest.staycationWindow,
+            preferred_lead_time: signupRequest.leadTime,
+            channel_opt_in: JSON.stringify(channelOptIn),
+            consent: signupRequest.consent || false,
+            consent_at: consentAt,
+            last_mail_sent: null,
+            number_of_bookings: 0,
+            source: 'lastminute.villatokay.com',
+            locale: 'en', // Default to English
+            ip_address: clientIP,
+            user_agent: userAgent,
+            created_at: now,
+            updated_at: now
+        };
+        
+        console.log('Prepared mailing list data:', mailingListData);
+        
+        // Insert into LMMailing_List table
+        const insertQuery = `
+            INSERT INTO LMMailing_List (
+                name, email, whatsapp_number, travel_type, staycation_window,
+                preferred_lead_time, channel_opt_in, consent, consent_at,
+                last_mail_sent, number_of_bookings, source, locale,
+                ip_address, user_agent, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        const values = [
+            mailingListData.name,
+            mailingListData.email,
+            mailingListData.whatsapp_number,
+            mailingListData.travel_type,
+            mailingListData.staycation_window,
+            mailingListData.preferred_lead_time,
+            mailingListData.channel_opt_in,
+            mailingListData.consent,
+            mailingListData.consent_at,
+            mailingListData.last_mail_sent,
+            mailingListData.number_of_bookings,
+            mailingListData.source,
+            mailingListData.locale,
+            mailingListData.ip_address,
+            mailingListData.user_agent,
+            mailingListData.created_at,
+            mailingListData.updated_at
+        ];
+        
+        // Execute the query (using PostgreSQL client based on earlier table creation)
+        const { Client } = require('pg');
+        const client = new Client({
+            connectionString: process.env.DATABASE_URL
+        });
+        
+        await client.connect();
+        const result = await client.query(
+            `INSERT INTO LMMailing_List (
+                name, email, whatsapp_number, travel_type, staycation_window,
+                preferred_lead_time, channel_opt_in, consent, consent_at,
+                last_mail_sent, number_of_bookings, source, locale,
+                ip_address, user_agent, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+            RETURNING id`,
+            values
+        );
+        await client.end();
+        
+        console.log('Mailing list signup saved with ID:', result.rows[0].id);
+        
+        // Return success response
+        res.json({
+            success: true,
+            signupId: result.rows[0].id,
+            message: "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.",
+            data: {
+                id: result.rows[0].id,
+                name: mailingListData.name,
+                email: mailingListData.email,
+                channelOptIn: channelOptIn
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error processing mailing list signup:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process signup. Please try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
 // Preload index.html and inject a *fresh* version each restart (busts caches)
 let htmlWithVersion;
 const ASSET_VERSION = Date.now().toString();
