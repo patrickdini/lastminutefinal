@@ -4013,22 +4013,35 @@ document.head.appendChild(style);
 // Mailing List Form Handler
 class MailingListHandler {
     constructor() {
+        console.log('=== INITIALIZING MailingListHandler ===');
         this.form = document.getElementById('escapeListForm');
         this.messageContainer = document.getElementById('escapeListMessage');
         this.submitButton = null;
         
+        console.log('Form element found:', !!this.form);
+        console.log('Message container found:', !!this.messageContainer);
+        
         if (this.form) {
             this.submitButton = this.form.querySelector('.escape-list-submit-btn');
+            console.log('Submit button found:', !!this.submitButton);
             this.initializeEventListeners();
+        } else {
+            console.error('ERROR: escapeListForm not found!');
         }
     }
     
     initializeEventListeners() {
+        console.log('=== ADDING EVENT LISTENERS ===');
         if (this.form) {
+            console.log('Adding submit event listener to form');
             this.form.addEventListener('submit', (e) => {
+                console.log('FORM SUBMIT EVENT TRIGGERED!');
                 e.preventDefault();
                 this.handleSubmit();
             });
+            console.log('Event listener added successfully');
+        } else {
+            console.error('Cannot add event listeners - form is null');
         }
     }
     
