@@ -4117,15 +4117,19 @@ class MailingListHandler {
     }
     
     showMessage(message, type) {
-        if (this.messageContainer) {
-            const messageText = this.messageContainer.querySelector('.message-text');
-            if (messageText) {
-                messageText.textContent = message;
-            }
-            
-            // Remove existing classes and add new type
-            this.messageContainer.className = 'escape-list-message ' + type;
-            this.messageContainer.style.display = 'block';
+        if (!this.messageContainer) {
+            console.error('Message container not found - cannot show message:', message);
+            return;
+        }
+        
+        const messageText = this.messageContainer.querySelector('.message-text');
+        if (messageText) {
+            messageText.textContent = message;
+        }
+        
+        // Remove existing classes and add new type
+        this.messageContainer.className = 'escape-list-message ' + type;
+        this.messageContainer.style.display = 'block';
             
             // Hide form on successful submission
             if (type === 'success' && this.form) {
