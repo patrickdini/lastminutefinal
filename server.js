@@ -381,9 +381,9 @@ app.post('/api/mailing-list', async (req, res) => {
             consent_at: consentAt,
             last_mail_sent: null,
             number_of_bookings: 0,
-            source: 'escape_list_form', // Match database default
+            source: 'lastminute.villatokay.com',
             locale: 'en', // Default to English
-            ip_address: ipToBinary(clientIP),
+            ip_address: clientIP,
             user_agent: userAgent ? userAgent.substring(0, 255) : null, // Truncate to field length
             created_at: now,
             updated_at: now
