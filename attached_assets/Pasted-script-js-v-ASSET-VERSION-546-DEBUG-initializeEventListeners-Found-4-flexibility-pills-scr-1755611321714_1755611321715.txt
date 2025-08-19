@@ -1,0 +1,159 @@
+script.js?v=__ASSET_VERSION__:546 DEBUG: initializeEventListeners() - Found 4 flexibility pills
+script.js?v=__ASSET_VERSION__:548 DEBUG: Pill 0: data-flexibility="exact", text="
+                                Exact
+                            "
+script.js?v=__ASSET_VERSION__:548 DEBUG: Pill 1: data-flexibility="1", text="
+                                ±1 day
+                            "
+script.js?v=__ASSET_VERSION__:548 DEBUG: Pill 2: data-flexibility="2", text="
+                                ±2 days
+                            "
+script.js?v=__ASSET_VERSION__:548 DEBUG: Pill 3: data-flexibility="3", text="
+                                ±3 days
+                            "
+script.js?v=__ASSET_VERSION__:678 Calendar generated with 15 selectable dates
+script.js?v=__ASSET_VERSION__:186 Loading saved user state: Object
+script.js?v=__ASSET_VERSION__:187 DEBUG: Loaded flexibility value: 2
+script.js?v=__ASSET_VERSION__:219 DEBUG: Set pendingFlexibilityRestore to: 2
+script.js?v=__ASSET_VERSION__:221 User state restored successfully
+script.js?v=__ASSET_VERSION__:792 Calendar display updated - CheckIn: 9 CheckOut: 11
+script.js?v=__ASSET_VERSION__:109 Loading offers cache...
+script.js?v=__ASSET_VERSION__:77 DEBUG: About to restore flexibility, pendingFlexibilityRestore = 2
+script.js?v=__ASSET_VERSION__:79 Final flexibility restoration to: 2
+script.js?v=__ASSET_VERSION__:465 Setting flexibility to: 2 Pills found: 4
+script.js?v=__ASSET_VERSION__:471 Selected pill with flexibility: 2
+script.js?v=__ASSET_VERSION__:477 Current selected pill: 2
+script.js?v=__ASSET_VERSION__:95 Applying calendar filter with restored state...
+script.js?v=__ASSET_VERSION__:867 Calendar filter applied: 2025-08-28 to 2025-08-30
+script.js?v=__ASSET_VERSION__:1524 Building query with flexibility: 2
+script.js?v=__ASSET_VERSION__:1457 Fetching available offers from: /api/activities?adults=2&children=0&checkinDate=2025-08-28&checkoutDate=2025-08-30&flexibility=2
+script.js?v=__ASSET_VERSION__:85 Final flexibility verification: 2
+script.js?v=__ASSET_VERSION__:1459 Response status: 200 OK
+script.js?v=__ASSET_VERSION__:1473 Received 13 available offers: Object
+script.js?v=__ASSET_VERSION__:1474 Displaying available offers: Array(13)
+script.js?v=__ASSET_VERSION__:1754 Displaying available offers: Array(13)
+script.js?v=__ASSET_VERSION__:1761 Stored currentOffers with offer_ids: Array(13)
+script.js?v=__ASSET_VERSION__:1840 === STARTING generateChampionCards ===
+script.js?v=__ASSET_VERSION__:1841 Generating villa cards for 13 offers
+script.js?v=__ASSET_VERSION__:1845 Grouped into 4 villas
+script.js?v=__ASSET_VERSION__:1846 Villa groups: Array(4)
+script.js?v=__ASSET_VERSION__:1861 Generating card for villa: The Pearl Villa with 2 booking options
+script.js?v=__ASSET_VERSION__:1862 Primary offer: 2025-08-26T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1863 All options: Array(2)
+script.js?v=__ASSET_VERSION__:2067 === Generating card for The Pearl Villa ===
+script.js?v=__ASSET_VERSION__:2068 Primary offer data: Object
+script.js?v=__ASSET_VERSION__:3390 parseImageUrls called with: [
+  "https://villatokay.com/wp-content/uploads/2022/09/Villa-Tokay-The-Pearl-Outdoors-Terrace.jpg",
+...
+script.js?v=__ASSET_VERSION__:3400 parseImageUrls: Attempting JSON parse
+script.js?v=__ASSET_VERSION__:3402 parseImageUrls: Successfully parsed 12 URLs from JSON
+script.js?v=__ASSET_VERSION__:2078 Parsed 12 image URLs for The Pearl Villa: Array(12)
+script.js?v=__ASSET_VERSION__:1946 Booking options generation for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:1947 Primary offer: Object
+script.js?v=__ASSET_VERSION__:1948 All villa offers: Array(2)
+script.js?v=__ASSET_VERSION__:1981 Found 2 unique booking options for villa The Pearl Villa
+script.js?v=__ASSET_VERSION__:1861 Generating card for villa: The Shore Villa with 5 booking options
+script.js?v=__ASSET_VERSION__:1862 Primary offer: 2025-08-26T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1863 All options: Array(5)
+script.js?v=__ASSET_VERSION__:2067 === Generating card for The Shore Villa ===
+script.js?v=__ASSET_VERSION__:2068 Primary offer data: Object
+script.js?v=__ASSET_VERSION__:3390 parseImageUrls called with: [
+  "https://villatokay.com/wp-content/uploads/2025/08/the-Shore-3.jpg",
+  "https://villatokay.com/w...
+script.js?v=__ASSET_VERSION__:3400 parseImageUrls: Attempting JSON parse
+script.js?v=__ASSET_VERSION__:3402 parseImageUrls: Successfully parsed 11 URLs from JSON
+script.js?v=__ASSET_VERSION__:2078 Parsed 11 image URLs for The Shore Villa: Array(11)
+script.js?v=__ASSET_VERSION__:1946 Booking options generation for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:1947 Primary offer: Object
+script.js?v=__ASSET_VERSION__:1948 All villa offers: Array(5)
+script.js?v=__ASSET_VERSION__:1981 Found 5 unique booking options for villa The Shore Villa
+script.js?v=__ASSET_VERSION__:1861 Generating card for villa: The Sunset Room with 5 booking options
+script.js?v=__ASSET_VERSION__:1862 Primary offer: 2025-08-26T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1863 All options: Array(5)
+script.js?v=__ASSET_VERSION__:2067 === Generating card for The Sunset Room ===
+script.js?v=__ASSET_VERSION__:2068 Primary offer data: Object
+script.js?v=__ASSET_VERSION__:3390 parseImageUrls called with: [
+  "https://villatokay.com/wp-content/uploads/2025/07/Villa-Tokay-Sunset-Garden.jpg",
+  "https://vi...
+script.js?v=__ASSET_VERSION__:3400 parseImageUrls: Attempting JSON parse
+script.js?v=__ASSET_VERSION__:3402 parseImageUrls: Successfully parsed 10 URLs from JSON
+script.js?v=__ASSET_VERSION__:2078 Parsed 10 image URLs for The Sunset Room: Array(10)
+script.js?v=__ASSET_VERSION__:1946 Booking options generation for villa: The Sunset Room
+script.js?v=__ASSET_VERSION__:1947 Primary offer: Object
+script.js?v=__ASSET_VERSION__:1948 All villa offers: Array(5)
+script.js?v=__ASSET_VERSION__:1981 Found 5 unique booking options for villa The Sunset Room
+script.js?v=__ASSET_VERSION__:1861 Generating card for villa: The Wave Villa with 1 booking options
+script.js?v=__ASSET_VERSION__:1862 Primary offer: 2025-08-26T00:00:00.000Z nights: 2
+script.js?v=__ASSET_VERSION__:1863 All options: Array(1)
+script.js?v=__ASSET_VERSION__:2067 === Generating card for The Wave Villa ===
+script.js?v=__ASSET_VERSION__:2068 Primary offer data: Object
+script.js?v=__ASSET_VERSION__:3390 parseImageUrls called with: [
+  "https://villatokay.com/wp-content/uploads/2025/07/Villa-Tokay-Wave-Bedroom-Outdoors.jpg",
+  "ht...
+script.js?v=__ASSET_VERSION__:3400 parseImageUrls: Attempting JSON parse
+script.js?v=__ASSET_VERSION__:3402 parseImageUrls: Successfully parsed 8 URLs from JSON
+script.js?v=__ASSET_VERSION__:2078 Parsed 8 image URLs for The Wave Villa: Array(8)
+script.js?v=__ASSET_VERSION__:1946 Booking options generation for villa: The Wave Villa
+script.js?v=__ASSET_VERSION__:1947 Primary offer: Object
+script.js?v=__ASSET_VERSION__:1948 All villa offers: Array(1)
+script.js?v=__ASSET_VERSION__:1981 Found 1 unique booking options for villa The Wave Villa
+script.js?v=__ASSET_VERSION__:1867 Generated HTML for The Pearl Villa, length: 11070 chars
+script.js?v=__ASSET_VERSION__:1867 Generated HTML for The Shore Villa, length: 12912 chars
+script.js?v=__ASSET_VERSION__:1867 Generated HTML for The Sunset Room, length: 12378 chars
+script.js?v=__ASSET_VERSION__:1867 Generated HTML for The Wave Villa, length: 8272 chars
+script.js?v=__ASSET_VERSION__:1875 Total villa cards HTML generated: 4
+script.js?v=__ASSET_VERSION__:1876 HTML lengths: Array(4)
+script.js?v=__ASSET_VERSION__:1880 championOffers element exists? true
+script.js?v=__ASSET_VERSION__:1889 Total HTML to insert: 44632 chars
+script.js?v=__ASSET_VERSION__:1890 First 200 chars of HTML: 
+            <div class="champion-offer-card" data-offer-id="172" data-current-offer='{"checkIn":"2025-08-26T00:00:00.000Z","checkOut":"2025-08-28","nights":2}' data-images='["https://villatokay.com/w
+script.js?v=__ASSET_VERSION__:1893 HTML inserted into championOffers
+script.js?v=__ASSET_VERSION__:1897 Villa cards found after insertion: 4
+script.js?v=__ASSET_VERSION__:1901 Setting offersContainer to display: block
+script.js?v=__ASSET_VERSION__:1909 Starting carousels for 4 cards
+script.js?v=__ASSET_VERSION__:1914 === COMPLETED generateChampionCards ===
+script.js?v=__ASSET_VERSION__:226 DEBUG: Starting delayed villa state restoration...
+script.js?v=__ASSET_VERSION__:337 DEBUG: Starting villa state restoration
+script.js?v=__ASSET_VERSION__:338 - State to restore: Object
+script.js?v=__ASSET_VERSION__:339 - Expanded villas: Array(2)
+script.js?v=__ASSET_VERSION__:340 - Selected offers: Object
+script.js?v=__ASSET_VERSION__:344 - Available villa cards: 4
+script.js?v=__ASSET_VERSION__:348 - Card 0: villa="The Pearl Villa"
+script.js?v=__ASSET_VERSION__:348 - Card 1: villa="The Shore Villa"
+script.js?v=__ASSET_VERSION__:348 - Card 2: villa="The Sunset Room"
+script.js?v=__ASSET_VERSION__:348 - Card 3: villa="The Wave Villa"
+script.js?v=__ASSET_VERSION__:353 DEBUG: Restoring villa expansions...
+script.js?v=__ASSET_VERSION__:355 - Looking for villa: "The Shore Villa"
+script.js?v=__ASSET_VERSION__:366 - Found card for villa "The Shore Villa": true
+script.js?v=__ASSET_VERSION__:370 - Found show details button: true
+script.js?v=__ASSET_VERSION__:371 - Button expanded state: false
+script.js?v=__ASSET_VERSION__:374 - Expanding villa "The Shore Villa"...
+script.js?v=__ASSET_VERSION__:376 ✅ Restored expansion for villa: The Shore Villa
+script.js?v=__ASSET_VERSION__:355 - Looking for villa: "The Pearl Villa"
+script.js?v=__ASSET_VERSION__:366 - Found card for villa "The Pearl Villa": true
+script.js?v=__ASSET_VERSION__:370 - Found show details button: true
+script.js?v=__ASSET_VERSION__:371 - Button expanded state: false
+script.js?v=__ASSET_VERSION__:374 - Expanding villa "The Pearl Villa"...
+script.js?v=__ASSET_VERSION__:376 ✅ Restored expansion for villa: The Pearl Villa
+script.js?v=__ASSET_VERSION__:390 DEBUG: Restoring offer selections...
+script.js?v=__ASSET_VERSION__:392 - Looking for villa "The Shore Villa" with selected button index: 0
+script.js?v=__ASSET_VERSION__:407 - Looking for button index: 0
+script.js?v=__ASSET_VERSION__:408 - Available buttons in villa "The Shore Villa": 5
+script.js?v=__ASSET_VERSION__:412 - Found target button at index 0
+script.js?v=__ASSET_VERSION__:413 - Button selected state: true
+script.js?v=__ASSET_VERSION__:420 ⚠️ Offer already selected or button not found
+script.js?v=__ASSET_VERSION__:392 - Looking for villa "The Pearl Villa" with selected button index: 0
+script.js?v=__ASSET_VERSION__:407 - Looking for button index: 0
+script.js?v=__ASSET_VERSION__:408 - Available buttons in villa "The Pearl Villa": 2
+script.js?v=__ASSET_VERSION__:412 - Found target button at index 0
+script.js?v=__ASSET_VERSION__:413 - Button selected state: true
+script.js?v=__ASSET_VERSION__:420 ⚠️ Offer already selected or button not found
+script.js?v=__ASSET_VERSION__:392 - Looking for villa "The Sunset Room" with selected button index: 0
+script.js?v=__ASSET_VERSION__:407 - Looking for button index: 0
+script.js?v=__ASSET_VERSION__:408 - Available buttons in villa "The Sunset Room": 5
+script.js?v=__ASSET_VERSION__:412 - Found target button at index 0
+script.js?v=__ASSET_VERSION__:413 - Button selected state: true
+script.js?v=__ASSET_VERSION__:420 ⚠️ Offer already selected or button not found
+script.js?v=__ASSET_VERSION__:116 Loaded 4519 offers into cache
+script.js?v=__ASSET_VERSION__:120 Unique villa names in cache: (8) ['The Sunset Room', 'The Leaf Villa', 'The Swell 2BR', 'The Swell 3BR Villa', 'The Tide Villa', 'The Pearl Villa', 'The Shore Villa', 'The Wave Villa']
+script.js?v=__ASSET_VERSION__:4053 Submitting mailing list form: {name: 'Acadia', email: 'ASDF@ASDF.COM', whatsapp: '', travelType: 'couple-solo', staycationWindow: 'either', …}

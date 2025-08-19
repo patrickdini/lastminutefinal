@@ -4053,6 +4053,7 @@ class MailingListHandler {
             console.log('Submitting mailing list form:', data);
             
             // Submit to API
+            console.log('About to send fetch request...');
             const response = await fetch('/api/mailing-list', {
                 method: 'POST',
                 headers: {
@@ -4061,7 +4062,9 @@ class MailingListHandler {
                 body: JSON.stringify(data)
             });
             
+            console.log('Fetch response received:', response.status, response.statusText);
             const result = await response.json();
+            console.log('Response parsed as JSON:', result);
             
             if (result.success) {
                 this.showMessage(result.message, 'success');
