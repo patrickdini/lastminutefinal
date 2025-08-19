@@ -366,15 +366,6 @@ app.post('/api/mailing-list', async (req, res) => {
         console.log('Prepared mailing list data:', mailingListData);
         
         // Insert into LMMailing_List table
-        const insertQuery = `
-            INSERT INTO LMMailing_List (
-                name, email, whatsapp_number, travel_type, staycation_window,
-                preferred_lead_time, channel_opt_in, consent, consent_at,
-                last_mail_sent, number_of_bookings, source, locale,
-                ip_address, user_agent, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        
         const values = [
             mailingListData.name,
             mailingListData.email,
@@ -395,34 +386,31 @@ app.post('/api/mailing-list', async (req, res) => {
             mailingListData.updated_at
         ];
         
-        // Execute the query (using PostgreSQL client based on earlier table creation)
-        const { Client } = require('pg');
-        const client = new Client({
-            connectionString: process.env.DATABASE_URL
-        });
+        // Execute the query using MySQL (same as rest of the app)
+        const db = require('./config/database');
+        const connection = await db.getConnection();
         
-        await client.connect();
-        const result = await client.query(
-            `INSERT INTO LMMailing_List (
+        const insertQuery = `
+            INSERT INTO LMMailing_List (
                 name, email, whatsapp_number, travel_type, staycation_window,
                 preferred_lead_time, channel_opt_in, consent, consent_at,
                 last_mail_sent, number_of_bookings, source, locale,
                 ip_address, user_agent, created_at, updated_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
-            RETURNING id`,
-            values
-        );
-        await client.end();
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
         
-        console.log('Mailing list signup saved with ID:', result.rows[0].id);
+        const [result] = await connection.execute(insertQuery, values);
+        connection.release();
+        
+        console.log('Mailing list signup saved with ID:', result.insertId);
         
         // Return success response
         res.json({
             success: true,
-            signupId: result.rows[0].id,
+            signupId: result.insertId,
             message: "You're in! 🌞\nNext time paradise calls, you'll be the first to know. Look out for our last-minute villa escapes and insider perks—max 2 messages per month, promise.",
             data: {
-                id: result.rows[0].id,
+                id: result.insertId,
                 name: mailingListData.name,
                 email: mailingListData.email,
                 channelOptIn: channelOptIn
