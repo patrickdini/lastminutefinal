@@ -4130,29 +4130,28 @@ class MailingListHandler {
         // Remove existing classes and add new type
         this.messageContainer.className = 'escape-list-message ' + type;
         this.messageContainer.style.display = 'block';
+        
+        // Hide form on successful submission
+        if (type === 'success' && this.form) {
+            this.form.style.display = 'none';
             
-            // Hide form on successful submission
-            if (type === 'success' && this.form) {
-                this.form.style.display = 'none';
-                
-                // Add "Update preferences" button to success message
-                const updateButton = document.createElement('button');
-                updateButton.className = 'escape-list-update-btn';
-                updateButton.textContent = 'Update preferences';
-                updateButton.onclick = () => this.showForm();
-                
-                // Check if button doesn't already exist
-                if (!this.messageContainer.querySelector('.escape-list-update-btn')) {
-                    this.messageContainer.appendChild(updateButton);
-                }
-            }
+            // Add "Update preferences" button to success message
+            const updateButton = document.createElement('button');
+            updateButton.className = 'escape-list-update-btn';
+            updateButton.textContent = 'Update preferences';
+            updateButton.onclick = () => this.showForm();
             
-            // Auto-hide success messages after 12 seconds (longer since form is hidden)
-            if (type === 'success') {
-                setTimeout(() => {
-                    this.hideMessage();
-                }, 12000);
+            // Check if button doesn't already exist
+            if (!this.messageContainer.querySelector('.escape-list-update-btn')) {
+                this.messageContainer.appendChild(updateButton);
             }
+        }
+        
+        // Auto-hide success messages after 12 seconds (longer since form is hidden)
+        if (type === 'success') {
+            setTimeout(() => {
+                this.hideMessage();
+            }, 12000);
         }
     }
     
