@@ -126,7 +126,7 @@ async function getVillaAmenities(villaName) {
     try {
         const connection = await db.getConnection();
         const [rows] = await connection.execute(
-            'SELECT key_amenities FROM LMRoomDescription WHERE villa_name = ?',
+            'SELECT key_amenities FROM LMRoomDescription WHERE name = ?',
             [villaName]
         );
         connection.release();
