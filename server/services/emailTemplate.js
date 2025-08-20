@@ -1,6 +1,7 @@
 // server/services/emailTemplate.js
 const fs = require('fs');
 const path = require('path');
+const db = require('../../config/database');
 
 /**
  * Format date with standard Villa Tokay check-in/check-out times
@@ -119,9 +120,31 @@ function generateNextStepsSection(needTransfer) {
 }
 
 /**
+ * Get villa amenities from LMRoomDescription table
+ */
+async function getVillaAmenities(villaName) {
+    try {
+        const connection = await db.getConnection();
+        const [rows] = await connection.execute(
+            'SELECT key_amenities FROM LMRoomDescription WHERE villa_name = ?',
+            [villaName]
+        );
+        connection.release();
+        
+        if (rows.length > 0 && rows[0].key_amenities) {
+            return rows[0].key_amenities;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching villa amenities:', error);
+        return null;
+    }
+}
+
+/**
  * Process booking confirmation email template
  */
-function processConfirmationTemplate(bookingData) {
+async function processConfirmationTemplate(bookingData) {
     try {
         // Read template file
         const templatePath = path.join(__dirname, '../../public/templates/confirmation_email.html');
@@ -137,8 +160,13 @@ function processConfirmationTemplate(bookingData) {
             ? `${bookingData.adults} Adults, ${bookingData.children} Children`
             : `${bookingData.adults} Adults`;
         
-        // Prepare villa features (extract from booking data if available)
-        const villaFeatures = `${bookingData.bedrooms || 1} Bedroom • ${bookingData.bathrooms || 1} Bath • ${bookingData.view_type || 'Garden View'} • ${bookingData.pool_type || 'Private Pool'}`;
+        // Get real villa amenities from database
+        const villaName = bookingData.villaName || bookingData.villaDisplayName || bookingData.villaKey;
+        const realAmenities = await getVillaAmenities(villaName);
+        
+        // Use real amenities or fallback to constructed features
+        const villaFeatures = realAmenities || 
+            `${bookingData.bedrooms || 1} Bedroom • ${bookingData.bathrooms || 1} Bath • ${bookingData.view_type || 'Garden View'} • ${bookingData.pool_type || 'Private Pool'}`;
         
         // Generate dynamic content sections
         const transferSection = generateTransferContent(

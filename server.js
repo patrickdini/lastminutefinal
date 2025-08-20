@@ -317,7 +317,7 @@ app.post("/api/confirm-booking", async (req, res) => {
         
         try {
             console.log("Processing confirmation email template...");
-            const emailHtml = processConfirmationTemplate(bookingRequest);
+            const emailHtml = await processConfirmationTemplate(bookingRequest);
             
             console.log("Sending confirmation email to:", bookingRequest.email);
             const messageId = await sendEmail({
