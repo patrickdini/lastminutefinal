@@ -138,7 +138,7 @@ function processConfirmationTemplate(bookingData) {
             : `${bookingData.adults} Adults`;
         
         // Prepare villa features (extract from booking data if available)
-        const villaFeatures = `${bookingData.bedrooms || 1} Bedroom • ${bookingData.bathrooms || 1} Bath • ${bookingData.viewType || 'Garden View'} • ${bookingData.poolType || 'Private Pool'}`;
+        const villaFeatures = `${bookingData.bedrooms || 1} Bedroom • ${bookingData.bathrooms || 1} Bath • ${bookingData.view_type || 'Garden View'} • ${bookingData.pool_type || 'Private Pool'}`;
         
         // Generate dynamic content sections
         const transferSection = generateTransferContent(
