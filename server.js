@@ -328,6 +328,20 @@ app.post("/api/confirm-booking", async (req, res) => {
             
             console.log("Confirmation email sent successfully. Message ID:", messageId);
             
+            // Update confirmation_email_sent flag in database
+            try {
+                const connection = await pool.getConnection();
+                await connection.execute(
+                    'UPDATE LMReservations SET confirmation_email_sent = 1 WHERE id = ?',
+                    [result.insertId]
+                );
+                connection.release();
+                console.log("Confirmation email flag updated for reservation ID:", result.insertId);
+            } catch (updateError) {
+                console.error("Failed to update confirmation_email_sent flag:", updateError);
+                // Continue - don't affect user response
+            }
+            
         } catch (error) {
             console.error("Failed to send confirmation email:", error);
             emailSuccess = false;
