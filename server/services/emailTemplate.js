@@ -132,7 +132,19 @@ async function getVillaAmenities(villaName) {
         connection.release();
         
         if (rows.length > 0 && rows[0].key_amenities) {
-            return rows[0].key_amenities;
+            const amenitiesData = rows[0].key_amenities;
+            
+            // Parse JSON array and format for display
+            try {
+                const amenitiesArray = JSON.parse(amenitiesData);
+                if (Array.isArray(amenitiesArray) && amenitiesArray.length > 0) {
+                    return amenitiesArray.join(' • ');
+                }
+            } catch (parseError) {
+                console.error('Error parsing amenities JSON:', parseError);
+                // If JSON parsing fails, return the raw string
+                return amenitiesData;
+            }
         }
         return null;
     } catch (error) {
