@@ -306,7 +306,7 @@ body {
 }
 
 .price-label {
-    color: #4A4A47;
+    color: #FFFFFF;
 }
 
 .price-value {
@@ -316,7 +316,7 @@ body {
 
 .price-value.original {
     text-decoration: line-through;
-    color: #4A4A47;
+    color: #FFFFFF;
 }
 
 .price-total {
@@ -361,7 +361,7 @@ body {
 }
 
 .form-subtitle {
-    color: #4A4A47;
+    color: #FFFFFF;
     margin-bottom: 32px;
     font-size: 1rem;
 }
@@ -403,7 +403,7 @@ input[type="text"]::placeholder,
 input[type="email"]::placeholder,
 input[type="tel"]::placeholder,
 textarea::placeholder {
-    color: #4A4A47;
+    color: #A0A0A0;
 }
 
 input[type="text"]:focus,
@@ -480,7 +480,7 @@ input[type="checkbox"] {
 
 .checkbox-subtitle {
     display: block;
-    color: #4A4A47;
+    color: #A0A0A0;
     font-size: 0.85rem;
 }
 
@@ -519,7 +519,7 @@ input[type="checkbox"] {
 
 .submit-note {
     margin-top: 12px;
-    color: #4A4A47;
+    color: #FFFFFF;
     font-size: 0.9rem;
 }
 

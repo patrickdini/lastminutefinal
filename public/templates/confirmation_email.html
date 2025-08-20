@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Your Villa Tokay Escape Awaits</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Open+Sans:wght@300;400;600&display=swap");
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: "Open Sans", Arial, sans-serif;
+                line-height: 1.6;
+                color: #262626;
+                background-color: #f8f8f8;
+            }
+
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .header {
+                background-color: #0f3128;
+                padding: 30px 40px;
+                text-align: center;
+            }
+
+            .logo {
+                font-family: "Crimson Text", serif;
+                font-size: 32px;
+                font-weight: 600;
+                color: #ffffff;
+                margin: 0;
+                letter-spacing: 1px;
+            }
+
+            .tagline {
+                color: #aa7831;
+                font-size: 14px;
+                font-weight: 300;
+                margin: 8px 0 0 0;
+                letter-spacing: 0.5px;
+            }
+
+            .content {
+                padding: 40px;
+            }
+
+            .greeting {
+                font-size: 18px;
+                color: #0f3128;
+                margin-bottom: 24px;
+                font-weight: 400;
+            }
+
+            .confirmation-box {
+                background-color: #f9f9f9;
+                border-left: 4px solid #aa7831;
+                padding: 24px;
+                margin: 24px 0;
+            }
+
+            .booking-title {
+                font-family: "Crimson Text", serif;
+                font-size: 24px;
+                color: #0f3128;
+                margin: 0 0 16px 0;
+            }
+
+            .villa-description {
+                color: #4a4a47;
+                font-size: 14px;
+                margin-bottom: 20px;
+                font-style: italic;
+            }
+
+            .details-grid {
+                display: table;
+                width: 100%;
+                margin: 20px 0;
+            }
+
+            .detail-row {
+                display: table-row;
+            }
+
+            .detail-label {
+                display: table-cell;
+                padding: 8px 16px 8px 0;
+                font-weight: 600;
+                color: #0f3128;
+                width: 40%;
+                vertical-align: top;
+            }
+
+            .detail-value {
+                display: table-cell;
+                padding: 8px 0;
+                color: #262626;
+            }
+
+            .price-highlight {
+                background-color: #0f3128;
+                color: #ffffff;
+                padding: 16px 24px;
+                text-align: center;
+                margin: 24px 0;
+            }
+
+            .price-text {
+                font-size: 16px;
+                margin: 0;
+            }
+
+            .price-amount {
+                font-size: 28px;
+                font-weight: 600;
+                color: #aa7831;
+                margin: 4px 0 0 0;
+            }
+
+            .included-section {
+                margin: 32px 0;
+            }
+
+            .section-title {
+                font-family: "Crimson Text", serif;
+                font-size: 20px;
+                color: #0f3128;
+                margin: 0 0 16px 0;
+            }
+
+            .included-item {
+                display: flex;
+                align-items: flex-start;
+                margin: 12px 0;
+                color: #4a4a47;
+            }
+
+            .included-icon {
+                color: #aa7831;
+                margin-right: 12px;
+                margin-top: 2px;
+            }
+
+            .transfer-note {
+                background-color: #f0f7f4;
+                border: 1px solid #aa7831;
+                padding: 16px;
+                margin: 24px 0;
+                border-radius: 4px;
+            }
+
+            .transfer-title {
+                color: #0f3128;
+                font-weight: 600;
+                margin: 0 0 8px 0;
+            }
+
+            .next-steps {
+                margin: 32px 0;
+                padding: 24px;
+                background-color: #f9f9f9;
+            }
+
+            .step {
+                margin: 16px 0;
+                padding-left: 20px;
+                position: relative;
+            }
+
+            .step::before {
+                content: "→";
+                position: absolute;
+                left: 0;
+                color: #aa7831;
+                font-weight: bold;
+            }
+
+            .footer {
+                background-color: #0f3128;
+                color: #ffffff;
+                padding: 32px 40px;
+                text-align: center;
+            }
+
+            .contact-info {
+                margin: 16px 0;
+            }
+
+            .contact-link {
+                color: #aa7831;
+                text-decoration: none;
+            }
+
+            .footer-text {
+                font-size: 14px;
+                color: #cccccc;
+                margin: 20px 0 0 0;
+            }
+
+            @media only screen and (max-width: 600px) {
+                .content,
+                .header,
+                .footer {
+                    padding: 24px !important;
+                }
+
+                .details-grid {
+                    display: block;
+                }
+
+                .detail-row {
+                    display: block;
+                    margin: 12px 0;
+                }
+
+                .detail-label,
+                .detail-value {
+                    display: block;
+                    width: 100%;
+                    padding: 4px 0;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="logo">Villa Tokay</h1>
+                <p class="tagline">Gili Air Sanctuary</p>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="greeting">
+                    Your private sanctuary awaits – we're thrilled you chose
+                    Villa Tokay for your escape to Gili Air.
+                </div>
+
+                <div class="confirmation-box">
+                    <h2 class="booking-title">The Pearl Villa</h2>
+                    <p class="villa-description">
+                        Art-deco bath, private pool, lush garden sanctuary
+                    </p>
+
+                    <div class="details-grid">
+                        <div class="detail-row">
+                            <div class="detail-label">Check-in:</div>
+                            <div class="detail-value">
+                                Friday, August 22 (2:00 PM)
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Check-out:</div>
+                            <div class="detail-value">
+                                Sunday, August 24 (11:00 AM)
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Duration:</div>
+                            <div class="detail-value">2 nights</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Guests:</div>
+                            <div class="detail-value">2 Adults, 1 Child</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Villa Features:</div>
+                            <div class="detail-value">
+                                1 Bedroom • 1 Bath • Garden View • Private Pool
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-highlight">
+                    <p class="price-text">Your Net Price</p>
+                    <p class="price-amount">11.0M IDR</p>
+                </div>
+
+                <div class="included-section">
+                    <h3 class="section-title">Your Experience Includes</h3>
+
+                    <div class="included-item">
+                        <span class="included-icon">🍹</span>
+                        <span
+                            >Homemade cocktails – enjoy our selection in your
+                            villa or at the bar</span
+                        >
+                    </div>
+
+                    <div class="included-item">
+                        <span class="included-icon">💆</span>
+                        <span
+                            >One-hour massage – pamper yourself with a
+                            rejuvenating massage in the comfort of your private
+                            villa</span
+                        >
+                    </div>
+                </div>
+
+                <div class="transfer-note">
+                    <div class="transfer-title">Your Door-to-Door Transfer</div>
+                    <p style="margin: 0; color: #4a4a47">
+                        To arrange your seamless journey from Shady Lane, Bali,
+                        our team will contact you within 24 hours. Since you're
+                        interested in our private boat option, we'll include
+                        those exclusive details as well.
+                    </p>
+                </div>
+
+                <div class="next-steps">
+                    <h3 class="section-title">What Happens Next</h3>
+
+                    <div class="step">
+                        Our guest relations team will contact you within 24
+                        hours to arrange your transfer
+                    </div>
+
+                    <div class="step">
+                        We will send you a secured payment link
+                    </div>
+
+                    <div class="step">
+                        Simply arrive and let us handle everything else – your
+                        villa will be prepared, your cocktails ready, and your
+                        massage scheduled
+                    </div>
+                </div>
+
+                <p style="margin: 32px 0; color: #4a4a47">
+                    Just 200 meters from Gili Air's clearest waters, your villa
+                    offers the perfect balance – close enough for spontaneous
+                    beach moments, secluded enough for complete tranquility. We
+                    can't wait to welcome you to your home away from home.
+                </p>
+
+                <p style="color: #0f3128; font-weight: 600">
+                    Questions before you arrive? We're here to help make this
+                    escape exactly what you're dreaming of.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div class="contact-info">
+                    <p style="margin: 8px 0"><strong>Villa Tokay</strong></p>
+                    <p style="margin: 8px 0">
+                        Email:
+                        <a
+                            href="mailto:info@villatokay.com"
+                            class="contact-link"
+                            >info@villatokay.com</a
+                        >
+                    </p>
+                    <p style="margin: 8px 0">
+                        WhatsApp:
+                        <a href="tel:+6282182161541" class="contact-link"
+                            >+62 821 8216 1541</a
+                        >
+                    </p>
+                    <p style="margin: 8px 0">Gili Air, Lombok, Indonesia</p>
+                </div>
+
+                <p class="footer-text">
+                    Thank you for choosing Villa Tokay. Your perfect moments in
+                    paradise begin soon.
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
