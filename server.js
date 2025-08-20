@@ -3,6 +3,8 @@ const path = require("path");
 const cors = require("cors");
 const fs = require("fs");
 const session = require("express-session");
+const { sendEmail } = require("./server/services/mailer");
+const { processConfirmationTemplate } = require("./server/services/emailTemplate");
 console.log("Loading activities routes...");
 const activitiesRoutes = require("./routes/activities");
 console.log("Activities routes loaded:", typeof activitiesRoutes);
@@ -309,8 +311,31 @@ app.post("/api/confirm-booking", async (req, res) => {
 
         console.log("Reservation saved with ID:", result.insertId);
 
-        // Return success response
-        res.json({
+        // Send confirmation email
+        let emailSuccess = true;
+        let emailError = null;
+        
+        try {
+            console.log("Processing confirmation email template...");
+            const emailHtml = processConfirmationTemplate(bookingRequest);
+            
+            console.log("Sending confirmation email to:", bookingRequest.email);
+            const messageId = await sendEmail({
+                to: bookingRequest.email,
+                subject: "Your Villa Tokay escape is confirmed",
+                html: emailHtml
+            });
+            
+            console.log("Confirmation email sent successfully. Message ID:", messageId);
+            
+        } catch (error) {
+            console.error("Failed to send confirmation email:", error);
+            emailSuccess = false;
+            emailError = error.message;
+        }
+
+        // Return success response with email status
+        const response = {
             success: true,
             bookingId: result.insertId,
             message: "Booking confirmed successfully!",
@@ -322,7 +347,14 @@ app.post("/api/confirm-booking", async (req, res) => {
                 guests: `${bookingRequest.adults} Adults${bookingRequest.children > 0 ? `, ${bookingRequest.children} Children` : ""}`,
                 email: bookingRequest.email,
             },
-        });
+        };
+
+        // Add email status information
+        if (!emailSuccess) {
+            response.emailWarning = "Booking confirmed but confirmation email could not be sent. You will receive a manual confirmation within 24 hours.";
+        }
+
+        res.json(response);
     } catch (error) {
         console.error("Error processing booking:", error);
         res.status(500).json({

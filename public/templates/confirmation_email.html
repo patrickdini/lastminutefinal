@@ -239,41 +239,41 @@
             <!-- Main Content -->
             <div class="content">
                 <div class="greeting">
-                    Your private sanctuary awaits – we're thrilled you chose
+                    Dear {{guestName}}, your private sanctuary awaits – we're thrilled you chose
                     Villa Tokay for your escape to Gili Air.
                 </div>
 
                 <div class="confirmation-box">
-                    <h2 class="booking-title">The Pearl Villa</h2>
+                    <h2 class="booking-title">{{villaName}}</h2>
                     <p class="villa-description">
-                        Art-deco bath, private pool, lush garden sanctuary
+                        {{villaTagline}}
                     </p>
 
                     <div class="details-grid">
                         <div class="detail-row">
                             <div class="detail-label">Check-in:</div>
                             <div class="detail-value">
-                                Friday, August 22 (2:00 PM)
+                                {{checkInDate}}
                             </div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Check-out:</div>
                             <div class="detail-value">
-                                Sunday, August 24 (11:00 AM)
+                                {{checkOutDate}}
                             </div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Duration:</div>
-                            <div class="detail-value">2 nights</div>
+                            <div class="detail-value">{{nights}} nights</div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Guests:</div>
-                            <div class="detail-value">2 Adults, 1 Child</div>
+                            <div class="detail-value">{{guestInfo}}</div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Villa Features:</div>
                             <div class="detail-value">
-                                1 Bedroom • 1 Bath • Garden View • Private Pool
+                                {{villaFeatures}}
                             </div>
                         </div>
                     </div>
@@ -281,39 +281,15 @@
 
                 <div class="price-highlight">
                     <p class="price-text">Your Net Price</p>
-                    <p class="price-amount">11.0M IDR</p>
+                    <p class="price-amount">{{totalPrice}}</p>
                 </div>
 
                 <div class="included-section">
                     <h3 class="section-title">Your Experience Includes</h3>
-
-                    <div class="included-item">
-                        <span class="included-icon">🍹</span>
-                        <span
-                            >Homemade cocktails – enjoy our selection in your
-                            villa or at the bar</span
-                        >
-                    </div>
-
-                    <div class="included-item">
-                        <span class="included-icon">💆</span>
-                        <span
-                            >One-hour massage – pamper yourself with a
-                            rejuvenating massage in the comfort of your private
-                            villa</span
-                        >
-                    </div>
+                    {{perksSection}}
                 </div>
 
-                <div class="transfer-note">
-                    <div class="transfer-title">Your Door-to-Door Transfer</div>
-                    <p style="margin: 0; color: #4a4a47">
-                        To arrange your seamless journey from Shady Lane, Bali,
-                        our team will contact you within 24 hours. Since you're
-                        interested in our private boat option, we'll include
-                        those exclusive details as well.
-                    </p>
-                </div>
+                {{transferSection}}
 
                 <div class="next-steps">
                     <h3 class="section-title">What Happens Next</h3>

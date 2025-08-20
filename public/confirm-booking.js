@@ -275,6 +275,10 @@ class ConfirmBooking {
             perks: this.bookingData.perks,
             faceValue: this.bookingData.faceValue,
             
+            // Villa display data (add missing fields for email template)
+            villaDisplayName: this.bookingData.villaDisplayName,
+            tagline: this.bookingData.tagline,
+            
             // Guest information from form
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
@@ -316,8 +320,8 @@ class ConfirmBooking {
                 // Clear sessionStorage
                 sessionStorage.removeItem('bookingData');
                 
-                // Show success message
-                this.showSuccessMessage(result.bookingId);
+                // Show success message (with email warning if applicable)
+                this.showSuccessMessage(result.bookingId, result.emailWarning);
             } else {
                 // Show error message
                 alert('There was an error processing your booking. Please try again.');
@@ -338,7 +342,17 @@ class ConfirmBooking {
     /**
      * Show success message after booking
      */
-    showSuccessMessage(bookingId) {
+    showSuccessMessage(bookingId, emailWarning) {
+        // Email status message
+        const emailStatusHTML = emailWarning 
+            ? `<div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 16px; margin: 20px auto; max-width: 500px; color: #856404;">
+                <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                ${emailWarning}
+               </div>`
+            : `<p style="color: #4A4A47; margin-bottom: 32px;">
+                We've sent a confirmation email with payment instructions and villa details.
+               </p>`;
+
         const successHTML = `
             <div class="booking-summary" style="text-align: center; padding: 60px 40px;">
                 <i class="fas fa-check-circle" style="font-size: 4rem; color: #AA7831; margin-bottom: 20px;"></i>
@@ -353,9 +367,7 @@ class ConfirmBooking {
                         ${bookingId || 'VT-' + Date.now().toString(36).toUpperCase()}
                     </strong>
                 </div>
-                <p style="color: #4A4A47; margin-bottom: 32px;">
-                    We've sent a confirmation email with payment instructions and villa details.
-                </p>
+                ${emailStatusHTML}
                 <a href="/" class="submit-btn" style="text-decoration: none; display: inline-flex;">
                     <span>View More Special Offers</span>
                     <i class="fas fa-arrow-right"></i>
