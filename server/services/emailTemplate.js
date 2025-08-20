@@ -3,31 +3,28 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Format date for Bali timezone in format "Friday, August 22 (2:00 PM)"
+ * Format date with standard Villa Tokay check-in/check-out times
+ * @param {string} dateInput - Date string from booking data
+ * @param {boolean} isCheckIn - true for check-in (2:00 PM), false for check-out (11:00 AM)
  */
-function formatBaliDate(dateInput, includeTime = false) {
+function formatBaliDate(dateInput, isCheckIn = false) {
+    // Parse just the date part, ignoring any time/timezone info
     const date = new Date(dateInput);
-    // Convert to Bali time (UTC+8)
-    const baliDate = new Date(date.getTime() + (8 * 60 * 60 * 1000));
     
     const options = {
         weekday: 'long',
         month: 'long', 
         day: 'numeric',
-        timeZone: 'UTC' // Since we already adjusted for Bali time
+        timeZone: 'UTC'
     };
     
-    let formatted = baliDate.toLocaleDateString('en-US', options);
+    let formatted = date.toLocaleDateString('en-US', options);
     
-    if (includeTime) {
-        const timeOptions = {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'UTC'
-        };
-        const time = baliDate.toLocaleTimeString('en-US', timeOptions);
-        formatted += ` (${time})`;
+    // Add standard Villa Tokay times
+    if (isCheckIn) {
+        formatted += ' (2:00 PM)';
+    } else {
+        formatted += ' (11:00 AM)';
     }
     
     return formatted;
@@ -131,7 +128,7 @@ function processConfirmationTemplate(bookingData) {
             '{{villaName}}': bookingData.villaName || bookingData.villaDisplayName || bookingData.villaKey,
             '{{villaTagline}}': bookingData.tagline || '',
             '{{checkInDate}}': formatBaliDate(bookingData.checkIn, true),
-            '{{checkOutDate}}': formatBaliDate(bookingData.checkOut, true), 
+            '{{checkOutDate}}': formatBaliDate(bookingData.checkOut, false), 
             '{{nights}}': nights,
             '{{guestInfo}}': guestInfo,
             '{{villaFeatures}}': villaFeatures,
