@@ -330,7 +330,7 @@ app.post("/api/confirm-booking", async (req, res) => {
             
             // Update confirmation_email_sent flag in database
             try {
-                const connection = await pool.getConnection();
+                const connection = await db.getConnection();
                 await connection.execute(
                     'UPDATE LMReservations SET confirmation_email_sent = 1 WHERE id = ?',
                     [result.insertId]

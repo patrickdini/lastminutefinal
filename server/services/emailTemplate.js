@@ -42,7 +42,7 @@ function formatPrice(priceInRupiah) {
  * Generate transfer section content based on user preferences
  */
 function generateTransferContent(needTransfer, interestedInPrivateBoat, transferLocation) {
-    if (!needTransfer) {
+    if (needTransfer === 'no') {
         return `
             <div class="transfer-note">
                 <div class="transfer-title">Getting to Villa Tokay</div>
@@ -92,6 +92,33 @@ function generatePerksHtml(perks) {
 }
 
 /**
+ * Generate next steps section HTML based on transfer preferences
+ */
+function generateNextStepsSection(needTransfer) {
+    const transferStep = needTransfer === 'yes' 
+        ? `<div class="step">
+            Our guest relations team will contact you within 24
+            hours to arrange your transfer
+           </div>` 
+        : '';
+
+    return `
+        <div class="next-steps">
+            <h3 class="section-title">What Happens Next</h3>
+            ${transferStep}
+            <div class="step">
+                We will send you a secured payment link
+            </div>
+            <div class="step">
+                Simply arrive and let us handle everything else – your
+                villa will be prepared, your cocktails ready, and your
+                massage scheduled
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Process booking confirmation email template
  */
 function processConfirmationTemplate(bookingData) {
@@ -121,6 +148,7 @@ function processConfirmationTemplate(bookingData) {
         );
         
         const perksHtml = generatePerksHtml(bookingData.perks);
+        const nextStepsHtml = generateNextStepsSection(bookingData.needTransfer);
         
         // Replace all placeholders
         const replacements = {
@@ -134,7 +162,8 @@ function processConfirmationTemplate(bookingData) {
             '{{villaFeatures}}': villaFeatures,
             '{{totalPrice}}': formatPrice(bookingData.totalPrice || bookingData.totalRate || bookingData.rate),
             '{{perksSection}}': perksHtml,
-            '{{transferSection}}': transferSection
+            '{{transferSection}}': transferSection,
+            '{{nextStepsSection}}': nextStepsHtml
         };
         
         // Apply all replacements
