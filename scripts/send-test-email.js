@@ -1,4 +1,8 @@
 // scripts/send-test-email.js
+require("dotenv").config({
+  path: require("path").resolve(__dirname, "../.env"),
+});
+
 const { transporter, sendEmail } = require("../server/services/mailer");
 
 (async () => {
