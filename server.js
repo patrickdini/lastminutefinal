@@ -1,10 +1,13 @@
+require("dotenv").config(); // This line is the fix
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const fs = require("fs");
 const session = require("express-session");
 const { sendEmail } = require("./server/services/mailer");
-const { processConfirmationTemplate } = require("./server/services/emailTemplate");
+const {
+    processConfirmationTemplate,
+} = require("./server/services/emailTemplate");
 console.log("Loading activities routes...");
 const activitiesRoutes = require("./routes/activities");
 console.log("Activities routes loaded:", typeof activitiesRoutes);
@@ -314,36 +317,49 @@ app.post("/api/confirm-booking", async (req, res) => {
         // Send confirmation email
         let emailSuccess = true;
         let emailError = null;
-        
+
         try {
             console.log("Processing confirmation email template...");
             const emailHtml = await processConfirmationTemplate(bookingRequest);
-            
+
             console.log("Sending confirmation email to:", bookingRequest.email);
             const messageId = await sendEmail({
                 to: bookingRequest.email,
                 subject: "Your Villa Tokay escape is confirmed",
-                html: emailHtml
+                html: emailHtml,
             });
-            
-            console.log("Confirmation email sent successfully. Message ID:", messageId);
-            
+
+            console.log(
+                "Confirmation email sent successfully. Message ID:",
+                messageId,
+            );
+
             // Update confirmation_email_sent flag in database
             try {
                 const connection = await db.getConnection();
                 await connection.execute(
-                    'UPDATE LMReservations SET confirmation_email_sent = 1 WHERE id = ?',
-                    [result.insertId]
+                    "UPDATE LMReservations SET confirmation_email_sent = 1 WHERE id = ?",
+                    [result.insertId],
                 );
                 connection.release();
-                console.log("Confirmation email flag updated for reservation ID:", result.insertId);
+                console.log(
+                    "Confirmation email flag updated for reservation ID:",
+                    result.insertId,
+                );
             } catch (updateError) {
-                console.error("Failed to update confirmation_email_sent flag:", updateError);
+                console.error(
+                    "Failed to update confirmation_email_sent flag:",
+                    updateError,
+                );
                 // Continue - don't affect user response
             }
-            
         } catch (error) {
             console.error("Failed to send confirmation email:", error);
+            fs.writeFileSync(
+                "error.log",
+                JSON.stringify(error, Object.getOwnPropertyNames(error), 2),
+            );
+
             emailSuccess = false;
             emailError = error.message;
         }
@@ -365,7 +381,8 @@ app.post("/api/confirm-booking", async (req, res) => {
 
         // Add email status information
         if (!emailSuccess) {
-            response.emailWarning = "Booking confirmed but confirmation email could not be sent. You will receive a manual confirmation within 24 hours.";
+            response.emailWarning =
+                "Booking confirmed but confirmation email could not be sent. You will receive a manual confirmation within 24 hours.";
         }
 
         res.json(response);
