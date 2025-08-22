@@ -1,4 +1,3 @@
-/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +14,6 @@ body {
     min-height: 100vh;
 }
 
-/* Mobile-first base styles */
 .container {
     margin: 0 auto;
     padding: 15px;
@@ -24,7 +22,6 @@ body {
     flex-direction: column;
 }
 
-/* Header Styles */
 .site-header {
     display: flex;
     justify-content: space-between;
@@ -51,13 +48,11 @@ body {
     display: block;
 }
 
-/* Carousel Styles */
-/* Hero carousel at top of page */
 body > .container > .carousel-container {
     position: relative;
     width: 100%;
     max-width: 100vw;
-    margin: 0 -15px 30px -15px; /* Full width on mobile */
+    margin: 0 -15px 30px -15px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     border-radius: 0;
     overflow: hidden;
@@ -66,7 +61,7 @@ body > .container > .carousel-container {
 body > .container > .carousel-container .carousel-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/5; /* Mobile portrait aspect ratio */
+    aspect-ratio: 4/5;
 }
 
 body > .container > .carousel-container .carousel-slide {
@@ -83,7 +78,6 @@ body > .container > .carousel-container .carousel-slide.active {
     opacity: 1;
 }
 
-/* Hero carousel specific styles */
 body > .container > .carousel-container .carousel-slide picture,
 body > .container > .carousel-container .carousel-slide img {
     width: 100%;
@@ -178,9 +172,6 @@ body > .container > .carousel-container .carousel-slide img {
     background: #AA7831;
 }
 
-
-
-/* Tablet styles */
 @media screen and (min-width: 481px) {
     .carousel-container {
         margin: 0 0 30px 0;
@@ -191,7 +182,7 @@ body > .container > .carousel-container .carousel-slide img {
     }
 
     body > .container > .carousel-container .carousel-wrapper {
-        aspect-ratio: 16/9; /* Desktop landscape aspect ratio */
+        aspect-ratio: 16/9;
     }
 
     .carousel-text-overlay {
@@ -216,7 +207,6 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* Desktop styles */
 @media screen and (min-width: 769px) {
     .carousel-text-overlay {
         width: 40%;
@@ -252,36 +242,25 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* Controls */
-
-/* Main content column wrapper */
 .main-content-column {
     max-width: 800px;
-    margin: 0 auto; /* Centers the column */
+    margin: 0 auto;
     width: 100%;
 }
 
-/* Unified styles for guest selection and calendar only */
 .guest-selection,
 .calendar-section,
 .escape-list-section {
-    /* Unified Background and Appearance */
     background: linear-gradient(145deg, #f8f9fa, #e9ecef);
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     padding: 20px;
     margin-bottom: 20px;
-    border: none; /* Remove previous borders */
+    border: none;
 
-    /* Remove individual sizing/centering */
     max-width: none;
     margin-left: 0;
     margin-right: 0;
-}
-
-/* Guest Selection Styling - Compact Picker */
-.guest-selection {
-    /* Additional specific styles inherit from unified rule above */
 }
 
 .picker-title {
@@ -417,16 +396,15 @@ body > .container > .carousel-container .carousel-slide img {
     text-align: center;
 }
 
-/* Mobile-first guest selection optimizations */
 @media (max-width: 480px) {
     .main-content-column {
         margin: 0;
     }
-    
+
     .guest-selection {
         margin-bottom: 25px;
     }
-    
+
     .picker-title,
     .calendar-label {
         font-size: 1.2rem;
@@ -441,11 +419,6 @@ body > .container > .carousel-container .carousel-slide img {
         height: 32px;
         font-size: 1rem;
     }
-}
-
-/* Calendar section styles - matching Villa Tokay reference */
-.calendar-section {
-    /* Styles now inherited from unified .calendar-section rule above */
 }
 
 .calendar-label {
@@ -534,29 +507,27 @@ body > .container > .carousel-container .carousel-slide img {
     visibility: hidden;
 }
 
-/* Mobile optimizations */
 @media (max-width: 480px) {
     .calendar-container {
         width: 100%;
         margin: 0 auto;
         padding: 0 5px;
     }
-    
+
     .calendar-section {
         padding: 20px 15px;
         text-align: center;
     }
-    
+
     .calendar-grid {
         padding: 5px;
     }
-    
+
     .calendar-date {
         font-size: 0.9rem;
         min-height: 36px;
     }
-    
-    /* Date filter grid - proper 2x2 matrix for mobile */
+
     .date-filter-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
@@ -564,7 +535,7 @@ body > .container > .carousel-container .carousel-slide img {
         gap: 10px;
         margin-bottom: 15px;
     }
-    
+
     .date-filter-box {
         padding: 14px 10px;
         min-height: 75px;
@@ -574,30 +545,30 @@ body > .container > .carousel-container .carousel-slide img {
         justify-content: center;
         align-items: center;
     }
-    
+
     .date-filter-box i {
         font-size: 1.2rem;
         margin-bottom: 3px;
     }
-    
+
     .filter-title {
         font-size: 0.85rem;
         font-weight: 600;
         margin-bottom: 2px;
         text-align: center;
     }
-    
+
     .filter-subtitle {
         font-size: 0.7rem;
         opacity: 0.85;
         text-align: center;
     }
-    
+
     .filter-controls {
         padding: 16px;
         margin-bottom: 15px;
     }
-    
+
     .filter-label {
         font-size: 1rem;
         margin-bottom: 12px;
@@ -658,7 +629,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-weight: 400;
 }
 
-/* Custom date slider */
 .custom-date-slider {
     background: rgba(38, 38, 38, 0.9);
     border: 1px solid #4A4A47;
@@ -849,10 +819,6 @@ body > .container > .carousel-container .carousel-slide img {
     transform: none;
 }
 
-/* Status bar */
-
-
-/* Content area - Keep original dark styling for villa cards */
 .content {
     flex: 1;
     background: linear-gradient(145deg, #f8f9fa, #e9ecef);
@@ -863,11 +829,10 @@ body > .container > .carousel-container .carousel-slide img {
     border: 1px solid #4A4A47;
 }
 
-/* Loading spinner */
 .loading-spinner {
     text-align: center;
     padding: 60px 20px;
-    color: #666; /* Restored for dark background */
+    color: #666;
 }
 
 .loading-spinner i {
@@ -880,7 +845,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1.2rem;
 }
 
-/* Error message */
 .error-message {
     text-align: center;
     padding: 60px 20px;
@@ -903,7 +867,6 @@ body > .container > .carousel-container .carousel-slide img {
     line-height: 1.6;
 }
 
-/* Empty state */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -921,7 +884,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1.5rem;
 }
 
-/* Activities container */
 .offers-container {
     animation: fadeIn 0.5s ease-in;
 }
@@ -956,7 +918,6 @@ body > .container > .carousel-container .carousel-slide img {
     border: 1px solid #AA7831;
 }
 
-/* Table */
 .table-container {
     overflow-x: auto;
     border-radius: 8px;
@@ -1005,7 +966,6 @@ body > .container > .carousel-container .carousel-slide img {
     background: rgba(170, 120, 49, 0.15);
 }
 
-/* Custom cell styling */
 .availability-available {
     color: #4CAF50;
     font-weight: 600;
@@ -1043,7 +1003,6 @@ body > .container > .carousel-container .carousel-slide img {
     border: 1px solid rgba(128, 128, 128, 0.3);
 }
 
-/* Footer */
 .footer {
     text-align: center;
     color: rgba(255, 255, 255, 0.8);
@@ -1051,15 +1010,11 @@ body > .container > .carousel-container .carousel-slide img {
     padding: 20px 0;
 }
 
-/* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile-first: Base styles are mobile, enhance for larger screens */
-
-/* Mobile base styles for components */
 .controls {
     flex-direction: column;
     align-items: center;
@@ -1109,88 +1064,85 @@ body > .container > .carousel-container .carousel-slide img {
     max-width: 150px;
 }
 
-/* Tablet styles (481px and up) */
 @media (min-width: 481px) {
     .header h1 {
         font-size: 2rem;
     }
-    
+
     .subtitle {
         font-size: 1.1rem;
     }
-    
+
     .btn {
         padding: 12px 20px;
         font-size: 1rem;
     }
-    
+
     .activities-table {
         font-size: 0.85rem;
     }
-    
+
     .cell-text {
         max-width: 200px;
     }
 }
 
-/* Desktop styles (769px and up) */
 @media (min-width: 769px) {
     .container {
         max-width: 1200px;
         padding: 20px;
     }
-    
+
     .header h1 {
         font-size: 2.5rem;
     }
-    
+
     .controls {
         flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
     }
-    
+
     .filter-buttons {
         flex-direction: row;
         align-items: center;
     }
-    
+
     .btn-filter {
         width: auto;
         max-width: none;
     }
-    
+
     .status-bar {
         flex-direction: row;
         justify-content: space-between;
         text-align: left;
     }
-    
+
     .activities-header {
         flex-direction: row;
         justify-content: space-between;
         text-align: left;
     }
-    
+
     .content {
         padding: 30px;
     }
-    
+
     .activities-table {
         font-size: 1rem;
     }
-    
+
     .activities-table th,
     .activities-table td {
         padding: 12px 15px;
     }
-    
+
     .cell-text {
         max-width: none;
     }
 }
 
-/* Villa Cards Layout */
 .villa-cards-container {
     display: flex;
     flex-direction: column;
@@ -1206,7 +1158,6 @@ body > .container > .carousel-container .carousel-slide img {
     border: 1px solid #4A4A47;
 }
 
-/* Villa Image Gallery - Enhanced Flexbox Layout */
 .villa-card .villa-image-gallery {
     display: flex;
     position: relative;
@@ -1256,7 +1207,6 @@ body > .container > .carousel-container .carousel-slide img {
     color: white;
 }
 
-/* Villa Tagline and Name */
 .villa-tagline {
     font-size: 2.2rem;
     font-weight: 700;
@@ -1274,7 +1224,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-style: italic;
 }
 
-/* Villa Specifications */
 .villa-specifications {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1299,7 +1248,6 @@ body > .container > .carousel-container .carousel-slide img {
     text-align: center;
 }
 
-/* Expandable Description */
 .villa-description {
     margin-bottom: 20px;
 }
@@ -1334,7 +1282,6 @@ body > .container > .carousel-container .carousel-slide img {
     color: #D4A843;
 }
 
-/* Key Amenities */
 .key-amenities {
     margin-top: 20px;
     padding-top: 15px;
@@ -1554,7 +1501,6 @@ body > .container > .carousel-container .carousel-slide img {
     box-shadow: 0 4px 12px rgba(170, 120, 49, 0.4);
 }
 
-/* Consolidated Booking Card Styles */
 .consolidated-booking-card {
     background: rgba(38, 38, 38, 0.9);
     border-radius: 12px;
@@ -1568,7 +1514,6 @@ body > .container > .carousel-container .carousel-slide img {
     background: rgba(38, 38, 38, 0.95);
 }
 
-/* Night Selector Styles */
 .night-selector {
     display: flex;
     align-items: center;
@@ -1614,7 +1559,6 @@ body > .container > .carousel-container .carousel-slide img {
     box-shadow: 0 0 12px rgba(170, 120, 49, 0.4);
 }
 
-/* Booking Content Layout - Enhanced Grid */
 .booking-content {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -1638,48 +1582,47 @@ body > .container > .carousel-container .carousel-slide img {
     grid-area: book;
 }
 
-/* Villa Cards Responsive */
 @media (max-width: 768px) {
     .villa-image-gallery {
         height: 200px;
     }
-    
+
     .villa-tagline {
         font-size: 1.8rem;
     }
-    
+
     .villa-name-subtitle {
         font-size: 1rem;
     }
-    
+
     .villa-specifications {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
-    
+
     .spec-item {
         font-size: 0.8rem;
     }
-    
+
     .villa-card-header {
         padding: 20px;
     }
-    
+
     .villa-details {
         gap: 20px;
     }
-    
+
     .booking-option {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
     }
-    
+
     .booking-price {
         margin-right: 0;
         align-self: flex-end;
     }
-    
+
     .booking-content {
         grid-template-columns: 1fr;
         grid-template-areas: 
@@ -1689,11 +1632,11 @@ body > .container > .carousel-container .carousel-slide img {
         gap: 15px;
         text-align: center;
     }
-    
+
     .night-selector {
         justify-content: center;
     }
-    
+
     .night-selector-btn {
         width: 35px;
         height: 35px;
@@ -1707,60 +1650,59 @@ body > .container > .carousel-container .carousel-slide img {
         margin: 20px auto 0;
         padding: 0 5px;
     }
-    
+
     .villa-card {
         margin: 0;
     }
-    
+
     .villa-image-gallery {
         height: 180px;
     }
-    
+
     .villa-tagline {
         font-size: 1.5rem;
     }
-    
+
     .villa-specifications {
         grid-template-columns: 1fr;
     }
-    
+
     .villa-card-header {
         padding: 15px;
     }
-    
-    /* Even more compact for smaller screens */
+
     .guest-selection {
         padding: 16px;
         margin-bottom: 20px;
     }
-    
+
     .guest-inputs {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 10px;
     }
-    
+
     .date-filter-box {
         padding: 10px 8px;
         min-height: 65px;
     }
-    
+
     .date-filter-box i {
         font-size: 1.1rem;
     }
-    
+
     .filter-title {
         font-size: 0.8rem;
     }
-    
+
     .filter-subtitle {
         font-size: 0.65rem;
     }
-    
+
     .filter-controls {
         padding: 14px;
     }
-    
+
     .guest-select {
         font-size: 0.95rem;
         min-height: 42px;
@@ -1769,7 +1711,6 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* Load More Button */
 .load-more-container {
     text-align: center;
     padding: 2rem 0;
@@ -1821,7 +1762,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1.2rem;
 }
 
-/* Match type badge styling */
 .match-badge {
     position: absolute;
     top: 15px;
@@ -1839,18 +1779,17 @@ body > .container > .carousel-container .carousel-slide img {
 }
 
 .match-badge.exact {
-    background: rgba(34, 197, 94, 0.9); /* Green for exact matches */
+    background: rgba(34, 197, 94, 0.9);
 }
 
 .match-badge.nearby {
-    background: rgba(59, 130, 246, 0.9); /* Blue for nearby matches */
+    background: rgba(59, 130, 246, 0.9);
 }
 
 .match-badge.mixed {
-    background: rgba(168, 85, 247, 0.9); /* Purple for mixed matches */
+    background: rgba(168, 85, 247, 0.9);
 }
 
-/* Nights Display - Match picker and calendar label styling */
 .nights-display {
     font-size: 1.4rem;
     color: #0F3128;
@@ -1859,7 +1798,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-weight: 600;
 }
 
-/* Special Offers Layout */
 .champion-offers {
     display: flex;
     flex-direction: column;
@@ -1869,7 +1807,6 @@ body > .container > .carousel-container .carousel-slide img {
     padding: 0;
 }
 
-/* Special Offer Card */
 .champion-offer-card {
     background: rgba(74, 74, 71, 0.8);
     border-radius: 1rem;
@@ -1878,7 +1815,6 @@ body > .container > .carousel-container .carousel-slide img {
     border: 1px solid #4A4A47;
 }
 
-/* Hero Image Section */
 .champion-hero {
     position: relative;
     width: 100%;
@@ -1894,7 +1830,6 @@ body > .container > .carousel-container .carousel-slide img {
     display: block;
 }
 
-/* Fix for villa card carousel images */
 .champion-offer-card .carousel-container {
     width: 100%;
     height: 100%;
@@ -1911,8 +1846,8 @@ body > .container > .carousel-container .carousel-slide img {
 .champion-offer-card .carousel-slide {
     min-width: 100%;
     height: 100%;
-    opacity: 1 !important; /* Override hero carousel opacity */
-    position: relative !important; /* Override absolute positioning */
+    opacity: 1 !important;
+    position: relative !important;
 }
 
 .champion-offer-card .carousel-slide img {
@@ -1922,7 +1857,6 @@ body > .container > .carousel-container .carousel-slide img {
     display: block;
 }
 
-/* General Carousel Container (villa cards) */
 .champion-hero .carousel-container {
     width: 100%;
     height: 100%;
@@ -1944,7 +1878,6 @@ body > .container > .carousel-container .carousel-slide img {
     position: relative;
 }
 
-/* Modal Gallery Styles - Enhanced Flexbox Layout */
 .modal {
     display: none;
     position: fixed;
@@ -2040,7 +1973,6 @@ body > .container > .carousel-container .carousel-slide img {
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* Price Overlay */
 .champion-price-overlay {
     position: absolute;
     top: 1rem;
@@ -2096,7 +2028,6 @@ body > .container > .carousel-container .carousel-slide img {
     z-index: 10;
 }
 
-/* Date Flexibility Pills */
 .flexibility-pills-container {
     margin: 20px 0;
     display: flex;
@@ -2110,8 +2041,8 @@ body > .container > .carousel-container .carousel-slide img {
 }
 
 .flexibility-pill {
-    flex: 1; /* Allows buttons to grow and shrink from a base of 80px */
-    text-align: center; /* Ensures text is centered */
+    flex: 1;
+    text-align: center;
     min-width: 60px;
     padding: 12px 16px;
     border: 2px solid rgba(74, 74, 71, 0.5);
@@ -2139,7 +2070,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-weight: 600;
 }
 
-/* Mobile optimizations for pills */
 @media (max-width: 480px) {
     .flexibility-pill {
         min-width: 70px;
@@ -2148,7 +2078,6 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* Scrollbar styling for horizontal scroll */
 .flexibility-pills::-webkit-scrollbar {
     height: 4px;
 }
@@ -2163,7 +2092,6 @@ body > .container > .carousel-container .carousel-slide img {
     border-radius: 2px;
 }
 
-/* Villa Details Collapsible Functionality */
 .show-details-container {
     padding: 15px 20px 0 20px;
     text-align: center;
@@ -2210,7 +2138,6 @@ body > .container > .carousel-container .carousel-slide img {
     display: block !important;
 }
 
-/* Smooth animation for collapsible content */
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -2241,7 +2168,6 @@ body > .container > .carousel-container .carousel-slide img {
     animation: slideUp 0.3s ease-out forwards;
 }
 
-/* Booking Options Selector */
 .booking-options-container {
     margin: 20px 0;
     padding: 20px;
@@ -2259,7 +2185,6 @@ body > .container > .carousel-container .carousel-slide img {
     text-align: center;
 }
 
-/* Single booking option */
 .single-booking-option {
     text-align: center;
 }
@@ -2278,7 +2203,6 @@ body > .container > .carousel-container .carousel-slide img {
     gap: 20px;
 }
 
-/* Multiple booking options */
 .booking-options-list {
     display: flex;
     flex-direction: column;
@@ -2331,7 +2255,6 @@ body > .container > .carousel-container .carousel-slide img {
     margin-top: 2px;
 }
 
-/* Date circles for booking options */
 .date-circle {
     width: 45px;
     height: 45px;
@@ -2371,7 +2294,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-weight: 600;
 }
 
-/* Savings Banner */
 .champion-savings-banner {
     background: linear-gradient(135deg, #2E7D32, #43A047);
     color: white;
@@ -2389,14 +2311,13 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1rem;
 }
 
-/* Content Section */
 .champion-content {
     padding: 0.5rem;
     color: white;
 }
 
 .champion-title {
-    color: #AA7831;
+    color: #FFFFFF;
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 0.5rem 0;
@@ -2409,7 +2330,6 @@ body > .container > .carousel-container .carousel-slide img {
     margin-bottom: 1.5rem;
 }
 
-/* Perks Section */
 .champion-perks-section {
     margin-bottom: 1.5rem;
 }
@@ -2443,7 +2363,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1rem;
 }
 
-/* Timeline Extension */
 .timeline-container {
     background: rgba(74, 74, 71, 0.3);
     padding: 20px;
@@ -2539,7 +2458,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-style: italic;
 }
 
-/* Book Button */
 .champion-book-btn {
     width: 100%;
     background: linear-gradient(135deg, #AA7831, #C4903A);
@@ -2561,20 +2479,18 @@ body > .container > .carousel-container .carousel-slide img {
     box-shadow: 0 5px 15px rgba(170, 120, 49, 0.3);
 }
 
-/* Responsive Design */
-/* Mobile optimizations for timeline */
 @media (max-width: 400px) {
     .timeline-dates {
         flex-wrap: wrap;
         gap: 6px;
     }
-    
+
     .date-circle {
         width: 36px;
         height: 36px;
         font-size: 0.7rem;
     }
-    
+
     .timeline-connector {
         width: 15px;
     }
@@ -2585,45 +2501,42 @@ body > .container > .carousel-container .carousel-slide img {
         max-width: 100%;
         margin: 0 10px;
     }
-    
+
     .champion-hero {
         height: 220px;
     }
-    
+
     .champion-price-tag {
         font-size: 1.2rem;
         padding: 10px 16px;
     }
-    
+
     .champion-content {
         padding: 20px;
     }
-    
+
     .champion-title {
         font-size: 1.5rem;
     }
-    
+
     .champion-night-btn {
         width: 40px;
         height: 40px;
         font-size: 0.9rem;
     }
-    
+
     .champion-night-date {
         width: 40px;
         font-size: 0.75rem;
     }
 }
 
-/* --- Mobile-Only Styles for Villa Card Date Display --- */
 @media (max-width: 768px) {
-    /* Hide the date circles inside the booking options */
     .single-booking-option .date-range,
     .booking-option-btn .date-range {
         display: none;
     }
 
-    /* Center the remaining text elements for a cleaner look */
     .single-booking-option .date-labels,
     .booking-option-btn {
         justify-content: center;
@@ -2635,9 +2548,6 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* === Escape List Section Styling === */
-
-/* Escape List Header */
 .escape-list-header h2 {
     font-family: 'Crimson Text', serif;
     font-size: 1.8rem;
@@ -2667,7 +2577,6 @@ body > .container > .carousel-container .carousel-slide img {
     line-height: 1.4;
 }
 
-/* Escape List Form Layout */
 .escape-list-form .form-row {
     display: flex;
     gap: 15px;
@@ -2713,7 +2622,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-style: italic;
 }
 
-/* Consent Section */
 .consent-section {
     margin: 25px 0;
 }
@@ -2763,7 +2671,6 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 0.8rem;
 }
 
-/* Submit Button */
 .escape-list-submit-btn {
     width: 100%;
     padding: 15px 25px;
@@ -2797,31 +2704,29 @@ body > .container > .carousel-container .carousel-slide img {
     font-size: 1rem;
 }
 
-/* Mobile responsiveness for escape list form */
 @media (max-width: 480px) {
     .escape-list-form .form-row {
         flex-direction: column;
         gap: 0;
     }
-    
+
     .escape-list-form .form-group {
         margin-bottom: 15px;
     }
-    
+
     .escape-list-header h2 {
         font-size: 1.5rem;
     }
-    
+
     .escape-list-description {
         font-size: 1rem;
     }
-    
+
     .consent-checkbox {
         font-size: 0.85rem;
     }
 }
 
-/* Success/Error Message Styling */
 .escape-list-message {
     margin-top: 20px;
     padding: 20px;
@@ -2888,7 +2793,6 @@ body > .container > .carousel-container .carousel-slide img {
     }
 }
 
-/* Loading state for submit button */
 .escape-list-submit-btn.loading {
     opacity: 0.7;
     cursor: not-allowed;
@@ -2911,7 +2815,6 @@ body > .container > .carousel-container .carousel-slide img {
     100% { transform: rotate(360deg); }
 }
 
-/* Update preferences button styling */
 .escape-list-update-btn {
     background: linear-gradient(135deg, #AA7831, #CC9444);
     color: white;
@@ -2939,7 +2842,6 @@ body > .container > .carousel-container .carousel-slide img {
     transform: translateY(0);
 }
 
-/* Smooth form transitions */
 .escape-list-form {
     transition: opacity 0.3s ease, height 0.3s ease;
 }
