@@ -821,7 +821,7 @@ body > .container > .carousel-container .carousel-slide img {
 
 .content {
     flex: 1;
-    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    background: lightcoral; /* Changed for testing */
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.3);
