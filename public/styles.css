@@ -821,12 +821,29 @@ body > .container > .carousel-container .carousel-slide img {
 
 .content {
     flex: 1;
-    background: lightcoral; /* Changed for testing */
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef); /* Original background */
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     margin-bottom: 20px;
     border: 1px solid #4A4A47;
+    position: relative; /* Added for the overlay effect */
+    z-index: 1; /* Added for the overlay effect */
+    overflow: hidden; /* Ensures the overlay stays within the rounded corners */
+}
+
+.content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/background.png');
+    background-repeat: repeat;
+    background-size: 25%; /* Makes the image 4x smaller */
+    opacity: 0.3; /* Adjust this value (0.0 to 1.0) for more/less transparency */
+    z-index: -1; /* Places the overlay behind the content */
 }
 
 .loading-spinner {
